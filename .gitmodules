@@ -1,0 +1,3 @@
+[submodule "libs/rapidyaml"]
+	path = libs/rapidyaml
+	url = https://github.com/biojppm/rapidyaml
