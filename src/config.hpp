@@ -41,7 +41,7 @@ public:
     /**
      * Constructs a new configuration instance and loads the given configuration file.
      *
-     * On errors, the {error} parameter will be set to the appropriate error code.
+     * On errors, the {file_error} and {parse_error} parameters will be set to the appropriate error code.
      *
      * @param config_file path to the configuration file
      * @param file_error optional error handling, but highly encouraged
