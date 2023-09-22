@@ -1,10 +1,12 @@
-cmake_minimum_required(VERSION 3.20)
+# note on 3.25 being the minimum requirement: add_subdirectory() with SYSTEM support
+# see https://cmake.org/cmake/help/latest/command/add_subdirectory.html
+cmake_minimum_required(VERSION 3.25)
 
 # register custom cmake modules
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 include(DetectAndRegisterPlatformMacros)
 
-project("cache-manager" CXX)
+project("cache-manager" LANGUAGES CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -20,4 +22,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=implicit-function-declaration")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
 
+# create dependency targets
+# add_library(rapidyaml INTERFACE)
+# target_include_directories(rapidyaml SYSTEM INTERFACE "${PROJECT_SOURCE_DIR}/libs/rapidyaml/src")
+# target_include_directories(rapidyaml SYSTEM INTERFACE "${PROJECT_SOURCE_DIR}/libs/rapidyaml/ext/c4core/src")
+add_subdirectory(libs/rapidyaml EXCLUDE_FROM_ALL SYSTEM)
+
+# add project targets
 add_subdirectory(src)

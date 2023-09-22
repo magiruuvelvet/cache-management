@@ -18,3 +18,6 @@ set_property(TARGET cachemgr PROPERTY CXX_EXTENSIONS OFF)
 
 # disable exceptions and runtime time information
 target_compile_options(cachemgr PRIVATE -fno-exceptions -fno-rtti)
+
+# include dependencies
+target_link_libraries(cachemgr PRIVATE ryml) # rapidyaml

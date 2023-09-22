@@ -1,5 +1,6 @@
 #include <cstdio>
 
+#include "config.hpp"
 #include "cachemgr.hpp"
 #include "os_utils.hpp"
 
@@ -26,6 +27,12 @@ int main(int argc, char **argv)
             std::printf("%s -> %s\n", dir.original_path.c_str(), dir.symlinked_path.c_str());
         }
     }
+
+    configuration_t::file_error file_error;
+    configuration_t::parse_error parse_error;
+    configuration_t config("./test.yaml", &file_error, &parse_error);
+
+    std::printf("file_error = %i, parse_error = %i\n", file_error, parse_error);
 
     return 0;
 }
