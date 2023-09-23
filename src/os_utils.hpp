@@ -40,4 +40,13 @@ std::string getenv(const char *name, const std::string &default_value, bool *exi
  */
 std::string get_home_directory();
 
+/**
+ * Checks whether the given path is a mount point or a regular directory.
+ *
+ * @param path the path to check
+ * @return true the given path is a mount point residing on another filesystem
+ * @return false the given path is a regular directory on the same filesystem
+ */
+bool is_mount_point(const std::string &path);
+
 } // namespace os_utils

@@ -2,11 +2,23 @@
 
 #include <cstdlib>
 #include <cerrno>
-#include <unistd.h>
 
 #if defined(PROJECT_PLATFORM_WINDOWS)
+// Windows
 #else
+// everything else
+#include <unistd.h>
 #include <pwd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
+
+#if defined(PROJECT_PLATFORM_LINUX)
+// Linux
+#include <sys/statfs.h>
+#elif defined(PROJECT_PLATFORM_BSD)
+// BSD systems
+#include <sys/mount.h> // TODO: is this needed?
 #endif
 
 namespace os_utils {
@@ -78,6 +90,39 @@ std::string get_home_directory()
             return {};
         }
     }
+#endif
+}
+
+bool is_mount_point(const std::string &path)
+{
+#if defined(PROJECT_PLATFORM_WINDOWS)
+#error os_utils::is_mount_point not implemented for this platform
+#else
+    errno = 0;
+
+    // struct statfs fs_info;
+    // if (::statfs(path.c_str(), &fs_info) == 0) {}
+
+    struct stat st1, st2;
+    if (
+        // stat the given path
+        ::stat(path.c_str(), &st1) == 0 &&
+        // stat the parent directory of the given path
+        ::stat((path + "/..").c_str(), &st2) == 0)
+    {
+        // assume that the given path is a mount point to another filesystem
+        // TODO: check how this behaves for bind mounts
+        return st1.st_dev != st2.st_dev;
+    }
+
+    // TODO: better error handling instead of printing to stderr inside library functions
+    if (errno != 0)
+    {
+        perror(nullptr);
+    }
+
+    // assume that the given path is a regular directory
+    return false;
 #endif
 }
 

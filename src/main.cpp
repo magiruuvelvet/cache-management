@@ -28,6 +28,9 @@ int main(int argc, char **argv)
         }
     }
 
+    std::printf("is_mount_point(/home): %i\n", os_utils::is_mount_point("/home"));
+    std::printf("is_mount_point(/caches/1000): %i\n", os_utils::is_mount_point("/caches/1000"));
+
     configuration_t::file_error file_error;
     configuration_t::parse_error parse_error;
     configuration_t config("./test.yaml", &file_error, &parse_error);
