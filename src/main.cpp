@@ -1,11 +1,28 @@
 #include <cstdio>
 
+#include <utils/logging_helper.hpp>
+#include <utils/os_utils.hpp>
+
 #include "config.hpp"
 #include "cachemgr.hpp"
-#include "os_utils.hpp"
+
+// TODO: just for testing, will be replaced with an external logging library
+class logger : public logging_helper
+{
+public:
+    void log_info(const std::string &message) override {
+        std::fprintf(stderr, "[inf] %s\n", message.c_str()); }
+    void log_warning(const std::string &message) override {
+        std::fprintf(stderr, "[wrn] %s\n", message.c_str()); }
+    void log_error(const std::string &message) override {
+        std::fprintf(stderr, "[err] %s\n", message.c_str()); }
+};
 
 int main(int argc, char **argv)
 {
+    // obtain log messages produced by library functions
+    logging_helper::set_logger(std::make_shared<logger>());
+
     cachemgr_t cachemgr;
 
     // receive essential directories

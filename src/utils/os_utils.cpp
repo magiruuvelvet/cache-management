@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <cerrno>
 
+#include <utils/logging_helper.hpp>
+
 #if defined(PROJECT_PLATFORM_WINDOWS)
 // Windows
 #else
@@ -74,6 +76,8 @@ std::string get_home_directory()
     // if that fails, fallback to using the environment variable HOME
     else
     {
+        logging_helper::get_logger()->log_warning("getpwuid() failed, trying $HOME environment variable");
+
         // attempt to get the home directory from the environment variable HOME
         bool exists = false;
         const std::string home_dir = getenv("HOME", &exists);
@@ -86,7 +90,7 @@ std::string get_home_directory()
         // if that fails, return an empty string
         else
         {
-            // TODO: handle errors
+            logging_helper::get_logger()->log_error("failed to find user's home directory");
             return {};
         }
     }
@@ -115,10 +119,9 @@ bool is_mount_point(const std::string &path)
         return st1.st_dev != st2.st_dev;
     }
 
-    // TODO: better error handling instead of printing to stderr inside library functions
     if (errno != 0)
     {
-        perror(nullptr);
+        logging_helper::get_logger()->log_error(strerror(errno));
     }
 
     // assume that the given path is a regular directory

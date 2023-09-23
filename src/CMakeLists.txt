@@ -21,3 +21,6 @@ target_compile_options(cachemgr PRIVATE -fno-exceptions -fno-rtti)
 
 # include dependencies
 target_link_libraries(cachemgr PRIVATE ryml) # rapidyaml
+
+# add current directory to include paths
+target_include_directories(cachemgr PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
