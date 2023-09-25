@@ -9,6 +9,15 @@ class configuration_t final
 {
 public:
     /**
+     * Represents a cache mapping in the configuration file.
+     */
+    struct cache_mapping_t
+    {
+        const std::string source;
+        const std::string target;
+    };
+
+    /**
      * Possible error codes related to file handling.
      */
     enum class file_error : unsigned
@@ -47,7 +56,7 @@ public:
      * @param file_error optional error handling, but highly encouraged
      * @param parse_error optional error handling, but highly encouraged
      */
-    configuration_t(const std::string &config_file, file_error *file_error = nullptr, parse_error *parse_error = nullptr);
+    configuration_t(const std::string &config_file, file_error *file_error = nullptr, parse_error *parse_error = nullptr) noexcept;
     virtual ~configuration_t() = default;
 
 private:

@@ -5,6 +5,11 @@
 #include <filesystem>
 #include <string_view>
 
+/**
+ * Notes on the YAML parser used:
+ *  - the internal string structure of ryml is NOT zero terminated
+ *    (you must use str+len to correctly access the intended range of data)
+ */
 #include <ryml.hpp>
 
 /// yaml key names to avoid typos and repetitive strings in code
@@ -18,7 +23,7 @@ namespace {
     constexpr const char *key_str_target = "target";
 }
 
-configuration_t::configuration_t(const std::string &config_file, file_error *file_error, parse_error *parse_error)
+configuration_t::configuration_t(const std::string &config_file, file_error *file_error, parse_error *parse_error) noexcept
 {
     // assume no errors at the beginning
     if (file_error != nullptr) { *file_error = file_error::no_error; }
@@ -77,5 +82,30 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
         std::fprintf(stderr, "'cache_mappings' is not a sequence\n");
         if (parse_error != nullptr) { *parse_error = parse_error::cache_mappings_not_a_seq; }
         return;
+    }
+
+    // iterate over all cache mappings
+    unsigned i = 0;
+    for (const auto &cache_mapping : cache_mappings)
+    {
+        ++i;
+
+        // sequence entry must be a map and have all required keys
+        if (cache_mapping.is_map() &&
+            cache_mapping.has_child(key_str_source) &&
+            cache_mapping.has_child(key_str_target))
+        {
+            // get a reference to all required keys
+            const auto &source = cache_mapping[key_str_source].val();
+            const auto &target = cache_mapping[key_str_target].val();
+
+            std::printf("cache_mapping: source='%s', target='%s'\n",
+                std::string(source.str, source.len).c_str(),
+                std::string(target.str, target.len).c_str());
+        }
+        else
+        {
+            std::fprintf(stderr, "found non-map or invalid entry in 'cache_mappings' sequence at position %d\n", i);
+        }
     }
 }
