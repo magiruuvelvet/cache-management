@@ -1,3 +1,6 @@
 [submodule "libs/rapidyaml"]
 	path = libs/rapidyaml
 	url = https://github.com/biojppm/rapidyaml
+[submodule "libs/Catch2"]
+	path = libs/Catch2
+	url = https://github.com/catchorg/Catch2
