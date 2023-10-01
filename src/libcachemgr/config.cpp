@@ -108,7 +108,7 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
             const auto &source = cache_mapping[key_str_source].val();
             const auto &target = cache_mapping[key_str_target].val();
 
-            LOG_INFO(libcachemgr::log_config,
+            LOG_DEBUG(libcachemgr::log_config,
                 "found cache_mapping: source='{}', target='{}', type='{}'",
                 std::string(source.str, source.len).c_str(),
                 std::string(target.str, target.len).c_str(),
