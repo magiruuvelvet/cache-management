@@ -162,6 +162,7 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
         // create stdout logger
         auto stdout_handler = quill::stdout_handler(name, colors);
         stdout_handler->set_pattern(log_pattern);
+        stdout_handler->set_log_level(config.log_level_console);
 
         handlers.push_back(stdout_handler);
     }
@@ -174,12 +175,16 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
 
         // create log file at $XDG_CACHE_HOME/cachemgr.log
         auto file_handler = quill::file_handler(xdg_cache_home + "/cachemgr.log", file_handler_config);
+        file_handler->set_log_level(config.log_level_file);
 
         handlers.push_back(file_handler);
     }
 
     // create loggers
-    return quill::create_logger(name, std::move(handlers));
+    auto logger = quill::create_logger(name, std::move(handlers));
+    // pass-through every log level, let the handler decide what to log
+    logger->set_log_level(quill::LogLevel::TraceL3);
+    return logger;
 }
 
 quill::Logger *libcachemgr::get_logger(const std::string &name)

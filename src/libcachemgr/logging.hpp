@@ -23,6 +23,16 @@ struct logging_config
      * Initializes the file logger.
      */
     bool log_to_file = true;
+
+    /**
+     * The default log level for the console logger.
+     */
+    quill::LogLevel log_level_console = quill::LogLevel::Info; // TODO: should be configurable (CMake + command line)
+
+    /**
+     * The default log level for the file logger.
+     */
+    quill::LogLevel log_level_file = quill::LogLevel::Debug; // TODO: should be configurable ((CMake + command line)
 };
 
 /**
