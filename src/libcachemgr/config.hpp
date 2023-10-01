@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <list>
 
 /**
  * Configuration for the application.
@@ -13,9 +14,15 @@ public:
      */
     struct cache_mapping_t
     {
+        const std::string type; // unused for now, type might change in the future
         const std::string source;
         const std::string target;
     };
+
+    /**
+     * List of cache mappings in the configuration file.
+     */
+    using cache_mappings_t = std::list<cache_mapping_t>;
 
     /**
      * Possible error codes related to file handling.
@@ -45,6 +52,8 @@ public:
         cache_mappings_seq_not_found = 1,
         /// the 'cache_mappings' sequence is not a sequence
         cache_mappings_not_a_seq = 2,
+        /// the cache mapping type was not recognized
+        cache_mapping_unknown_type = 3,
     };
 
     /**
@@ -59,5 +68,37 @@ public:
     configuration_t(const std::string &config_file, file_error *file_error = nullptr, parse_error *parse_error = nullptr) noexcept;
     virtual ~configuration_t() = default;
 
+    /**
+     * Returns all registered cache mappings.
+     */
+    inline constexpr const cache_mappings_t &cache_mappings() const noexcept
+    {
+        return this->_cache_mappings;
+    }
+
 private:
+    /**
+     * Parses and normalizes the given path.
+     *
+     * Available placeholders are:
+     *   ~  = user's home directory
+     *   %u = uid (user id)
+     *   %g = gid (group id)
+     *
+     * Supported environment variables are:
+     *   $HOME
+     *   $XDG_CACHE_HOME
+     *
+     * There is no general support for environment variable expansion.
+     * The list of allowed environment variables is hardcoded in this function.
+     *
+     * @param path_with_placeholders
+     * @return normalized path without placeholders
+     */
+    static std::string parse_path(const std::string &path_with_placeholders);
+
+    /**
+     * List of all registered cache mappings.
+     */
+    cache_mappings_t _cache_mappings;
 };

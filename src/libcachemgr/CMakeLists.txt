@@ -9,6 +9,7 @@ add_library(libcachemgr-private STATIC
 SetupTarget(libcachemgr-private "libcachemgr")
 
 # include dependencies
+target_link_libraries(libcachemgr-private PRIVATE cachemgr-utils)
 target_link_libraries(libcachemgr-private PRIVATE ryml) # rapidyaml
 
 # create interface
