@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <cinttypes>
+#include <cstdint>
 
 namespace os_utils {
 
