@@ -35,6 +35,10 @@ int main(int argc, char **argv)
     libcachemgr::init_logging(libcachemgr::logging_config{
         // disable logging to console during tests
         .log_to_console = false,
+
+        // ensure debug file logging is enabled during tests
+        .log_to_file = true,
+        .log_level_file = quill::LogLevel::Debug,
     });
 
     return catch2_main(argc, argv);
