@@ -51,6 +51,20 @@ std::string get_home_directory();
 bool is_mount_point(const std::string &path);
 
 /**
+ * Checks whether the given path is a mount point or a regular directory.
+ *
+ * If the given path is a mount point, the mount target will be written to
+ * the {mount_target} parameter, otherwise the {mount_target} will be set to
+ * an empty string. [feature currently not implemented]
+ *
+ * @param path the path to check
+ * @param mount_target the mount target if the given path is a mount point
+ * @return true the given path is a mount point residing on another filesystem
+ * @return false the given path is a regular directory on the same filesystem
+ */
+bool is_mount_point(const std::string &path, std::string *mount_target);
+
+/**
  * Get the current user id.
  *
  * @return the current user id

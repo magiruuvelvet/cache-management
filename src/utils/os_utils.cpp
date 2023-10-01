@@ -99,10 +99,18 @@ std::string get_home_directory()
 
 bool is_mount_point(const std::string &path)
 {
+    return is_mount_point(path, nullptr);
+}
+
+bool is_mount_point(const std::string &path, std::string *mount_target)
+{
 #if defined(PROJECT_PLATFORM_WINDOWS)
 #error os_utils::is_mount_point not implemented for this platform
 #else
     errno = 0;
+
+    // TODO: is receiving the mount destination for bind mounts even possible?
+    // /proc/mounts only shows the block device, not the mount destination of the bind mount
 
     // struct statfs fs_info;
     // if (::statfs(path.c_str(), &fs_info) == 0) {}
@@ -115,7 +123,8 @@ bool is_mount_point(const std::string &path)
         ::stat((path + "/..").c_str(), &st2) == 0)
     {
         // assume that the given path is a mount point to another filesystem
-        // TODO: check how this behaves for bind mounts
+        // for bind mounted directories residing on different filesystems, this returns true
+        // TODO: check how this behaves for bind mounts residing on the same filesystem
         return st1.st_dev != st2.st_dev;
     }
 

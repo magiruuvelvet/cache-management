@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 
         for (auto&& dir : cachemgr.symlinked_cache_directories())
         {
-            std::printf("%s -> %s\n", dir.original_path.c_str(), dir.symlinked_path.c_str());
+            std::printf("%s -> %s\n", dir.original_path.c_str(), dir.target_path.c_str());
         }
     }
 

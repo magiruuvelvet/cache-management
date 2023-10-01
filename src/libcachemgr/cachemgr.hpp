@@ -25,19 +25,34 @@ public:
     virtual ~cachemgr_t();
 
     /**
+     * Type of the cache directory.
+     */
+    enum class directory_type_t : unsigned {
+        /// symbolic link to a directory
+        symbolic_link = 0,
+        /// bind mount
+        bind_mount = 1,
+    };
+
+    /**
      * Structure containing information about a cache directory mapping.
      */
     struct symlinked_cache_directory_t
     {
         /**
-         * The original path, which should be a symbolic link.
+         * The type of the cache directory {original_path}.
+         */
+        const directory_type_t directory_type;
+
+        /**
+         * The original path, which should be a symbolic link or bind mount.
          */
         const std::string original_path;
 
         /**
-         * The target directory of the symbolic link.
+         * The target directory of the symbolic link or bind mount.
          */
-        const std::string symlinked_path;
+        const std::string target_path;
     };
 
     /**
