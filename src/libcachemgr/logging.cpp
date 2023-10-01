@@ -96,6 +96,7 @@ static std::string home_dir, xdg_cache_home;
 
 /// see quill::PatternFormatter#_set_pattern for available patterns
 static constexpr const char *log_pattern = "%(level_id) [%(ascii_time)][%(thread_name)][%(logger_name:<8)] %(message)";
+static constexpr const char *timestamp_pattern = "%Y-%m-%d %H:%M:%S.%Qns";
 
 } // anonymous namespace
 
@@ -161,7 +162,7 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
 
         // create stdout logger
         auto stdout_handler = quill::stdout_handler(name, colors);
-        stdout_handler->set_pattern(log_pattern);
+        stdout_handler->set_pattern(log_pattern, timestamp_pattern);
         stdout_handler->set_log_level(config.log_level_console);
 
         handlers.push_back(stdout_handler);
@@ -171,7 +172,7 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
     {
         // create file logger
         auto file_handler_config = quill::FileHandlerConfig();
-        file_handler_config.set_pattern(log_pattern);
+        file_handler_config.set_pattern(log_pattern, timestamp_pattern);
 
         // create log file at $XDG_CACHE_HOME/cachemgr.log
         auto file_handler = quill::file_handler(xdg_cache_home + "/cachemgr.log", file_handler_config);
