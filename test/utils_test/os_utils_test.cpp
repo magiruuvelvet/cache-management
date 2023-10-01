@@ -5,7 +5,8 @@
 static constexpr const char *tag_name_getenv = "[os_utils::getenv]";
 static constexpr const char *tag_name_get_home_directory = "[os_utils::get_home_directory]";
 static constexpr const char *tag_name_is_mount_point = "[os_utils::is_mount_point]";
-static constexpr const char *tag_name_get_uid = "[os_utils::get_uid]";
+static constexpr const char *tag_name_get_user_id = "[os_utils::get_user_id]";
+static constexpr const char *tag_name_get_group_id = "[os_utils::get_group_id]";
 
 TEST_CASE("get environment variable success", tag_name_getenv) {
     {
@@ -102,11 +103,20 @@ TEST_CASE("get home directory", tag_name_get_home_directory) {
 // TEST_CASE("is mount point", tag_name_is_mount_point) {
 // }
 
-TEST_CASE("get user id", tag_name_get_uid) {
+TEST_CASE("get user id", tag_name_get_user_id) {
     {
-        const auto uid = os_utils::get_uid();
+        const auto uid = os_utils::get_user_id();
 
         // TODO: implement log file for tests to print hard to assert values
         //std::printf("uid = %lu\n", uid);
+    }
+}
+
+TEST_CASE("get group id", tag_name_get_group_id) {
+    {
+        const auto gid = os_utils::get_group_id();
+
+        // TODO: implement log file for tests to print hard to assert values
+        //std::printf("gid = %lu\n", gid);
     }
 }
