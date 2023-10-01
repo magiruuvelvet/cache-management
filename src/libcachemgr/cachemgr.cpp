@@ -1,4 +1,5 @@
 #include "cachemgr.hpp"
+#include "logging.hpp"
 
 #include <filesystem>
 
@@ -36,6 +37,9 @@ bool cachemgr_t::find_symlinked_cache_directories(const std::string &path, const
             // abort on errors immediately
             if (this->_last_system_error)
             {
+                LOG_ERROR(libcachemgr::log_cachemgr,
+                    "cachemgr_t::find_symlinked_cache_directories(): failed to read symbolic link: {} {}",
+                    entry.path(), this->_last_system_error.message());
                 return false;
             }
 
@@ -48,13 +52,17 @@ bool cachemgr_t::find_symlinked_cache_directories(const std::string &path, const
             // the target of the symlink must be a directory
             if (!fs::is_directory(symlink_target, this->_last_system_error))
             {
-                std::fprintf(stderr, "cachemgr_t::find_symlinked_cache_directories(): symlink target '%s' is not a directory\n", symlink_target.c_str());
+                LOG_ERROR(libcachemgr::log_cachemgr,
+                    "cachemgr_t::find_symlinked_cache_directories(): symlink target '{}' is not a directory", symlink_target);
                 continue;
             }
 
             // abort on errors immediately
             if (this->_last_system_error)
             {
+                LOG_ERROR(libcachemgr::log_cachemgr,
+                    "cachemgr_t::find_symlinked_cache_directories(): failed to stat directory: {} {}",
+                    entry.path(), this->_last_system_error.message());
                 return false;
             }
 

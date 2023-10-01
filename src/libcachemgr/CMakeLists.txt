@@ -4,6 +4,8 @@ add_library(libcachemgr-private STATIC
     cachemgr.hpp
     config.cpp
     config.hpp
+    logging.cpp
+    logging.hpp
 )
 
 SetupTarget(libcachemgr-private "libcachemgr")
@@ -11,6 +13,7 @@ SetupTarget(libcachemgr-private "libcachemgr")
 # include dependencies
 target_link_libraries(libcachemgr-private PRIVATE cachemgr-utils)
 target_link_libraries(libcachemgr-private PRIVATE ryml) # rapidyaml
+target_link_libraries(libcachemgr-private PRIVATE quill::quill)
 
 # create interface
 add_library(libcachemgr INTERFACE)

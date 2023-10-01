@@ -12,3 +12,5 @@ SetupTarget(cachemgr-utils-private "cachemgr-utils")
 add_library(cachemgr-utils INTERFACE)
 target_link_libraries(cachemgr-utils INTERFACE cachemgr-utils-private)
 target_include_directories(cachemgr-utils INTERFACE "${CMAKE_SOURCE_DIR}/src")
+
+# don't add dependencies here, utils should be standalone and portable

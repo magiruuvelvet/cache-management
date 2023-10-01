@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "logging.hpp"
 
 #include <cstdio>
 #include <fstream>
@@ -39,7 +40,8 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
     // implicit file creation not supported, abort if the file doesn't exist
     if (!std::filesystem::exists(config_file, ec))
     {
-        std::fprintf(stderr, "configuration file '%s' does not exist or is not accessible: %s\n",
+        LOG_ERROR(libcachemgr::log_config,
+            "configuration file '{}' does not exist or is not accessible: {}",
             config_file.c_str(), ec.message().c_str());
         if (file_error != nullptr) { *file_error = file_error::not_found; }
         return;
@@ -48,7 +50,8 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
     // validate if the given file is a regular file (or a symbolic link to a regular file)
     if (!std::filesystem::is_regular_file(config_file, ec))
     {
-        std::fprintf(stderr, "configuration file '%s' is not a regular file: %s\n",
+        LOG_ERROR(libcachemgr::log_config,
+            "configuration file '{}' is not a regular file: {}",
             config_file.c_str(), ec.message().c_str());
         if (file_error != nullptr) { *file_error = file_error::not_a_file; }
         return;
@@ -73,7 +76,7 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
     // validate that 'cache_mappings' exists
     if (!tree.has_child(tree.root_id(), key_seq_cache_mappings))
     {
-        std::fprintf(stderr, "'cache_mappings' sequence not found\n");
+        LOG_ERROR(libcachemgr::log_config, "'cache_mappings' sequence not found");
         if (parse_error != nullptr) { *parse_error = parse_error::cache_mappings_seq_not_found; }
         return;
     }
@@ -84,7 +87,7 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
     // validate that 'cache_mappings' is actually a sequence
     if (!cache_mappings.is_seq())
     {
-        std::fprintf(stderr, "'cache_mappings' is not a sequence\n");
+        LOG_ERROR(libcachemgr::log_config, "'cache_mappings' is not a sequence");
         if (parse_error != nullptr) { *parse_error = parse_error::cache_mappings_not_a_seq; }
         return;
     }
@@ -105,7 +108,8 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
             const auto &source = cache_mapping[key_str_source].val();
             const auto &target = cache_mapping[key_str_target].val();
 
-            std::fprintf(stderr, "found cache_mapping: source='%s', target='%s', type='%s'\n",
+            LOG_INFO(libcachemgr::log_config,
+                "found cache_mapping: source='{}', target='{}', type='{}'",
                 std::string(source.str, source.len).c_str(),
                 std::string(target.str, target.len).c_str(),
                 std::string(type.str, type.len).c_str());
@@ -119,7 +123,8 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
         }
         else
         {
-            std::fprintf(stderr, "found non-map or invalid entry in 'cache_mappings' sequence at position %d\n", i);
+            LOG_WARNING(libcachemgr::log_config,
+                "found non-map or invalid entry in 'cache_mappings' sequence at position {}", i);
         }
     }
 }
@@ -174,7 +179,7 @@ std::string configuration_t::parse_path(const std::string &path_with_placeholder
         ++it;
     }
 
-    std::fprintf(stderr, "parse_path('%s') -> normalized path: '%s'\n",
+    LOG_DEBUG(libcachemgr::log_config, "parse_path('{}') -> normalized path: '{}'",
         path_with_placeholders.c_str(), normalized_path.c_str());
 
     return normalized_path;

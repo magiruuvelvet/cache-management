@@ -2,6 +2,8 @@
 #include <catch2/internal/catch_leak_detector.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <libcachemgr/logging.hpp>
+
 /** COPIED FROM `Catch2/src/catch2/internal/catch_main.cpp` **/
 
 namespace Catch {
@@ -30,6 +32,10 @@ inline int catch2_main(int argc, char **argv)
  */
 int main(int argc, char **argv)
 {
-    // nothing for now, just run catch2_main()
+    libcachemgr::init_logging(libcachemgr::logging_config{
+        // disable logging to console during tests
+        .log_to_console = false,
+    });
+
     return catch2_main(argc, argv);
 }

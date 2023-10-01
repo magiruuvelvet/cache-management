@@ -2,6 +2,8 @@
 
 #include <utils/os_utils.hpp>
 
+#include <libcachemgr/logging.hpp>
+
 static constexpr const char *tag_name_getenv = "[os_utils::getenv]";
 static constexpr const char *tag_name_get_home_directory = "[os_utils::get_home_directory]";
 static constexpr const char *tag_name_is_mount_point = "[os_utils::is_mount_point]";
@@ -107,8 +109,7 @@ TEST_CASE("get user id", tag_name_get_user_id) {
     {
         const auto uid = os_utils::get_user_id();
 
-        // TODO: implement log file for tests to print hard to assert values
-        //std::printf("uid = %lu\n", uid);
+        LOG_INFO(libcachemgr::log_test, "{}: uid = {}", tag_name_get_user_id, uid);
     }
 }
 
@@ -116,7 +117,6 @@ TEST_CASE("get group id", tag_name_get_group_id) {
     {
         const auto gid = os_utils::get_group_id();
 
-        // TODO: implement log file for tests to print hard to assert values
-        //std::printf("gid = %lu\n", gid);
+        LOG_INFO(libcachemgr::log_test, "{}: gid = {}", tag_name_get_group_id, gid);
     }
 }
