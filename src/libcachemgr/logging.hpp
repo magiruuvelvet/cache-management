@@ -32,11 +32,16 @@ struct logging_config
     /**
      * The default log level for the file logger.
      */
-    quill::LogLevel log_level_file = quill::LogLevel::Debug; // TODO: should be configurable ((CMake + command line)
+    quill::LogLevel log_level_file = quill::LogLevel::Debug; // TODO: should be configurable (CMake + command line)
+
+    /**
+     * The log file path.
+     */
+    std::string log_file_path = "cachemgr.log"; // in working directory by default
 };
 
 /**
- * Initializes the logging system.
+ * Initializes the logging subsystem.
  */
 void init_logging(const logging_config &config = {});
 

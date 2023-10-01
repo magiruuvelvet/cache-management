@@ -39,6 +39,7 @@ int main(int argc, char **argv)
         // ensure debug file logging is enabled during tests
         .log_to_file = true,
         .log_level_file = quill::LogLevel::Debug,
+        .log_file_path = "./cachemgr-tests.log"
     });
 
     return catch2_main(argc, argv);

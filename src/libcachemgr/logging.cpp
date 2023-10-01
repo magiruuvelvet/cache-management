@@ -9,7 +9,6 @@
 #include <quill/Quill.h>
 
 #include <utils/logging_helper.hpp>
-#include <utils/os_utils.hpp>
 
 /**
  * Shutdown routines for the quill logging library.
@@ -67,9 +66,9 @@ namespace {
 class quill_utils_logger : public logging_helper
 {
 public:
-    quill_utils_logger()
+    quill_utils_logger(const libcachemgr::logging_config &config)
     {
-        this->_quill_utils_logger = libcachemgr::create_logger("utils");
+        this->_quill_utils_logger = libcachemgr::create_logger("utils", config);
     }
 
     void log_info(const std::string &message) override
@@ -91,9 +90,6 @@ private:
     quill::Logger *_quill_utils_logger = nullptr;
 };
 
-// directories needed for logging facilities
-static std::string home_dir, xdg_cache_home;
-
 /// see quill::PatternFormatter#_set_pattern for available patterns
 static constexpr const char *log_pattern = "%(level_id) [%(ascii_time)][%(thread_name)][%(logger_name:<8)] %(message)";
 static constexpr const char *timestamp_pattern = "%Y-%m-%d %H:%M:%S.%Qns";
@@ -107,10 +103,6 @@ quill::Logger *libcachemgr::log_test = nullptr;
 
 void libcachemgr::init_logging(const logging_config &config)
 {
-    // receive essential directories
-    home_dir = os_utils::get_home_directory();
-    xdg_cache_home = os_utils::getenv("XDG_CACHE_HOME", home_dir + "/.cache");
-
     // configure quill logging
     quill::configure(([]{
         quill::Config cfg;
@@ -134,7 +126,7 @@ void libcachemgr::init_logging(const logging_config &config)
     #endif
 
     // register a logger for the utils library
-    logging_helper::set_logger(std::make_shared<quill_utils_logger>());
+    logging_helper::set_logger(std::make_shared<quill_utils_logger>(config));
 
     // create loggers
     log_main =     libcachemgr::create_logger("main", config);
@@ -175,7 +167,7 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
         file_handler_config.set_pattern(log_pattern, timestamp_pattern);
 
         // create log file at $XDG_CACHE_HOME/cachemgr.log
-        auto file_handler = quill::file_handler(xdg_cache_home + "/cachemgr.log", file_handler_config);
+        auto file_handler = quill::file_handler(config.log_file_path, file_handler_config);
         file_handler->set_log_level(config.log_level_file);
 
         handlers.push_back(file_handler);

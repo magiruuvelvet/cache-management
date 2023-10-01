@@ -1,20 +1,40 @@
 #include <cstdio>
 
+#include <utils/logging_helper.hpp>
 #include <utils/os_utils.hpp>
 
 #include <libcachemgr/logging.hpp>
 #include <libcachemgr/config.hpp>
 #include <libcachemgr/cachemgr.hpp>
 
+namespace {
+class basic_utils_logger : public logging_helper
+{
+public:
+    void log_info(const std::string &message) override {
+        std::fprintf(stderr, "[inf] %s\n", message.c_str()); }
+    void log_warning(const std::string &message) override {
+        std::fprintf(stderr, "[wrn] %s\n", message.c_str()); }
+    void log_error(const std::string &message) override {
+        std::fprintf(stderr, "[err] %s\n", message.c_str()); }
+};
+} // anonymous namespace
+
 int main(int argc, char **argv)
 {
-    libcachemgr::init_logging();
-
-    cachemgr_t cachemgr;
+    // catch errors early during first os_utils function calls
+    logging_helper::set_logger(std::make_shared<basic_utils_logger>());
 
     // receive essential directories
     const auto home_dir = os_utils::get_home_directory();
     const auto xdg_cache_home = os_utils::getenv("XDG_CACHE_HOME", home_dir + "/.cache");
+
+    // initialize logging subsystem (includes os_utils function calls)
+    libcachemgr::init_logging(libcachemgr::logging_config{
+        .log_file_path = xdg_cache_home + "/cachemgr.log",
+    });
+
+    cachemgr_t cachemgr;
 
     std::printf("HOME: %s\n", home_dir.c_str());
     std::printf("XDG_CACHE_HOME: %s\n", xdg_cache_home.c_str());
