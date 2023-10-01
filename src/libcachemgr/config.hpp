@@ -76,6 +76,18 @@ public:
         return this->_cache_mappings;
     }
 
+    /**
+     * Finds the requested cache mapping in the registered cache mappings.
+     *
+     * If no such mapping is found, nullptr is returned.
+     *
+     * **Note:** Pointers returned by this method are only valid for the lifetime of the {configuration_t} instance.
+     *
+     * @param type the type of the cache mapping to find
+     * @return the found cache mapping, or nullptr if not found
+     */
+    const cache_mapping_t *find_cache_mapping(const std::string &type) const noexcept;
+
 private:
     /**
      * Parses and normalizes the given path.

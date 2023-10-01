@@ -124,6 +124,19 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
     }
 }
 
+const configuration_t::cache_mapping_t *configuration_t::find_cache_mapping(const std::string &type) const noexcept
+{
+    for (const auto &cache_mapping : this->_cache_mappings)
+    {
+        if (cache_mapping.type == type)
+        {
+            return &cache_mapping;
+        }
+    }
+
+    return nullptr;
+}
+
 namespace {
     /**
      * Regex pattern to match placeholders.
