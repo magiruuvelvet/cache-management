@@ -129,4 +129,13 @@ bool is_mount_point(const std::string &path)
 #endif
 }
 
+std::uint64_t get_uid()
+{
+#if defined(PROJECT_PLATFORM_WINDOWS)
+#error os_utils::get_uid not implemented for this platform
+#else
+    return std::uint64_t(getuid());
+#endif
+}
+
 } // namespace os_utils

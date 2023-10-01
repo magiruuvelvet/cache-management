@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cinttypes>
 
 namespace os_utils {
 
@@ -48,5 +49,12 @@ std::string get_home_directory();
  * @return false the given path is a regular directory on the same filesystem
  */
 bool is_mount_point(const std::string &path);
+
+/**
+ * Get the current user id.
+ *
+ * @return the current user id
+ */
+std::uint64_t get_uid();
 
 } // namespace os_utils
