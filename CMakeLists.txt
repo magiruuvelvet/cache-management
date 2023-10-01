@@ -23,10 +23,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=implicit-function-declaration")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
 
 # create dependency targets
-# add_library(rapidyaml INTERFACE)
-# target_include_directories(rapidyaml SYSTEM INTERFACE "${PROJECT_SOURCE_DIR}/libs/rapidyaml/src")
-# target_include_directories(rapidyaml SYSTEM INTERFACE "${PROJECT_SOURCE_DIR}/libs/rapidyaml/ext/c4core/src")
-add_subdirectory(libs/rapidyaml EXCLUDE_FROM_ALL SYSTEM)
+add_subdirectory(libs)
 
 # add project targets
 add_subdirectory(src)
+add_subdirectory(test)
