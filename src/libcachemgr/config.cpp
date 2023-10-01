@@ -150,12 +150,13 @@ std::string configuration_t::parse_path(const std::string &path_with_placeholder
 
     // define a map to store replacements for each placeholder
     // values defined here should not change during the lifetime of the process
+    static const std::string home_dir = os_utils::get_home_directory();
     static const std::unordered_map<std::string, std::string> replacements = {
-        { "~",               os_utils::get_home_directory()           },
+        { "~",               home_dir                                 },
         { "%u",              std::to_string(os_utils::get_user_id())  },
         { "%g",              std::to_string(os_utils::get_group_id()) },
         { "$HOME",           os_utils::getenv("HOME")                 },
-        { "$XDG_CACHE_HOME", os_utils::getenv("XDG_CACHE_HOME")       },
+        { "$XDG_CACHE_HOME", os_utils::getenv("XDG_CACHE_HOME", home_dir + "/.cache") },
     };
 
     // use std::sregex_iterator to find and replace matches
