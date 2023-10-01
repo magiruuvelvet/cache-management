@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.25)
 # register custom cmake modules
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")
 include(DetectAndRegisterPlatformMacros)
+include(SetupTarget)
 
 project("cache-manager" LANGUAGES CXX)
 
@@ -26,5 +27,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
 add_subdirectory(libs)
 
 # add project targets
-add_subdirectory(src)
+add_subdirectory(src/utils)
+add_subdirectory(src/app)
 add_subdirectory(test)

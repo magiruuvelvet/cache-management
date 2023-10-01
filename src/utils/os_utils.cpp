@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cerrno>
 
-#include <utils/logging_helper.hpp>
+#include "logging_helper.hpp"
 
 #if defined(PROJECT_PLATFORM_WINDOWS)
 // Windows
