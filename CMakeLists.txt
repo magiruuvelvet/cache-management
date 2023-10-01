@@ -28,5 +28,6 @@ add_subdirectory(libs)
 
 # add project targets
 add_subdirectory(src/utils)
+add_subdirectory(src/libcachemgr)
 add_subdirectory(src/app)
 add_subdirectory(test)

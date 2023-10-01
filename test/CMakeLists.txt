@@ -8,5 +8,5 @@ SetupTarget(cachemgr-tests "cachemgr-tests")
 
 # include dependencies
 target_link_libraries(cachemgr-tests PRIVATE cachemgr-utils)
-target_link_libraries(cachemgr-tests PRIVATE ryml)   # rapidyaml
+target_link_libraries(cachemgr-tests PRIVATE libcachemgr)
 target_link_libraries(cachemgr-tests PRIVATE Catch2) # Catch2 without default main()

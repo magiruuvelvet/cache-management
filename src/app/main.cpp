@@ -3,8 +3,8 @@
 #include <utils/logging_helper.hpp>
 #include <utils/os_utils.hpp>
 
-#include "config.hpp"
-#include "cachemgr.hpp"
+#include <libcachemgr/config.hpp>
+#include <libcachemgr/cachemgr.hpp>
 
 // TODO: just for testing, will be replaced with an external logging library
 class logger : public logging_helper
