@@ -129,12 +129,21 @@ bool is_mount_point(const std::string &path)
 #endif
 }
 
-std::uint64_t get_uid()
+std::uint64_t get_user_id()
 {
 #if defined(PROJECT_PLATFORM_WINDOWS)
-#error os_utils::get_uid not implemented for this platform
+#error os_utils::get_user_id not implemented for this platform
 #else
     return std::uint64_t(getuid());
+#endif
+}
+
+std::uint64_t get_group_id()
+{
+#if defined(PROJECT_PLATFORM_WINDOWS)
+#error os_utils::get_group_id not implemented for this platform
+#else
+    return std::uint64_t(getgid());
 #endif
 }
 

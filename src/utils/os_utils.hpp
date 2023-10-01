@@ -55,6 +55,13 @@ bool is_mount_point(const std::string &path);
  *
  * @return the current user id
  */
-std::uint64_t get_uid();
+std::uint64_t get_user_id();
+
+/**
+ * Get the current group id.
+ *
+ * @return the current group id
+ */
+std::uint64_t get_group_id();
 
 } // namespace os_utils
