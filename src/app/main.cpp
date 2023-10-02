@@ -40,16 +40,13 @@ int main(int argc, char **argv)
     std::printf("XDG_CACHE_HOME: %s\n", xdg_cache_home.c_str());
 
     // scan HOME and XDG_CACHE_HOME for symlinked cache directories
-    for (auto&& dir : {home_dir, xdg_cache_home})
+    const bool result = cachemgr.find_symlinked_cache_directories({home_dir, xdg_cache_home}, "/caches/1000");
+
+    std::printf("result = %s\n", result ? "true" : "false");
+
+    for (auto&& dir : cachemgr.symlinked_cache_directories())
     {
-        const bool result = cachemgr.find_symlinked_cache_directories(dir, "/caches/1000");
-
-        std::printf("result = %s\n", result ? "true" : "false");
-
-        for (auto&& dir : cachemgr.symlinked_cache_directories())
-        {
-            std::printf("%s -> %s\n", dir.original_path.c_str(), dir.target_path.c_str());
-        }
+        std::printf("%s -> %s\n", dir.original_path.c_str(), dir.target_path.c_str());
     }
 
     std::printf("is_mount_point(/home): %i\n", os_utils::is_mount_point("/home"));
@@ -60,6 +57,20 @@ int main(int argc, char **argv)
     configuration_t config("./test.yaml", &file_error, &parse_error);
 
     std::printf("file_error = %i, parse_error = %i\n", file_error, parse_error);
+
+    const auto compare_results = cachemgr.compare_cache_mappings(config.cache_mappings());
+    if (compare_results)
+    {
+        LOG_WARNING(libcachemgr::log_main, "found differences between expected and actual cache mappings");
+
+        LOG_WARNING(libcachemgr::log_main, "count of differences: {}", compare_results.count());
+
+        for (const auto &diff : compare_results.differences())
+        {
+            LOG_WARNING(libcachemgr::log_main, "difference: {} <=> {}",
+                diff.actual.target, diff.expected.target);
+        }
+    }
 
     return 0;
 }
