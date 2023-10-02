@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cache_mapping.hpp"
+
 #include <string>
 #include <list>
 
@@ -9,20 +11,9 @@
 class configuration_t final
 {
 public:
-    /**
-     * Represents a cache mapping in the configuration file.
-     */
-    struct cache_mapping_t
-    {
-        const std::string type; // unused for now, type might change in the future
-        const std::string source;
-        const std::string target;
-    };
-
-    /**
-     * List of cache mappings in the configuration file.
-     */
-    using cache_mappings_t = std::list<cache_mapping_t>;
+    // forward declarations
+    using cache_mapping_t = libcachemgr::cache_mapping_t;
+    using cache_mappings_t = libcachemgr::cache_mappings_t;
 
     /**
      * Possible error codes related to file handling.

@@ -1,5 +1,6 @@
 # create library
 add_library(libcachemgr-private STATIC
+    cache_mapping.hpp
     cachemgr.cpp
     cachemgr.hpp
     config.cpp

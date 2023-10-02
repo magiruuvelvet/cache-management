@@ -1,7 +1,10 @@
 #pragma once
 
+#include "cache_mapping.hpp"
+
 #include <string>
 #include <list>
+#include <initializer_list>
 #include <system_error>
 
 /**
@@ -10,6 +13,68 @@
 class cachemgr_t final
 {
 public:
+    /**
+     * Data structure to store comparison results for cache mappings.
+     */
+    struct cache_mappings_compare_results_t
+    {
+    public:
+        /**
+         * Standalone read-only copies of {libcachemgr::cache_mapping_t} for comparison.
+         */
+        struct cache_mappings_compare_result_t
+        {
+            /// the actual cache mapping, as found by the cache manager.
+            const libcachemgr::cache_mapping_t actual;
+            /// the expected cache mapping, as defined by the configuration file.
+            const libcachemgr::cache_mapping_t expected;
+        };
+
+        /**
+         * Push a new comparison result to the internal list.
+         *
+         * @param result actual and expected {libcachemgr::cache_mapping_t} object
+         */
+        constexpr inline void add_result(const cache_mappings_compare_result_t &result)
+        {
+            this->_differences.emplace_back(result);
+        }
+
+        /**
+         * Implicit boolean conversion operator to check if the comparison result has differences.
+         *
+         * @return true the internal result list contains differences
+         * @return false the internal result list is empty
+         */
+        constexpr inline operator bool() const
+        {
+            // return true if the internal result list contains differences
+            return this->_differences.size() > 0;
+        }
+
+        /**
+         * Get the count of differences.
+         */
+        constexpr inline auto count() const
+        {
+            return this->_differences.size();
+        }
+
+        /**
+         * Get the list of differences.
+         */
+        constexpr inline const auto &differences() const
+        {
+            return this->_differences;
+        }
+
+    private:
+        /**
+         * List of {cache_mappings_compare_result_t}.
+         */
+        std::list<const cache_mappings_compare_result_t> _differences;
+    };
+
     /**
      * Constructs and initializes a new cache manager.
      *
@@ -70,6 +135,31 @@ public:
     bool find_symlinked_cache_directories(const std::string &path, const std::string &symlink_target_prefix = {}) noexcept;
 
     /**
+     * Searches the given directories for any symlinked cache directories.
+     *
+     * Only symbolic links which point to directories starting with the {symlink_target_prefix} are used.
+     *
+     * The results are stored in {_symlinked_cache_directories}.
+     *
+     * @param paths directories in which symlinked cache directories should be searched
+     * @param symlink_target_prefix the prefix of the symlink target, empty to include all symlink targets
+     * @return true search was successful
+     * @return false error accessing directory, see {get_last_system_error} for an explanation
+     */
+    bool find_symlinked_cache_directories(
+        const std::initializer_list<std::string> &paths, const std::string &symlink_target_prefix = {}) noexcept;
+
+    /**
+     * Compares the given cache mapping list (from the configuration file) with the found symlinked cache directories.
+     *
+     * The results are stored in comparison results structure.
+     *
+     * @param cache_mappings the cache mapping list from the configuration file
+     * @return comparison results
+     */
+    cache_mappings_compare_results_t compare_cache_mappings(const libcachemgr::cache_mappings_t &cache_mappings) const noexcept;
+
+    /**
      * Returns the symlinked cache directories.
      */
     inline constexpr const std::list<symlinked_cache_directory_t> &symlinked_cache_directories() const
@@ -95,4 +185,24 @@ private:
      * Last system error encountered by the cache manager.
      */
     std::error_code _last_system_error;
+
+    /**
+     * Helper boolean to determine if the previous {_symlinked_cache_directories} should be cleared
+     * before rescanning the given directories.
+     */
+    bool _clear_previous_list = true;
+
+    /// callback to execute after the return statement
+    struct after_run_callback final
+    {
+        after_run_callback(bool *clear_previous_list)
+            : clear_previous_list(clear_previous_list) {}
+        ~after_run_callback()
+        {
+            // reset back to default value
+            *this->clear_previous_list = true;
+        }
+
+        bool *clear_previous_list = nullptr;
+    };
 };
