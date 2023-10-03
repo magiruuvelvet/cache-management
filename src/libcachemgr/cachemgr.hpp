@@ -191,18 +191,4 @@ private:
      * before rescanning the given directories.
      */
     bool _clear_previous_list = true;
-
-    /// callback to execute after the return statement
-    struct after_run_callback final
-    {
-        after_run_callback(bool *clear_previous_list)
-            : clear_previous_list(clear_previous_list) {}
-        ~after_run_callback()
-        {
-            // reset back to default value
-            *this->clear_previous_list = true;
-        }
-
-        bool *clear_previous_list = nullptr;
-    };
 };
