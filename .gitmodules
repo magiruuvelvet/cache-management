@@ -10,3 +10,6 @@
 [submodule "libs/fmt"]
 	path = libs/fmt
 	url = https://github.com/fmtlib/fmt
+[submodule "libs/argparse-cpp"]
+	path = libs/argparse-cpp
+	url = https://github.com/magiruuvelvet/argparse-cpp
