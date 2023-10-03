@@ -27,7 +27,7 @@ namespace {
     constexpr const char *key_str_type = "type";
     constexpr const char *key_str_source = "source";
     constexpr const char *key_str_target = "target";
-}
+} // anonymous namespace
 
 configuration_t::configuration_t(const std::string &config_file, file_error *file_error, parse_error *parse_error) noexcept
 {
@@ -147,7 +147,7 @@ namespace {
      * Regex pattern to match placeholders.
      */
     static const std::regex placeholder_regex(R"((~|%u|%g|\$HOME|\$XDG_CACHE_HOME))");
-}
+} // anonymous namespace
 
 std::string configuration_t::parse_path(const std::string &path_with_placeholders)
 {
