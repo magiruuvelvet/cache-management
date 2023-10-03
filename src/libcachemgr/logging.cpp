@@ -166,7 +166,7 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
         auto file_handler_config = quill::FileHandlerConfig();
         file_handler_config.set_pattern(log_pattern, timestamp_pattern);
 
-        // create log file at $XDG_CACHE_HOME/cachemgr.log
+        // create log file at the given location {config.log_level_file}
         auto file_handler = quill::file_handler(config.log_file_path, file_handler_config);
         file_handler->set_log_level(config.log_level_file);
 
