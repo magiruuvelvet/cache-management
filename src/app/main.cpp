@@ -2,6 +2,7 @@
 
 #include <utils/logging_helper.hpp>
 #include <utils/os_utils.hpp>
+#include <utils/xdg_paths.hpp>
 
 #include <libcachemgr/logging.hpp>
 #include <libcachemgr/config.hpp>
@@ -27,7 +28,7 @@ int main(int argc, char **argv)
 
     // receive essential directories
     const auto home_dir = os_utils::get_home_directory();
-    const auto xdg_cache_home = os_utils::getenv("XDG_CACHE_HOME", home_dir + "/.cache");
+    const auto xdg_cache_home = xdg_paths::get_xdg_cache_home();
 
     // initialize logging subsystem (includes os_utils function calls)
     libcachemgr::init_logging(libcachemgr::logging_config{
