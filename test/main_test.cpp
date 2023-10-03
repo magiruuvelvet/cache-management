@@ -32,6 +32,7 @@ inline int catch2_main(int argc, char **argv)
  */
 int main(int argc, char **argv)
 {
+    // initialize logging subsystem
     libcachemgr::init_logging(libcachemgr::logging_config{
         // disable logging to console during tests
         .log_to_console = false,
@@ -39,7 +40,7 @@ int main(int argc, char **argv)
         // ensure debug file logging is enabled during tests
         .log_to_file = true,
         .log_level_file = quill::LogLevel::Debug,
-        .log_file_path = "./cachemgr-tests.log"
+        .log_file_path = "./cachemgr-tests.log",
     });
 
     return catch2_main(argc, argv);
