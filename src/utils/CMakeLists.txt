@@ -4,6 +4,8 @@ add_library(cachemgr-utils-private STATIC
     logging_helper.hpp
     os_utils.cpp
     os_utils.hpp
+    xdg_paths.cpp
+    xdg_paths.hpp
 )
 
 SetupTarget(cachemgr-utils-private "cachemgr-utils")
