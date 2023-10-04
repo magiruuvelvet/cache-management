@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <array>
 
 #include <fmt/printf.h>
 
@@ -73,8 +74,59 @@ namespace {
         }
     };
 
-    static constexpr const char *cli_opt_help = "help";
-    static constexpr const char *cli_opt_version = "version";
+    /**
+     * compile-time command line option definition
+     */
+    struct cli_option final
+    {
+        /// the type of the command line option
+        using arg_type_t = argparse::Argument::Type;
+
+        static constexpr auto boolean_type = arg_type_t::Boolean;
+        static constexpr auto string_type = arg_type_t::String;
+
+        /// compile-time construct a command line option definition
+        constexpr cli_option(
+            const char *long_opt,
+            const char *short_opt,
+            const char *description,
+            const arg_type_t arg_type,
+            const bool required = false)
+        : long_opt(long_opt),
+          short_opt(short_opt),
+          description(description),
+          arg_type(arg_type),
+          required(required)
+        {}
+
+        const char *long_opt;
+        const char *short_opt;
+        const char *description;
+        const arg_type_t arg_type;
+        const bool required = false;
+
+        /// implicit const char * conversion operator, returns the long option
+        constexpr operator const char *() const {
+            return long_opt;
+        }
+
+        /// implicit std::string conversion operator, returns the long option
+        constexpr operator const std::string() const {
+            return long_opt;
+        }
+    };
+
+    // command line options
+    static constexpr const auto cli_opt_help =
+        cli_option("help",      "h", "print this help message and exit", cli_option::boolean_type);
+    static constexpr const auto cli_opt_version =
+        cli_option("version",   "",  "print the version and exit",       cli_option::boolean_type);
+
+    // array of command line options for easy registration in the parser
+    static constexpr const std::array<const cli_option*, 2> cli_options = {
+        &cli_opt_help,
+        &cli_opt_version,
+    };
 } // anonymous namespace
 
 static int parse_cli_options(int argc, char **argv, bool *abort)
@@ -84,8 +136,10 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
 
     // prepare command line parser and options
     argparse::ArgumentParser parser(argc, argv);
-    parser.addArgument("h", cli_opt_help,    "print this help message and exit", ArgType::Boolean);
-    parser.addArgument("",  cli_opt_version, "print the version and exit", ArgType::Boolean);
+    for (const auto *option : cli_options)
+    {
+        parser.addArgument(option->short_opt, option->long_opt, option->description, option->arg_type, option->required);
+    }
 
     // parse command line arguments
     switch (const auto parse_result = parser.parse())
