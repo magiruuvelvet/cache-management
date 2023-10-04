@@ -77,44 +77,75 @@ namespace {
     static constexpr const char *cli_opt_version = "version";
 } // anonymous namespace
 
+static int parse_cli_options(int argc, char **argv, bool *abort)
+{
+    using ArgType = argparse::Argument::Type;
+    using ParseResult = argparse::ArgumentParser::Result;
+
+    // prepare command line parser and options
+    argparse::ArgumentParser parser(argc, argv);
+    parser.addArgument("h", cli_opt_help,    "print this help message and exit", ArgType::Boolean);
+    parser.addArgument("",  cli_opt_version, "print the version and exit", ArgType::Boolean);
+
+    // parse command line arguments
+    switch (const auto parse_result = parser.parse())
+    {
+        // success is the most likely case, allow the compiler to optimize for it
+        // break out of the switch statement as no error handling is required
+        [[likely]] case ParseResult::Success: break;
+
+        // handle error cases
+
+        // not possible because there are no required arguments in the parser
+        [[unlikely]] case ParseResult::InsufficientArguments:
+        [[unlikely]] case ParseResult::MissingArgument:
+        // not possible since this is just the default result code upon {argparse::ArgumentParser} initialization
+        [[unlikely]] case ParseResult::Unknown:
+        {
+            // abort on any error
+            *abort = true;
+            // TODO: error messages
+            return 2;
+            break;
+        }
+    }
+
+    // print cli help message and exit
+    if (parser.exists(cli_opt_help))
+    {
+        *abort = true;
+        fmt::print("{}\n", parser.help());
+        return 0;
+    }
+
+    // print application version and exit
+    if (parser.exists(cli_opt_version))
+    {
+        *abort = true;
+        fmt::print("cachemgr 0.0.0\n"); // TODO: app versioning
+        return 0;
+    }
+
+    return 0;
+}
+
 /**
- * Perform the initialization of the CLI application.
+ * Perform the initialization and execution of the CLI application.
+ *  - parse command line arguments and populate the global state
  *  - initialize the logging subsystem
- *  - parse command line arguments
- *
- * After completion, invoke {cachemgr_cli}.
+ *  - start the CLI application {cachemgr_cli}
  */
 int main(int argc, char **argv)
 {
+    // parse command line arguments
     {
-        // parse command line arguments
-        argparse::ArgumentParser parser(argc, argv);
-        using ArgType = argparse::Argument::Type;
-        parser.addArgument("h", cli_opt_help,    "print this help message and exit", ArgType::Boolean);
-        parser.addArgument("",  cli_opt_version, "print the version and exit", ArgType::Boolean);
-
-        switch (const auto parse_result = parser.parse())
+        bool abort = false;
+        if (const auto status = parse_cli_options(argc, argv, &abort); abort)
         {
-            using ParseResult = argparse::ArgumentParser::Result;
-
-            case ParseResult::Success:
-                if (parser.exists(cli_opt_help))
-                {
-                    fmt::print("{}\n", parser.help());
-                    return 0;
-                }
-                break;
-
-            case ParseResult::InsufficientArguments:
-                break;
-
-            case ParseResult::MissingArgument:
-                break;
-
-            case ParseResult::Unknown:
-                break;
+            // exit program with status if requested to abort
+            return status;
         }
-    } // discard command line parser and continue with the rest of the program
+    }
 
     // catch errors early during first os_utils function calls
     // NOTE: xdg_paths::get_xdg_cache_home() makes calls to os_utils internally
