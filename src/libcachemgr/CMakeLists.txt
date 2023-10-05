@@ -7,6 +7,7 @@ set(libcachemgr_shared_sources
     cachemgr.hpp
     config.cpp
     config.hpp
+    libcachemgr.cpp
     libcachemgr.hpp
     logging.cpp
     logging.hpp

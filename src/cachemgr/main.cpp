@@ -11,8 +11,11 @@
 #include <libcachemgr/logging.hpp>
 #include <libcachemgr/config.hpp>
 #include <libcachemgr/cachemgr.hpp>
+#include <libcachemgr/libcachemgr.hpp>
 
 #include <argparse/argparse.hpp>
+
+using program_metadata = libcachemgr::program_metadata;
 
 static int cachemgr_cli()
 {
@@ -73,35 +76,6 @@ namespace {
         void log_error(const std::string &message) override {
             fmt::print(stderr, "[err] {}\n", message);
         }
-    };
-
-    /**
-     * centralized version information and metadata about the program
-     */
-    struct program_metadata final
-    {
-        /**
-         * application name
-         */
-        static constexpr std::string_view application_name = "cachemgr";
-
-        /**
-         * application version number
-         *
-         * adhere to semantic versioning 2.0.0, see https://semver.org/
-         *
-         * Q: When should I increment the major version number?
-         * A: When there are user-facing breaking changes to the command line interface
-         *    or the behavior of the program. `libcachemgr` is a private library and is
-         *    not intended for public consumption, so it doesn't need to adhere to semver.
-         *
-         * TODO: add `-dirty` suffix to indicate that this is a dirty build
-         */
-        static constexpr std::string_view application_version = "0.0.0-dev";
-
-        // TODO: read git repository information at build time using cmake
-        static constexpr std::string_view git_branch = "";
-        static constexpr std::string_view git_commit = "";
     };
 
     /**
@@ -239,8 +213,10 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     if (parser.exists(cli_opt_help))
     {
         *abort = true;
-        fmt::print("{} {}\n\n  Options:\n{}\n",
-            program_metadata::application_name, program_metadata::application_version,
+        fmt::print("{} {} (Platform: {})\n\n  Options:\n{}\n",
+            program_metadata::application_name,
+            program_metadata::application_version,
+            program_metadata::platform_name,
             parser.help());
         return 0;
     }
@@ -249,7 +225,10 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     if (parser.exists(cli_opt_version))
     {
         *abort = true;
-        fmt::print("{} {}\n", program_metadata::application_name, program_metadata::application_version);
+        fmt::print("{} {} (Platform: {})\n",
+            program_metadata::application_name,
+            program_metadata::application_version,
+            program_metadata::platform_name);
         return 0;
     }
 
