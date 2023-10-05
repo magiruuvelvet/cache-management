@@ -40,7 +40,7 @@ static int cachemgr_cli()
 
     configuration_t::file_error file_error;
     configuration_t::parse_error parse_error;
-    configuration_t config("./test.yaml", &file_error, &parse_error);
+    configuration_t config(libcachemgr::user_configuration()->configuration_file(), &file_error, &parse_error);
 
     std::printf("file_error = %i, parse_error = %i\n", file_error, parse_error);
 
@@ -230,6 +230,15 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
             program_metadata::application_version,
             program_metadata::platform_name);
         return 0;
+    }
+
+    if (parser.exists(cli_opt_config))
+    {
+        libcachemgr::user_configuration()->set_configuration_file(parser.get<std::string>(cli_opt_config));
+    }
+    else
+    {
+        libcachemgr::user_configuration()->set_configuration_file(cli_opt_config.get_config_file_location());
     }
 
     return 0;
