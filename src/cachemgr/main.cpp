@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <string_view>
 #include <array>
 
 #include <fmt/printf.h>
@@ -75,9 +76,38 @@ namespace {
     };
 
     /**
+     * centralized version information and metadata about the program
+     */
+    struct program_metadata final
+    {
+        /**
+         * application name
+         */
+        static constexpr std::string_view application_name = "cachemgr";
+
+        /**
+         * application version number
+         *
+         * adhere to semantic versioning 2.0.0, see https://semver.org/
+         *
+         * Q: When should I increment the major version number?
+         * A: When there are user-facing breaking changes to the command line interface
+         *    or the behavior of the program. `libcachemgr` is a private library and is
+         *    not intended for public consumption, so it doesn't need to adhere to semver.
+         *
+         * TODO: add `-dirty` suffix to indicate that this is a dirty build
+         */
+        static constexpr std::string_view application_version = "0.0.0-dev";
+
+        // TODO: read git repository information at build time using cmake
+        static constexpr std::string_view git_branch = "";
+        static constexpr std::string_view git_commit = "";
+    };
+
+    /**
      * compile-time command line option definition
      */
-    struct cli_option final
+    struct cli_option
     {
         /// the type of the command line option
         using arg_type_t = argparse::Argument::Type;
@@ -105,6 +135,12 @@ namespace {
         const arg_type_t arg_type;
         const bool required = false;
 
+        /// this cli option has additional description which can only determined at runtime
+        virtual bool has_runtime_description() const { return false; }
+
+        /// get the additional runtime description of this cli option
+        virtual std::string get_runtime_description() const { return ""; }
+
         /// implicit const char * conversion operator, returns the long option
         constexpr operator const char *() const {
             return long_opt;
@@ -116,16 +152,39 @@ namespace {
         }
     };
 
+    /**
+     * compile-time command line option definition for the `-c, --config` option
+     */
+    struct config_cli_option final : public cli_option
+    {
+        // inherit parent constructor
+        using cli_option::cli_option;
+
+        /// get the default configuration file location
+        std::string get_config_file_location() const {
+            static const std::string default_value = xdg_paths::get_xdg_config_home() + "/cachemgr.yaml";
+            return default_value;
+        }
+
+        bool has_runtime_description() const override { return true; }
+        std::string get_runtime_description() const override {
+            return fmt::format("(defaults to {})", this->get_config_file_location());
+        }
+    };
+
     // command line options
     static constexpr const auto cli_opt_help =
         cli_option("help",      "h", "print this help message and exit", cli_option::boolean_type);
     static constexpr const auto cli_opt_version =
         cli_option("version",   "",  "print the version and exit",       cli_option::boolean_type);
+    static constexpr const auto cli_opt_config =
+        config_cli_option("config", "c", "path to the configuration file", cli_option::string_type);
 
     // array of command line options for easy registration in the parser
-    static constexpr const std::array<const cli_option*, 2> cli_options = {
+    static constexpr const std::array<const cli_option*, 3> cli_options = {
         &cli_opt_help,
         &cli_opt_version,
+        &cli_opt_config,
     };
 } // anonymous namespace
 
@@ -138,7 +197,19 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     argparse::ArgumentParser parser(argc, argv);
     for (const auto *option : cli_options)
     {
-        parser.addArgument(option->short_opt, option->long_opt, option->description, option->arg_type, option->required);
+        // get the full description of this option
+        const std::string full_description = ([&option]{
+            if (option->has_runtime_description()) {
+                // append the additional runtime description to the existing description
+                return std::string{option->description} + " " + option->get_runtime_description();
+            } else {
+                // return the existing description
+                return std::string{option->description};
+            }
+        })();
+
+        // register the option in the parser
+        parser.addArgument(option->short_opt, option->long_opt, full_description, option->arg_type, option->required);
     }
 
     // parse command line arguments
@@ -168,7 +239,9 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     if (parser.exists(cli_opt_help))
     {
         *abort = true;
-        fmt::print("{}\n", parser.help());
+        fmt::print("{} {}\n\n  Options:\n{}\n",
+            program_metadata::application_name, program_metadata::application_version,
+            parser.help());
         return 0;
     }
 
@@ -176,7 +249,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     if (parser.exists(cli_opt_version))
     {
         *abort = true;
-        fmt::print("cachemgr 0.0.0\n"); // TODO: app versioning
+        fmt::print("{} {}\n", program_metadata::application_name, program_metadata::application_version);
         return 0;
     }
 
@@ -191,6 +264,10 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
  */
 int main(int argc, char **argv)
 {
+    // catch errors early during first os_utils function calls
+    // NOTE: xdg_paths::get_xdg_cache_home() makes calls to os_utils internally
+    logging_helper::set_logger(std::make_shared<basic_utils_logger>());
+
     // parse command line arguments
     {
         bool abort = false;
@@ -200,10 +277,6 @@ int main(int argc, char **argv)
             return status;
         }
     }
-
-    // catch errors early during first os_utils function calls
-    // NOTE: xdg_paths::get_xdg_cache_home() makes calls to os_utils internally
-    logging_helper::set_logger(std::make_shared<basic_utils_logger>());
 
     // initialize logging subsystem (includes os_utils function calls)
     libcachemgr::init_logging(libcachemgr::logging_config{
