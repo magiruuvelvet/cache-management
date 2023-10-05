@@ -175,7 +175,7 @@ namespace {
     // command line options
     static constexpr const auto cli_opt_help =
         cli_option("help",      "h", "print this help message and exit", cli_option::boolean_type);
-    static constexpr const auto cli_opt_version =
+    static constexpr const auto cli_opt_version = // -v is reserved for verbose output
         cli_option("version",   "",  "print the version and exit",       cli_option::boolean_type);
     static constexpr const auto cli_opt_config =
         config_cli_option("config", "c", "path to the configuration file", cli_option::string_type);
@@ -265,7 +265,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
 int main(int argc, char **argv)
 {
     // catch errors early during first os_utils function calls
-    // NOTE: xdg_paths::get_xdg_cache_home() makes calls to os_utils internally
+    // NOTE: parse_cli_options() and xdg_paths::get_xdg_cache_home() make calls to os_utils internally
     logging_helper::set_logger(std::make_shared<basic_utils_logger>());
 
     // parse command line arguments
