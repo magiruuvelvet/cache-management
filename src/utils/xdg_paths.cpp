@@ -45,7 +45,15 @@ std::string get_xdg_cache_home()
 
 std::string get_xdg_config_home()
 {
-    return get_xdg_path_helper("XDG_CONFIG_HOME", ".config", "/etc");
+#ifdef PROJECT_PLATFORM_FREEBSD // TODO: learn how other BSD platforms handle this
+    // use /usr/local/etc on FreeBSD to adhere to some conventions
+    const std::string_view fallback_path = "/usr/local/etc";
+#else
+    // use the default *nix /etc location for other platforms
+    const std::string_view fallback_path = "/etc";
+#endif
+
+    return get_xdg_path_helper("XDG_CONFIG_HOME", ".config", fallback_path);
 }
 
 } // namespace xdg_paths
