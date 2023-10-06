@@ -1,7 +1,9 @@
 # create executable
 add_executable(cachemgr-tests
     libcachemgr_test/config_test.cpp
+    utils_test/freedesktop_test/os-release_test.cpp
     utils_test/os_utils_test.cpp
+    utils_test/xdg_paths_test.cpp
     main_test.cpp
 )
 
