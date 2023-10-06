@@ -42,8 +42,8 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
     if (!std::filesystem::exists(config_file, ec))
     {
         LOG_ERROR(libcachemgr::log_config,
-            "configuration file '{}' does not exist or is not accessible: {}",
-            config_file.c_str(), ec.message().c_str());
+            "configuration file '{}' does not exist or is not accessible. error_code: {}",
+            config_file, ec);
         if (file_error != nullptr) { *file_error = file_error::not_found; }
         return;
     }
@@ -52,8 +52,8 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
     if (!std::filesystem::is_regular_file(config_file, ec))
     {
         LOG_ERROR(libcachemgr::log_config,
-            "configuration file '{}' is not a regular file: {}",
-            config_file.c_str(), ec.message().c_str());
+            "configuration file '{}' is not a regular file. error_code: {}",
+            config_file, ec);
         if (file_error != nullptr) { *file_error = file_error::not_a_file; }
         return;
     }

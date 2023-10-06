@@ -62,8 +62,8 @@ bool cachemgr_t::find_symlinked_cache_directories(const std::string &path, const
             if (this->_last_system_error)
             {
                 LOG_ERROR(libcachemgr::log_cachemgr,
-                    "cachemgr_t::find_symlinked_cache_directories(): failed to read symbolic link: {} {}",
-                    entry.path(), this->_last_system_error.message());
+                    "cachemgr_t::find_symlinked_cache_directories(): failed to read symbolic link: '{}' error_code: {}",
+                    entry.path(), this->_last_system_error);
                 return false;
             }
 
@@ -85,8 +85,8 @@ bool cachemgr_t::find_symlinked_cache_directories(const std::string &path, const
             if (this->_last_system_error)
             {
                 LOG_ERROR(libcachemgr::log_cachemgr,
-                    "cachemgr_t::find_symlinked_cache_directories(): failed to stat directory: {} {}",
-                    entry.path(), this->_last_system_error.message());
+                    "cachemgr_t::find_symlinked_cache_directories(): failed to stat directory: '{}' error_code: {}",
+                    entry.path(), this->_last_system_error);
                 return false;
             }
 
