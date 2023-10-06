@@ -6,6 +6,8 @@
 
 #include <mutex>
 
+#include <fmt/format.h>
+
 using namespace libcachemgr;
 
 const std::string_view program_metadata::application_name = "cachemgr";
@@ -18,6 +20,24 @@ const bool program_metadata::git_is_dirty{::git_is_dirty};
 const std::string_view program_metadata::git_branch{::git_branch};
 const std::string_view program_metadata::git_commit{::git_commit};
 const std::string_view program_metadata::git_commit_date{::git_commit_date};
+
+const std::string &program_metadata::full_application_version() noexcept
+{
+    static const std::string fav = ([]{
+        // semver application version
+        std::string buffer(program_metadata::application_version);
+
+        // if git information is available, add it to the version string as semver build metadata
+        if constexpr (program_metadata::git_retrieved_state)
+        {
+            buffer.append(fmt::format("+{}-{}", program_metadata::git_branch, program_metadata::git_commit));
+        }
+
+        return buffer;
+    })();
+
+    return fav;
+}
 
 namespace {
     /// mutex for the {user_configuration_t} singleton instance

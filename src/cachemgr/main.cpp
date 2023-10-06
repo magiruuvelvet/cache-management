@@ -223,7 +223,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         *abort = true;
         fmt::print("{} {} (Platform: {})\n\n  Options:\n{}\n",
             program_metadata::application_name,
-            program_metadata::application_version,
+            program_metadata::full_application_version(),
             program_metadata::platform_name,
             parser.help());
         return 0;
@@ -235,7 +235,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         *abort = true;
         fmt::print("{} {} (Platform: {})\n",
             program_metadata::application_name,
-            program_metadata::application_version,
+            program_metadata::full_application_version(),
             program_metadata::platform_name);
         return 0;
     }

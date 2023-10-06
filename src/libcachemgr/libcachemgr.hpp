@@ -29,6 +29,9 @@ struct program_metadata final
      */
     static const std::string_view application_version;
 
+    /// retrieve the full semver compliant application version string (including git version information)
+    static const std::string &full_application_version() noexcept;
+
     /**
      * the name of the platform on which the application is running
      *
