@@ -11,7 +11,7 @@
 using namespace libcachemgr;
 
 const std::string_view program_metadata::application_name = "cachemgr";
-const std::string_view program_metadata::application_version = "0.0.0";
+const std::string_view program_metadata::application_version = "0.0.1";
 const std::string_view program_metadata::platform_name = PROJECT_PLATFORM_NAME;
 
 // compiled-in git version information (will be blank when git is not available)
