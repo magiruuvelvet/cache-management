@@ -24,8 +24,6 @@ struct program_metadata final
      * A: When there are user-facing breaking changes to the command line interface
      *    or the behavior of the program. `libcachemgr` is a private library and is
      *    not intended for public consumption, so it doesn't need to adhere to semver.
-     *
-     * TODO: add `-dirty` suffix to indicate that this is a dirty build
      */
     static const std::string_view application_version;
 

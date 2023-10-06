@@ -11,7 +11,7 @@
 using namespace libcachemgr;
 
 const std::string_view program_metadata::application_name = "cachemgr";
-const std::string_view program_metadata::application_version = "0.0.0-dev";
+const std::string_view program_metadata::application_version = "0.0.0";
 const std::string_view program_metadata::platform_name = PROJECT_PLATFORM_NAME;
 
 // compiled-in git version information (will be blank when git is not available)
@@ -30,10 +30,15 @@ const std::string &program_metadata::full_application_version() noexcept
         // if git information is available, add it to the version string as semver build metadata
         if constexpr (program_metadata::git_retrieved_state)
         {
-            buffer.append(fmt::format("+{}-{}",
+            buffer.append(fmt::format("-{}+{}-{}",
+                // release builds should not have git information,
+                // so always append '*dev' when git information is available
+                program_metadata::git_is_dirty ? "dirtydev" : "dev",
                 program_metadata::git_branch,
                 program_metadata::git_commit.substr(0, 10)));
         }
+
+        // release builds don't have additional build metadata
 
         return buffer;
     })();
