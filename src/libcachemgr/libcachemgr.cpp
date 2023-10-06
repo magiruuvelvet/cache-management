@@ -30,7 +30,9 @@ const std::string &program_metadata::full_application_version() noexcept
         // if git information is available, add it to the version string as semver build metadata
         if constexpr (program_metadata::git_retrieved_state)
         {
-            buffer.append(fmt::format("+{}-{}", program_metadata::git_branch, program_metadata::git_commit));
+            buffer.append(fmt::format("+{}-{}",
+                program_metadata::git_branch,
+                program_metadata::git_commit.substr(0, 10)));
         }
 
         return buffer;
