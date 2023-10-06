@@ -34,6 +34,9 @@ public:
         parse_error = 4,
     };
 
+    /// receive a human-readable error message for a file error
+    //static std::string get_error_message(file_error error) noexcept;
+
     /**
      * Possible error codes related to the configuration file semantics.
      */
@@ -48,6 +51,9 @@ public:
         /// the cache mapping type was not recognized
         cache_mapping_unknown_type = 3,
     };
+
+    /// receive a human-readable error message for a parse error
+    //static std::string get_error_message(parse_error error) noexcept;
 
     /**
      * Constructs a new configuration instance and loads the given configuration file.

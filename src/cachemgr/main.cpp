@@ -20,6 +20,19 @@ using configuration_t = libcachemgr::configuration_t;
 
 static int cachemgr_cli()
 {
+    // parse the configuration file
+    configuration_t::file_error file_error;
+    configuration_t::parse_error parse_error;
+    configuration_t config(libcachemgr::user_configuration()->configuration_file(), &file_error, &parse_error);
+
+    // abort if there was an error parsing the configuration file
+    if (file_error != configuration_t::file_error::no_error || parse_error != configuration_t::parse_error::no_error)
+    {
+        // error are reported to the user via the logger
+        return 1;
+    }
+
+    // create the cache manager
     cachemgr_t cachemgr;
 
     // receive essential directories
@@ -38,12 +51,6 @@ static int cachemgr_cli()
 
     std::printf("is_mount_point(/home): %i\n", os_utils::is_mount_point("/home"));
     std::printf("is_mount_point(/caches/1000): %i\n", os_utils::is_mount_point("/caches/1000"));
-
-    configuration_t::file_error file_error;
-    configuration_t::parse_error parse_error;
-    configuration_t config(libcachemgr::user_configuration()->configuration_file(), &file_error, &parse_error);
-
-    fmt::print("{}, {}\n", file_error, parse_error);
 
     const auto compare_results = cachemgr.compare_cache_mappings(config.cache_mappings());
     if (compare_results)

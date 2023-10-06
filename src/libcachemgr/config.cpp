@@ -186,3 +186,11 @@ std::string libcachemgr::configuration_t::parse_path(const std::string &path_wit
 
     return normalized_path;
 }
+
+// std::string libcachemgr::configuration_t::get_error_message(file_error error) noexcept
+// {
+// }
+
+// std::string libcachemgr::configuration_t::get_error_message(parse_error error) noexcept
+// {
+// }
