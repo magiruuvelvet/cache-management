@@ -2,12 +2,12 @@
 add_library(cachemgr-utils-private STATIC
     freedesktop/os-release.cpp
     freedesktop/os-release.hpp
+    freedesktop/xdg_paths.cpp
+    freedesktop/xdg_paths.hpp
     logging_helper.cpp
     logging_helper.hpp
     os_utils.cpp
     os_utils.hpp
-    xdg_paths.cpp
-    xdg_paths.hpp
 )
 
 SetupTarget(cachemgr-utils-private "cachemgr-utils")

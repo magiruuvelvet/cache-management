@@ -6,7 +6,7 @@
 
 #include <utils/logging_helper.hpp>
 #include <utils/os_utils.hpp>
-#include <utils/xdg_paths.hpp>
+#include <utils/freedesktop/xdg_paths.hpp>
 
 #include <libcachemgr/logging.hpp>
 #include <libcachemgr/config.hpp>
@@ -37,7 +37,7 @@ static int cachemgr_cli()
 
     // receive essential directories
     const auto home_dir = os_utils::get_home_directory();
-    const auto xdg_cache_home = xdg_paths::get_xdg_cache_home();
+    const auto xdg_cache_home = freedesktop::xdg_paths::get_xdg_cache_home();
 
     // scan HOME and XDG_CACHE_HOME for symlinked cache directories
     const bool result = cachemgr.find_symlinked_cache_directories({home_dir, xdg_cache_home}, "/caches/1000");
@@ -150,7 +150,7 @@ namespace {
 
         /// get the default configuration file location
         std::string get_config_file_location() const {
-            static const std::string default_value = xdg_paths::get_xdg_config_home() + "/cachemgr.yaml";
+            static const std::string default_value = freedesktop::xdg_paths::get_xdg_config_home() + "/cachemgr.yaml";
             return default_value;
         }
 
@@ -267,7 +267,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
 int main(int argc, char **argv)
 {
     // catch errors early during first os_utils function calls
-    // NOTE: parse_cli_options() and xdg_paths::get_xdg_cache_home() make calls to os_utils internally
+    // NOTE: parse_cli_options() and freedesktop::xdg_paths::get_xdg_cache_home() make calls to os_utils internally
     logging_helper::set_logger(std::make_shared<basic_utils_logger>());
 
     // parse command line arguments
@@ -283,7 +283,7 @@ int main(int argc, char **argv)
     // initialize logging subsystem (includes os_utils function calls)
     libcachemgr::init_logging(libcachemgr::logging_config{
         // store the log file in $XDG_CACHE_HOME/cachemgr.log for now
-        .log_file_path = xdg_paths::get_xdg_cache_home() + "/cachemgr.log",
+        .log_file_path = freedesktop::xdg_paths::get_xdg_cache_home() + "/cachemgr.log",
     });
 
     return cachemgr_cli();

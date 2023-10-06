@@ -6,6 +6,7 @@
 
 #include "os_utils.hpp"
 
+namespace freedesktop {
 namespace xdg_paths {
 
 namespace {
@@ -57,3 +58,4 @@ std::string get_xdg_config_home()
 }
 
 } // namespace xdg_paths
+} // namespace freedesktop

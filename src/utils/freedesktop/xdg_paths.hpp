@@ -2,6 +2,8 @@
 
 #include <string>
 
+namespace freedesktop {
+
 /**
  * XDG Base Directory Specification Utilities
  *
@@ -48,3 +50,5 @@ std::string get_xdg_cache_home();
 std::string get_xdg_config_home();
 
 } // namespace xdg_paths
+
+} // namespace freedesktop

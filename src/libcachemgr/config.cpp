@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include <utils/os_utils.hpp>
-#include <utils/xdg_paths.hpp>
+#include <utils/freedesktop/xdg_paths.hpp>
 
 /**
  * Notes on the YAML parser used:
@@ -163,7 +163,7 @@ std::string libcachemgr::configuration_t::parse_path(const std::string &path_wit
         { "%u",              std::to_string(os_utils::get_user_id())  },
         { "%g",              std::to_string(os_utils::get_group_id()) },
         { "$HOME",           os_utils::getenv("HOME")                 },
-        { "$XDG_CACHE_HOME", xdg_paths::get_xdg_cache_home()          },
+        { "$XDG_CACHE_HOME", freedesktop::xdg_paths::get_xdg_cache_home() },
     };
 
     // use std::sregex_iterator to find and replace matches
