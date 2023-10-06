@@ -16,6 +16,7 @@
 #include <argparse/argparse.hpp>
 
 using program_metadata = libcachemgr::program_metadata;
+using configuration_t = libcachemgr::configuration_t;
 
 static int cachemgr_cli()
 {

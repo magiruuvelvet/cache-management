@@ -30,7 +30,8 @@ namespace {
     constexpr const char *key_str_target = "target";
 } // anonymous namespace
 
-configuration_t::configuration_t(const std::string &config_file, file_error *file_error, parse_error *parse_error) noexcept
+libcachemgr::configuration_t::configuration_t(
+    const std::string &config_file, file_error *file_error, parse_error *parse_error) noexcept
 {
     // assume no errors at the beginning
     if (file_error != nullptr) { *file_error = file_error::no_error; }
@@ -130,7 +131,8 @@ configuration_t::configuration_t(const std::string &config_file, file_error *fil
     }
 }
 
-const configuration_t::cache_mapping_t *configuration_t::find_cache_mapping(const std::string &type) const noexcept
+const libcachemgr::configuration_t::cache_mapping_t *libcachemgr::configuration_t::find_cache_mapping(
+    const std::string &type) const noexcept
 {
     for (const auto &cache_mapping : this->_cache_mappings)
     {
@@ -150,7 +152,7 @@ namespace {
     static const std::regex placeholder_regex(R"((~|%u|%g|\$HOME|\$XDG_CACHE_HOME))");
 } // anonymous namespace
 
-std::string configuration_t::parse_path(const std::string &path_with_placeholders)
+std::string libcachemgr::configuration_t::parse_path(const std::string &path_with_placeholders)
 {
     std::string normalized_path = path_with_placeholders;
 

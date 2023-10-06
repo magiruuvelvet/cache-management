@@ -5,6 +5,8 @@
 #include <string>
 #include <list>
 
+namespace libcachemgr {
+
 /**
  * Configuration for the application.
  */
@@ -105,3 +107,6 @@ private:
      */
     cache_mappings_t _cache_mappings;
 };
+
+} // namespace libcachemgr
+

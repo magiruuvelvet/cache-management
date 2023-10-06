@@ -7,6 +7,8 @@
 
 static constexpr const char *tag_name_config = "[libcachemgr::config]";
 
+using configuration_t = libcachemgr::configuration_t;
+
 TEST_CASE("parse config file", tag_name_config) {
     {
         configuration_t::file_error file_error;
