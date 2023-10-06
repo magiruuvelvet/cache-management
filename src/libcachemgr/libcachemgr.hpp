@@ -44,11 +44,14 @@ struct program_metadata final
 
 /**
  * global state containing the user configuration obtained from the command line
+ *
+ * NOTE: thread-safe singleton
  */
 struct user_configuration_t final
 {
 public:
-    static user_configuration_t *instance();
+    /// get the singleton instance (instance will be constructed upon first call)
+    static user_configuration_t *instance() noexcept;
 
     void set_configuration_file(const std::string &configuration_file) noexcept;
     const std::string &configuration_file() const noexcept;
@@ -59,7 +62,10 @@ private:
     std::string _configuration_file{};
 };
 
-inline user_configuration_t *user_configuration() noexcept
+/**
+ * convenience function to get the user configuration singleton instance
+ */
+[[nodiscard]] inline user_configuration_t *user_configuration() noexcept
 {
     return user_configuration_t::instance();
 }
