@@ -28,7 +28,7 @@ static int cachemgr_cli()
     // abort if there was an error parsing the configuration file
     if (file_error != configuration_t::file_error::no_error || parse_error != configuration_t::parse_error::no_error)
     {
-        // error are reported to the user via the logger
+        // errors are reported to the user via the logger
         return 1;
     }
 
@@ -42,16 +42,22 @@ static int cachemgr_cli()
     // scan HOME and XDG_CACHE_HOME for symlinked cache directories
     const bool result = cachemgr.find_symlinked_cache_directories({home_dir, xdg_cache_home}, "/caches/1000");
 
-    std::printf("result = %s\n", result ? "true" : "false");
-
-    for (auto&& dir : cachemgr.symlinked_cache_directories())
+    // abort if there was an error scanning the cache directories
+    if (!result)
     {
-        std::printf("%s -> %s\n", dir.original_path.c_str(), dir.target_path.c_str());
+        // most errors are reported to the user via the logger
+        const auto &ec = cachemgr.get_last_system_error();
+        LOG_ERROR(libcachemgr::log_cachemgr, "last system error: {}", ec);
+        return 1;
     }
 
-    std::printf("is_mount_point(/home): %i\n", os_utils::is_mount_point("/home"));
-    std::printf("is_mount_point(/caches/1000): %i\n", os_utils::is_mount_point("/caches/1000"));
+    // print all found symlinked cache directories
+    for (const auto &dir : cachemgr.symlinked_cache_directories())
+    {
+        fmt::print("{} -> {}\n", dir.original_path, dir.target_path);
+    }
 
+    // validate that all cache mappings exist
     const auto compare_results = cachemgr.compare_cache_mappings(config.cache_mappings());
     if (compare_results)
     {
