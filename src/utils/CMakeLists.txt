@@ -1,5 +1,7 @@
 # create library
 add_library(cachemgr-utils-private STATIC
+    freedesktop/os-release.cpp
+    freedesktop/os-release.hpp
     logging_helper.cpp
     logging_helper.hpp
     os_utils.cpp
