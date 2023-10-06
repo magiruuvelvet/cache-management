@@ -63,8 +63,10 @@ if (FILESYSTEM_WATCHER_BACKEND)
         COMPILE_DEFINITIONS FILESYSTEM_WATCHER_BACKEND="${FILESYSTEM_WATCHER_BACKEND}")
 endif()
 
-# include generated files directory
-target_include_directories(libcachemgr-private PRIVATE "${__libcachemgr_generated_dir}")
+# include the generated git version information only in the file where it is needed
+# avoids accidental use in other source files
+set_source_files_properties(libcachemgr.cpp PROPERTIES
+    INCLUDE_DIRECTORIES "${__libcachemgr_generated_dir}")
 
 # include dependencies
 target_link_libraries(libcachemgr-private PRIVATE Threads::Threads)
