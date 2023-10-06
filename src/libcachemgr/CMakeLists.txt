@@ -13,6 +13,11 @@ set(libcachemgr_shared_sources
     logging.hpp
 )
 
+# for <mutex>
+# 3rd party libraries already include this dependency,
+# but require it explicitly here too since this library also uses threading
+find_package(Threads REQUIRED)
+
 # determine the backend for the filesystem watcher
 if (PROJECT_PLATFORM_LINUX)
     set(FILESYSTEM_WATCHER_BACKEND "inotify" CACHE STRING "" FORCE)
@@ -51,6 +56,7 @@ if (FILESYSTEM_WATCHER_BACKEND)
 endif()
 
 # include dependencies
+target_link_libraries(libcachemgr-private PRIVATE Threads::Threads)
 target_link_libraries(libcachemgr-private PRIVATE cachemgr-utils)
 target_link_libraries(libcachemgr-private PRIVATE ryml) # rapidyaml
 target_link_libraries(libcachemgr-private PRIVATE quill::quill)
