@@ -73,3 +73,55 @@ TEST_CASE("parse config file", tag_name_config) {
         assert_cache_mapping("zig-lsp", home_dir + "/.cache/zls", caches_dir + "/zls");
     }
 }
+
+TEST_CASE("config file with missing sequence", tag_name_config) {
+    {
+        configuration_t::file_error file_error;
+        configuration_t::parse_error parse_error;
+        configuration_t config(cachemgr_tests_assets_dir + "/missing-sequence.yaml", &file_error, &parse_error);
+
+        REQUIRE(file_error == configuration_t::file_error::no_error);
+        REQUIRE(parse_error == configuration_t::parse_error::cache_mappings_seq_not_found);
+
+        REQUIRE(config.cache_mappings().size() == 0);
+    }
+}
+
+TEST_CASE("config file with sequence of wrong data type", tag_name_config) {
+    {
+        configuration_t::file_error file_error;
+        configuration_t::parse_error parse_error;
+        configuration_t config(cachemgr_tests_assets_dir + "/wrong-data-type.yaml", &file_error, &parse_error);
+
+        REQUIRE(file_error == configuration_t::file_error::no_error);
+        REQUIRE(parse_error == configuration_t::parse_error::cache_mappings_not_a_seq);
+
+        REQUIRE(config.cache_mappings().size() == 0);
+    }
+}
+
+TEST_CASE("config file not found", tag_name_config) {
+    {
+        configuration_t::file_error file_error;
+        configuration_t::parse_error parse_error;
+        configuration_t config(cachemgr_tests_assets_dir + "/file-not-found.yaml", &file_error, &parse_error);
+
+        REQUIRE(file_error == configuration_t::file_error::not_found);
+        REQUIRE(parse_error == configuration_t::parse_error::no_error);
+
+        REQUIRE(config.cache_mappings().size() == 0);
+    }
+}
+
+TEST_CASE("config file is a directory", tag_name_config) {
+    {
+        configuration_t::file_error file_error;
+        configuration_t::parse_error parse_error;
+        configuration_t config(cachemgr_tests_assets_dir + "/", &file_error, &parse_error);
+
+        REQUIRE(file_error == configuration_t::file_error::not_a_file);
+        REQUIRE(parse_error == configuration_t::parse_error::no_error);
+
+        REQUIRE(config.cache_mappings().size() == 0);
+    }
+}
