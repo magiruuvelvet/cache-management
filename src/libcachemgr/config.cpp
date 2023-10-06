@@ -182,7 +182,7 @@ std::string libcachemgr::configuration_t::parse_path(const std::string &path_wit
     }
 
     LOG_DEBUG(libcachemgr::log_config, "parse_path('{}') -> normalized path: '{}'",
-        path_with_placeholders.c_str(), normalized_path.c_str());
+        path_with_placeholders, normalized_path);
 
     return normalized_path;
 }

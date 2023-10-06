@@ -110,3 +110,39 @@ private:
 
 } // namespace libcachemgr
 
+#include <fmt/core.h>
+
+/**
+ * {fmt} formatter for the {libcachemgr::configuration_t::file_error} enum class
+ */
+template<> struct fmt::formatter<libcachemgr::configuration_t::file_error> : formatter<string_view> {
+    auto format(libcachemgr::configuration_t::file_error file_error, format_context &ctx) const {
+        using fe = libcachemgr::configuration_t::file_error;
+        string_view               name = "file_error::(unknown)";
+        switch (file_error) {
+            case fe::no_error:    name = "file_error::no_error"; break;
+            case fe::not_found:   name = "file_error::not_found"; break;
+            case fe::not_a_file:  name = "file_error::not_a_file"; break;
+            case fe::read_error:  name = "file_error::read_error"; break;
+            case fe::parse_error: name = "file_error::parse_error"; break;
+        }
+        return formatter<string_view>::format(name, ctx);
+    }
+};
+
+/**
+ * {fmt} formatter for the {libcachemgr::configuration_t::parse_error} enum class
+ */
+template<> struct fmt::formatter<libcachemgr::configuration_t::parse_error> : formatter<string_view> {
+    auto format(libcachemgr::configuration_t::parse_error parse_error, format_context &ctx) const {
+        using fe = libcachemgr::configuration_t::parse_error;
+        string_view                                name = "parse_error::(unknown)";
+        switch (parse_error) {
+            case fe::no_error:                     name = "parse_error::no_error"; break;
+            case fe::cache_mappings_seq_not_found: name = "parse_error::cache_mappings_seq_not_found"; break;
+            case fe::cache_mappings_not_a_seq:     name = "parse_error::cache_mappings_not_a_seq"; break;
+            case fe::cache_mapping_unknown_type:   name = "parse_error::cache_mapping_unknown_type"; break;
+        }
+        return formatter<string_view>::format(name, ctx);
+    }
+};

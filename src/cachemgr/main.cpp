@@ -43,7 +43,7 @@ static int cachemgr_cli()
     configuration_t::parse_error parse_error;
     configuration_t config(libcachemgr::user_configuration()->configuration_file(), &file_error, &parse_error);
 
-    std::printf("file_error = %i, parse_error = %i\n", file_error, parse_error);
+    fmt::print("{}, {}\n", file_error, parse_error);
 
     const auto compare_results = cachemgr.compare_cache_mappings(config.cache_mappings());
     if (compare_results)
