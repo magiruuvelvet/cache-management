@@ -142,6 +142,9 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
 
     std::vector<std::shared_ptr<quill::Handler>> handlers;
 
+    // find the highest log level
+    const LogLevel highest_log_level = std::min(config.log_level_console, config.log_level_file);
+
     if (config.log_to_console)
     {
         // setup colors for console logging
@@ -175,8 +178,10 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
 
     // create loggers
     auto logger = quill::create_logger(name, std::move(handlers));
-    // pass-through every log level, let the handler decide what to log
-    logger->set_log_level(quill::LogLevel::TraceL3);
+    // set the highest possible log level as the default log level,
+    // individual handlers might have a lower log level than this level
+    // this avoids running log formatters at runtime when they are not needed
+    logger->set_log_level(highest_log_level);
     return logger;
 }
 
