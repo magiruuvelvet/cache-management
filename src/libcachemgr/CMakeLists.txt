@@ -13,6 +13,14 @@ set(libcachemgr_shared_sources
     logging.hpp
 )
 
+# enable git version tracking if git is available
+set(__libcachemgr_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+file(MAKE_DIRECTORY "${__libcachemgr_generated_dir}/private")
+EnableGitVersionTracking(
+    "${CMAKE_CURRENT_SOURCE_DIR}/git_version.hpp.in"
+    "${__libcachemgr_generated_dir}/private/git_version.hpp"
+)
+
 # for <mutex>
 # 3rd party libraries already include this dependency,
 # but require it explicitly here too since this library also uses threading
@@ -54,6 +62,9 @@ if (FILESYSTEM_WATCHER_BACKEND)
     set_source_files_properties(fs_watcher/fs_watcher.cpp PROPERTIES
         COMPILE_DEFINITIONS FILESYSTEM_WATCHER_BACKEND="${FILESYSTEM_WATCHER_BACKEND}")
 endif()
+
+# include generated files directory
+target_include_directories(libcachemgr-private PRIVATE "${__libcachemgr_generated_dir}")
 
 # include dependencies
 target_link_libraries(libcachemgr-private PRIVATE Threads::Threads)

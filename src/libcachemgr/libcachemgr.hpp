@@ -36,10 +36,23 @@ struct program_metadata final
      */
     static const std::string_view platform_name;
 
-    // TODO: read git repository information at build time using cmake
-    static const std::string_view git_branch;
-    static const std::string_view git_commit;
+    // compiled-in git version information (will be blank when git is not available)
+
+    /// whether git version information has been retrieved or not.
+    /// this is also false when git was disabled at configure time.
+    static const bool git_retrieved_state;
+
+    /// this flag is true when the git repository is in dirty state (excluding untracked files)
     static const bool git_is_dirty;
+
+    /// the currently checked out git branch
+    static const std::string_view git_branch;
+
+    /// the currently checked out git commit
+    static const std::string_view git_commit;
+
+    /// the date of the currently checked out git commit
+    static const std::string_view git_commit_date;
 };
 
 /**
