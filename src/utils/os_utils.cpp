@@ -131,11 +131,35 @@ bool is_mount_point(const std::string &path, std::string *mount_target)
 
     if (errno != 0)
     {
-        logging_helper::get_logger()->log_error(strerror(errno));
+        logging_helper::get_logger()->log_error(path + ": " + strerror(errno));
     }
 
     // assume that the given path is a regular directory
     return false;
+#endif
+}
+
+bool can_access_file(const std::string &path, std::filesystem::perms mode)
+{
+    using fs_perms = std::filesystem::perms;
+
+#if defined(PROJECT_PLATFORM_WINDOWS)
+#error os_utils::can_access_file not implemented for this platform
+#else
+    // get the expectations from the given permission mask
+    const bool should_can_read = (fs_perms::owner_read & mode) != fs_perms::none;
+    const bool should_can_write = (fs_perms::owner_write & mode) != fs_perms::none;
+    const bool should_can_execute = (fs_perms::owner_exec & mode) != fs_perms::none;
+
+    // translate the std::filesystem::perms to a POSIX access mask
+    int access_mask = 0x0;
+    if (should_can_read) access_mask |= R_OK;
+    if (should_can_write) access_mask |= W_OK;
+    if (should_can_execute) access_mask |= X_OK;
+
+    // abuse the POSIX access function to check if the given file can be accessed with the requested permission mask
+    // this function is meant for suid binaries, but it fits this use case perfectly
+    return ::access(path.c_str(), access_mask) == 0;
 #endif
 }
 

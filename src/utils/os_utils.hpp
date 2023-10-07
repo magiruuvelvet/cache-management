@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <tuple>
 #include <system_error>
+#include <filesystem>
 
 namespace os_utils {
 
@@ -65,6 +66,16 @@ bool is_mount_point(const std::string &path);
  * @return false the given path is a regular directory on the same filesystem
  */
 bool is_mount_point(const std::string &path, std::string *mount_target);
+
+/**
+ * Checks if the current user can access the given file with the requested permissions.
+ *
+ * @param path file to check
+ * @param mode permission mask
+ * @return true current user can access the given file with the requested permissions
+ * @return false no access to the given file with the requested permissions
+ */
+bool can_access_file(const std::string &path, std::filesystem::perms mode);
 
 /**
  * Calculate the used disk space of the given directory.
