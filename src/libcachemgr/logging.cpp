@@ -35,11 +35,16 @@ static void shutdown_quill()
  */
 static void crash_signal_handler(int signal)
 {
-    // call std::atexit functions and re-raise the signal
+    // restore original signal handler
+    std::signal(signal, SIG_DFL);
+
+    fmt::print(stderr, "program received crashing signal {}, running shutdown routines...\n", signal);
+
+    // shutdown quill logging thread
     shutdown_quill();
 
-    // restore original signal handler and re-raise the signal
-    std::signal(signal, SIG_DFL);
+    // re-raise the signal and let the system handle it
+    fmt::print(stderr, "re-raising original signal, goodbye.\n");
     std::raise(signal);
 }
 
