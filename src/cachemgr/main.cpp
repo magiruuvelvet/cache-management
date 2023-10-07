@@ -44,7 +44,8 @@ static int cachemgr_cli()
     const auto xdg_cache_home = freedesktop::xdg_paths::get_xdg_cache_home();
 
     // scan HOME and XDG_CACHE_HOME for symlinked cache directories
-    const bool result = cachemgr.find_symlinked_cache_directories({home_dir, xdg_cache_home}, "/caches/1000");
+    const bool result = cachemgr.find_symlinked_cache_directories({home_dir, xdg_cache_home},
+        config.cache_root());
 
     // abort if there was an error scanning the cache directories
     if (!result)
