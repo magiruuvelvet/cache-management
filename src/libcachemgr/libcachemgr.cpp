@@ -77,3 +77,15 @@ const std::string &user_configuration_t::configuration_file() const noexcept
     mutex_lock_t lock{user_configuration_mutex};
     return this->_configuration_file;
 }
+
+void user_configuration_t::set_show_usage_stats(bool show_usage_stats) noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    this->_show_usage_stats = show_usage_stats;
+}
+
+bool user_configuration_t::show_usage_stats() const noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    return this->_show_usage_stats;
+}

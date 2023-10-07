@@ -3,15 +3,19 @@
 #include <array>
 
 #include <fmt/printf.h>
+#include <fmt/ostream.h>
 
 #include <utils/logging_helper.hpp>
 #include <utils/os_utils.hpp>
+#include <utils/types.hpp>
 #include <utils/freedesktop/xdg_paths.hpp>
 
 #include <libcachemgr/logging.hpp>
 #include <libcachemgr/config.hpp>
 #include <libcachemgr/cachemgr.hpp>
 #include <libcachemgr/libcachemgr.hpp>
+
+template<> struct fmt::formatter<human_readable_file_size> : ostream_formatter{};
 
 #include <argparse/argparse.hpp>
 
@@ -52,10 +56,10 @@ static int cachemgr_cli()
     }
 
     // print all found symlinked cache directories
-    for (const auto &dir : cachemgr.symlinked_cache_directories())
-    {
-        fmt::print("{} -> {}\n", dir.original_path, dir.target_path);
-    }
+    // for (const auto &dir : cachemgr.symlinked_cache_directories())
+    // {
+    //     fmt::print("{} -> {}\n", dir.original_path, dir.target_path);
+    // }
 
     // validate that all cache mappings exist
     const auto compare_results = cachemgr.compare_cache_mappings(config.cache_mappings());
@@ -70,6 +74,52 @@ static int cachemgr_cli()
             LOG_WARNING(libcachemgr::log_main, "difference: {} <=> {}",
                 diff.actual.target, diff.expected.target);
         }
+    }
+
+    if (libcachemgr::user_configuration()->show_usage_stats())
+    {
+        fmt::print("Calculating usage statistics...\n");
+
+        std::uintmax_t total_size = 0;
+
+        // used to pad the output
+        std::uint32_t max_length_of_source_path = 0;
+        std::uint32_t max_length_of_target_path = 0;
+
+        // collect usage statistics and print the results of individual directories
+        for (const auto &dir : cachemgr.symlinked_cache_directories())
+        {
+            if (dir.original_path.size() > max_length_of_source_path)
+            {
+                max_length_of_source_path = dir.original_path.size();
+            }
+            if (dir.target_path.size() > max_length_of_target_path)
+            {
+                max_length_of_target_path = dir.target_path.size();
+            }
+
+            const auto [dir_size, ec] = os_utils::get_used_disk_space_of(dir.target_path);
+            if (ec)
+            {
+                LOG_WARNING(libcachemgr::log_main, "failed to get used disk space of '{}': {}", dir.target_path, ec);
+            }
+            total_size += dir_size;
+            dir.disk_size = dir_size;
+        }
+        for (const auto &dir : cachemgr.symlinked_cache_directories())
+        {
+            fmt::print("{:<{}} -> {:<{}} : {:>8} ({} bytes)\n",
+                dir.original_path, max_length_of_source_path,
+                dir.target_path, max_length_of_target_path,
+                human_readable_file_size{dir.disk_size}, dir.disk_size);
+        }
+
+        // print the total size of all cache directories
+        fmt::print("{:>{}} total size : {:>8} ({} bytes)\n", " ",
+            max_length_of_source_path + max_length_of_target_path - 7,
+            human_readable_file_size{total_size}, total_size);
+
+        return 0;
     }
 
     return 0;
@@ -168,11 +218,16 @@ namespace {
     static constexpr const auto cli_opt_config =
         config_cli_option("config", "c", "path to the configuration file", cli_option::string_type);
 
+    // print usage statistics of caches and exit program
+    static constexpr const auto cli_opt_usage_stats =
+        cli_option("usage", "u", "show the usage statistics of caches", cli_option::boolean_type);
+
     // array of command line options for easy registration in the parser
-    static constexpr const std::array<const cli_option*, 3> cli_options = {
+    static constexpr const std::array<const cli_option*, 4> cli_options = {
         &cli_opt_help,
         &cli_opt_version,
         &cli_opt_config,
+        &cli_opt_usage_stats,
     };
 } // anonymous namespace
 
@@ -244,6 +299,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         return 0;
     }
 
+    // obtain the location of the configuration file
     if (parser.exists(cli_opt_config))
     {
         libcachemgr::user_configuration()->set_configuration_file(parser.get<std::string>(cli_opt_config));
@@ -251,6 +307,12 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     else
     {
         libcachemgr::user_configuration()->set_configuration_file(cli_opt_config.get_config_file_location());
+    }
+
+    // does the user want to show the usage statistics of the caches?
+    if (parser.exists(cli_opt_usage_stats))
+    {
+        libcachemgr::user_configuration()->set_show_usage_stats(true);
     }
 
     return 0;

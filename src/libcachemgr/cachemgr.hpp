@@ -118,6 +118,12 @@ public:
          * The target directory of the symbolic link or bind mount.
          */
         const std::string target_path;
+
+        /**
+         * The size on disk of the target directory {target_path}.
+         * This property can be mutated in const contexts.
+         */
+        mutable std::uintmax_t disk_size{0};
     };
 
     /**

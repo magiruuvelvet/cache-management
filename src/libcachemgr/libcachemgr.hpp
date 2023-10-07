@@ -74,10 +74,14 @@ public:
     void set_configuration_file(const std::string &configuration_file) noexcept;
     const std::string &configuration_file() const noexcept;
 
+    void set_show_usage_stats(bool show_usage_stats) noexcept;
+    bool show_usage_stats() const noexcept;
+
 private:
     user_configuration_t() = default;
 
     std::string _configuration_file{};
+    bool _show_usage_stats{false};
 };
 
 /**
