@@ -4,12 +4,12 @@
 [submodule "libs/Catch2"]
 	path = libs/Catch2
 	url = https://github.com/catchorg/Catch2
-[submodule "libs/quill"]
-	path = libs/quill
-	url = https://github.com/odygrd/quill
 [submodule "libs/fmt"]
 	path = libs/fmt
 	url = https://github.com/fmtlib/fmt
 [submodule "libs/argparse-cpp"]
 	path = libs/argparse-cpp
 	url = https://github.com/magiruuvelvet/argparse-cpp
+[submodule "libs/quill"]
+	path = libs/quill
+	url = https://github.com/magiruuvelvet/quill
