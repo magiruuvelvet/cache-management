@@ -36,6 +36,27 @@ public:
 
     inline constexpr bool has_os_release() const { return _has_os_release; }
 
+    // several convenience functions
+
+    /**
+     * Returns the name of the distribution.
+     *
+     * Tries the following name keys in order:
+     *  - `NAME`
+     *  - `PRETTY_NAME`
+     */
+    std::string unified_name() const;
+
+    /**
+     * Returns the version of the distribution.
+     *
+     * Tries the following version keys in order:
+     *  - `VERSION_ID`
+     *  - `VERSION_CODENAME`
+     *  - `VERSION`
+     */
+    std::string unified_version() const;
+
 private:
     std::string _name;
     std::string _id;

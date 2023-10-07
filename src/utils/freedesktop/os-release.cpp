@@ -115,4 +115,47 @@ os_release_t::os_release_t(const std::string &path)
     }
 }
 
+std::string os_release_t::unified_name() const
+{
+    // usually a short name
+    if (this->_name.size() > 0)
+    {
+        return this->_name;
+    }
+    // usually a long name (sometimes also containing the version)
+    else if (this->_pretty_name.size() > 0)
+    {
+        return this->_pretty_name;
+    }
+    // this distribution does not have a name
+    else
+    {
+        return {};
+    }
+}
+
+std::string os_release_t::unified_version() const
+{
+    // usually a short version
+    if (this->_version_id.size() > 0)
+    {
+        return this->_version_id;
+    }
+    // the codename of the version
+    else if (this->_version_codename.size() > 0)
+    {
+        return this->_version_codename;
+    }
+    // usually a long version (sometimes also containing the codename and extra metadata)
+    else if (this->_version.size() > 0)
+    {
+        return this->_version;
+    }
+    // this distribution does not have a version
+    else
+    {
+        return {};
+    }
+}
+
 } // namespace freedesktop
