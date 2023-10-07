@@ -24,6 +24,8 @@ struct program_metadata final
      * A: When there are user-facing breaking changes to the command line interface
      *    or the behavior of the program. `libcachemgr` is a private library and is
      *    not intended for public consumption, so it doesn't need to adhere to semver.
+     *
+     * useful tool: https://jubianchi.github.io/semver-check
      */
     static const std::string_view application_version;
     // examples: dev, alpha, beta, rc.1, rc.2, rc.3, rc.4, rc.5
