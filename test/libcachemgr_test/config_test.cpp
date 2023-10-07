@@ -81,7 +81,7 @@ TEST_CASE("config file with missing sequence", tag_name_config) {
         configuration_t config(cachemgr_tests_assets_dir + "/missing-sequence.yaml", &file_error, &parse_error);
 
         REQUIRE(file_error == configuration_t::file_error::no_error);
-        REQUIRE(parse_error == configuration_t::parse_error::cache_mappings_seq_not_found);
+        REQUIRE(parse_error == configuration_t::parse_error::missing_key);
 
         REQUIRE(config.cache_mappings().size() == 0);
     }
@@ -94,7 +94,7 @@ TEST_CASE("config file with sequence of wrong data type", tag_name_config) {
         configuration_t config(cachemgr_tests_assets_dir + "/wrong-data-type.yaml", &file_error, &parse_error);
 
         REQUIRE(file_error == configuration_t::file_error::no_error);
-        REQUIRE(parse_error == configuration_t::parse_error::cache_mappings_not_a_seq);
+        REQUIRE(parse_error == configuration_t::parse_error::invalid_datatype);
 
         REQUIRE(config.cache_mappings().size() == 0);
     }

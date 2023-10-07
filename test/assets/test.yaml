@@ -5,10 +5,24 @@
 #   %u = uid (user id)
 #   %g = gid (group id)
 #
-# supported environment variables in paths:
+# supported system environment variables in paths:
 # (there is no general envvar support, the allowed list of envvars is hardcoded)
 #   $HOME
 #   $XDG_CACHE_HOME
+
+# mandatory environment settings
+env:
+  # the mount point for the compressed cache filesystem
+  # (this setting is currently not utilized and might change in the future)
+  cache_drive_mount_point: /caches
+
+  # the root directory where caches should be stored
+  #
+  # access this variable with "$env.cache_root" in paths
+  # example:
+  #  cache_mappings:
+  #   - target: $env:cache_root/bundle
+  cache_root: /caches/%u
 
 # a sequence of cache mappings which should map a source path to a target path.
 # all mappings are verified, and in the unlikely event that the source path is no
@@ -18,74 +32,74 @@ cache_mappings:
   # Ruby bundler
   - type: ruby-bundler
     source: ~/.bundle
-    target: /caches/%u/bundle
+    target: $env.cache_root/bundle
 
   # Rust cargo package manager
   - type: rust-cargo
     source: ~/.cargo
-    target: /caches/%u/cargo
+    target: $env.cache_root/cargo
 
   # global clangd cache `~/.cache/clangd`
   - type: clangd-cache
     source: ~/.cache/clangd
-    target: /caches/%u/clangd
+    target: $env.cache_root/clangd
 
   # PHP Composer
   - type: php-composer
     source: ~/.cache/composer
-    target: /caches/%u/composer
+    target: $env.cache_root/composer
 
   # Dart Language Server
   - type: dart-lsp
     source: ~/.dartServer
-    target: /caches/%u/dartServer
+    target: $env.cache_root/dartServer
 
   # D dub package manager
   - type: d-dub
     source: ~/.dub
-    target: /caches/%u/dub
+    target: $env.cache_root/dub
 
   # `~/.go` cache
   - type: go-cache
     source: ~/.go
-    target: /caches/%u/go
+    target: $env.cache_root/go
 
   # go build cache
   - type: go-build-cache
     source: ~/.cache/go-build
-    target: /caches/%u/go-build
+    target: $env.cache_root/go-build
 
   # Gradle cache
   - type: gradle
     source: ~/.gradle
-    target: /caches/%u/gradle
+    target: $env.cache_root/gradle
 
   # Apache Maven cache
   - type: maven
     source: ~/.m2
-    target: /caches/%u/m2
+    target: $env.cache_root/m2
 
   # Node development headers for building native extensions
   - type: node-gyp
     source: ~/.node-gyp
-    target: /caches/%u/node-gyp
+    target: $env.cache_root/node-gyp
 
   # Node package manager
   - type: node-npm
     source: ~/.npm
-    target: /caches/%u/npm
+    target: $env.cache_root/npm
 
   # Dart pub package manager
   - type: dart-pub
     source: ~/.pub-cache
-    target: /caches/%u/pub-cache
+    target: $env.cache_root/pub-cache
 
   # Zig compiler cache
   - type: zig-cache
     source: ~/.cache/zig
-    target: /caches/%u/zig
+    target: $env.cache_root/zig
 
   # Zig language server
   - type: zig-lsp
     source: ~/.cache/zls
-    target: /caches/%u/zls
+    target: $env.cache_root/zls

@@ -11,6 +11,28 @@
 #include <utils/os_utils.hpp>
 #include <utils/freedesktop/xdg_paths.hpp>
 
+namespace {
+    /// collection of yaml data types for generic validation
+    enum key_type
+    {
+        sequence,
+        map,
+        string,
+    };
+} // anonymous namespace
+
+template<> struct fmt::formatter<key_type> : formatter<string_view> {
+    auto format(key_type key_type, format_context &ctx) const {
+        string_view           name = "key_type::(unknown)";
+        switch (key_type) {
+            case sequence:    name = "key_type::sequence"; break;
+            case map:         name = "key_type::map"; break;
+            case string:      name = "key_type::string"; break;
+        }
+        return formatter<string_view>::format(name, ctx);
+    }
+};
+
 /**
  * Notes on the YAML parser used:
  *  - the internal string structure of ryml is NOT zero terminated
@@ -20,6 +42,10 @@
 
 /// yaml key names to avoid typos and repetitive strings in code
 namespace {
+    /// mandatory environment settings
+    constexpr const char *key_map_env = "env";
+    constexpr const char *key_str_cache_root = "cache_root";
+
     /// sequence of cache mappings
     /// cache_mappings:
     ///   - source: original cache location
@@ -75,24 +101,133 @@ libcachemgr::configuration_t::configuration_t(
     // TODO: handle parse errors (?)
     const ryml::Tree tree = ryml::parse_in_arena(buffer.c_str());
 
-    // validate that 'cache_mappings' exists
-    if (!tree.has_child(tree.root_id(), key_seq_cache_mappings))
-    {
-        LOG_ERROR(libcachemgr::log_config, "'cache_mappings' sequence not found");
-        if (parse_error != nullptr) { *parse_error = parse_error::cache_mappings_seq_not_found; }
-        return;
-    }
+    /// helper function to check if a given key with the correct data type exists
+    // FIXME: simplify this whole process (the developer of rapidyaml has a library for yaml-based configurations)
+    // see https://github.com/biojppm/c4conf
+    const auto validate_key = [&tree, &parse_error]
+        (const char *key, key_type expected_type, bool is_key_required) -> bool {
 
-    // get 'cache_mappings' sequence
+        // validate that the key exists
+        const bool found = tree.has_child(tree.root_id(), key);
+        if (is_key_required && !found)
+        {
+            LOG_ERROR(libcachemgr::log_config, "key='{}' of type {} not found", key, expected_type);
+            if (parse_error != nullptr) { *parse_error = parse_error::missing_key; }
+            return false;
+        }
+        else if (!is_key_required && !found)
+        {
+            // key is optional, no further checking needed
+            return true;
+        }
+
+        // validate the datatype of the key
+        bool has_expected_type = false;
+        switch (expected_type)
+        {
+            case sequence: has_expected_type = tree[key].is_seq(); break;
+            case map:      has_expected_type = tree[key].is_map(); break;
+            case string:   has_expected_type = tree[key].is_keyval(); break;
+        }
+        if (!has_expected_type)
+        {
+            LOG_ERROR(libcachemgr::log_config, "expected key='{}' to be of type {}, but found {} instead",
+                key, expected_type, tree[key].type_str());
+            if (parse_error != nullptr) { *parse_error = parse_error::invalid_datatype; }
+            return false;
+        }
+
+        return true;
+    };
+
+    /// helper function to check if a given key with the correct data type exists
+    // FIXME: simplify this whole process
+    const auto validate_key_in_node = [&parse_error]
+        (const char *node_name, const auto &node_ref, const char *key, key_type expected_type, bool is_key_required) -> bool {
+
+        // validate that the key exists
+        const bool found = node_ref.has_child(key);
+        if (is_key_required && !found)
+        {
+            LOG_ERROR(libcachemgr::log_config, "key='{}.{}' of type {} not found", node_name, key, expected_type);
+            if (parse_error != nullptr) { *parse_error = parse_error::missing_key; }
+            return false;
+        }
+        else if (!is_key_required && !found)
+        {
+            // key is optional, no further checking needed
+            return true;
+        }
+
+        // validate the datatype of the key
+        bool has_expected_type = false;
+        switch (expected_type)
+        {
+            case sequence: has_expected_type = node_ref[key].is_seq(); break;
+            case map:      has_expected_type = node_ref[key].is_map(); break;
+            case string:   has_expected_type = node_ref[key].is_keyval(); break;
+        }
+        if (!has_expected_type)
+        {
+            LOG_ERROR(libcachemgr::log_config, "expected key='{}.{}' to be of type {}, but found {} instead",
+                node_name, key, expected_type, node_ref[key].type_str());
+            if (parse_error != nullptr) { *parse_error = parse_error::invalid_datatype; }
+            return false;
+        }
+
+        // if the expected type is a string and the key is required, the value must be a non-empty string
+        if (is_key_required && expected_type == string)
+        {
+            const auto &value_ref = node_ref[key].val();
+            if (std::string(value_ref.str, value_ref.len).empty())
+            {
+                LOG_ERROR(libcachemgr::log_config, "expected key='{}.{}' to have a non-empty string value",
+                    node_name, key);
+                if (parse_error!= nullptr) { *parse_error = parse_error::invalid_value; }
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    std::list<bool> error_collection;
+    const auto has_any_errors = [&error_collection]{
+        return std::any_of(error_collection.cbegin(), error_collection.cend(), [](bool success){
+            return !success;
+        });
+    };
+
+    // check for mandatory keys, report as many errors as possible at once to the user
+    error_collection = {
+        validate_key(key_map_env, key_type::map, true),
+        validate_key(key_seq_cache_mappings, key_type::sequence, true),
+    };
+
+    // if any of the mandatory keys are missing, abort
+    if (has_any_errors()) {
+        return;
+    };
+
+    // get env map
+    const auto &env = tree[key_map_env];
+
+    // check for mandatory keys in the env map
+    error_collection = {
+        validate_key_in_node(key_map_env, env, key_str_cache_root, key_type::string, true),
+    };
+
+    // if any of the mandatory keys are missing, abort
+    if (has_any_errors()) {
+        return;
+    };
+
+    // get the cache root path
+    const auto &cache_root = env[key_str_cache_root].val();
+    this->_env_cache_root = parse_path(std::string(cache_root.str, cache_root.len));
+
+    // get cache_mappings sequence
     const auto &cache_mappings = tree[key_seq_cache_mappings];
-
-    // validate that 'cache_mappings' is actually a sequence
-    if (!cache_mappings.is_seq())
-    {
-        LOG_ERROR(libcachemgr::log_config, "'cache_mappings' is not a sequence");
-        if (parse_error != nullptr) { *parse_error = parse_error::cache_mappings_not_a_seq; }
-        return;
-    }
 
     // iterate over all cache mappings
     unsigned i = 0;
@@ -126,7 +261,7 @@ libcachemgr::configuration_t::configuration_t(
         else
         {
             LOG_WARNING(libcachemgr::log_config,
-                "found non-map or invalid entry in 'cache_mappings' sequence at position {}", i);
+                "found non-map or invalid entry in the '{}' sequence at position {}", key_seq_cache_mappings, i);
         }
     }
 }
@@ -149,21 +284,30 @@ namespace {
     /**
      * Regex pattern to match placeholders.
      */
-    static const std::regex placeholder_regex(R"((~|%u|%g|\$HOME|\$XDG_CACHE_HOME))");
+    static const std::regex placeholder_regex(
+        R"((~|%u|%g|\$HOME|\$XDG_CACHE_HOME|\$env\.cache_root))"
+    );
 } // anonymous namespace
 
 std::string libcachemgr::configuration_t::parse_path(const std::string &path_with_placeholders)
 {
     std::string normalized_path = path_with_placeholders;
 
-    // define a map to store replacements for each placeholder
     // values defined here should not change during the lifetime of the process
-    static const std::unordered_map<std::string, std::string> replacements = {
-        { "~",               os_utils::get_home_directory()           },
-        { "%u",              std::to_string(os_utils::get_user_id())  },
-        { "%g",              std::to_string(os_utils::get_group_id()) },
-        { "$HOME",           os_utils::getenv("HOME")                 },
-        { "$XDG_CACHE_HOME", freedesktop::xdg_paths::get_xdg_cache_home() },
+    static const auto home_dir = os_utils::get_home_directory();
+    static const auto home_env = os_utils::getenv("HOME");
+    static const auto xdg_cache_home = freedesktop::xdg_paths::get_xdg_cache_home();
+    static const auto uid = std::to_string(os_utils::get_user_id());
+    static const auto gid = std::to_string(os_utils::get_group_id());
+
+    // define a map to store replacements for each placeholder
+    const std::unordered_map<std::string, std::string> replacements = {
+        { "~",               home_dir               },
+        { "%u",              uid                    },
+        { "%g",              gid                    },
+        { "$HOME",           home_env               },
+        { "$XDG_CACHE_HOME", xdg_cache_home         },
+        { "$env.cache_root", this->_env_cache_root  },
     };
 
     // use std::sregex_iterator to find and replace matches

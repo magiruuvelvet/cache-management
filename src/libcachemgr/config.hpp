@@ -44,12 +44,12 @@ public:
     {
         /// indicates no error occurred
         no_error = 0,
-        /// the 'cache_mappings' sequence was not found in the yaml file
-        cache_mappings_seq_not_found = 1,
-        /// the 'cache_mappings' sequence is not a sequence
-        cache_mappings_not_a_seq = 2,
-        /// the cache mapping type was not recognized
-        cache_mapping_unknown_type = 3,
+        /// indicates that a required key is missing
+        missing_key = 1,
+        /// indicates that a key doesn't have the expected datatype
+        invalid_datatype = 2,
+        /// indicates that a key has an invalid value
+        invalid_value = 3,
     };
 
     /// receive a human-readable error message for a parse error
@@ -106,7 +106,12 @@ private:
      * @param path_with_placeholders
      * @return normalized path without placeholders
      */
-    static std::string parse_path(const std::string &path_with_placeholders);
+    std::string parse_path(const std::string &path_with_placeholders);
+
+    /**
+     * Root directory where caches are stored.
+     */
+    std::string _env_cache_root;
 
     /**
      * List of all registered cache mappings.
@@ -142,12 +147,12 @@ template<> struct fmt::formatter<libcachemgr::configuration_t::file_error> : for
 template<> struct fmt::formatter<libcachemgr::configuration_t::parse_error> : formatter<string_view> {
     auto format(libcachemgr::configuration_t::parse_error parse_error, format_context &ctx) const {
         using fe = libcachemgr::configuration_t::parse_error;
-        string_view                                name = "parse_error::(unknown)";
+        string_view                    name = "parse_error::(unknown)";
         switch (parse_error) {
-            case fe::no_error:                     name = "parse_error::no_error"; break;
-            case fe::cache_mappings_seq_not_found: name = "parse_error::cache_mappings_seq_not_found"; break;
-            case fe::cache_mappings_not_a_seq:     name = "parse_error::cache_mappings_not_a_seq"; break;
-            case fe::cache_mapping_unknown_type:   name = "parse_error::cache_mapping_unknown_type"; break;
+            case fe::no_error:         name = "parse_error::no_error"; break;
+            case fe::missing_key:      name = "parse_error::missing_key"; break;
+            case fe::invalid_datatype: name = "parse_error::invalid_datatype"; break;
+            case fe::invalid_value:    name = "parse_error::invalid_value"; break;
         }
         return formatter<string_view>::format(name, ctx);
     }
