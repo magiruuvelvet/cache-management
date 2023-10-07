@@ -8,7 +8,10 @@
 
 #include <quill/Quill.h>
 
+#include "libcachemgr.hpp"
+
 #include <utils/logging_helper.hpp>
+#include <utils/freedesktop/os-release.hpp>
 
 /**
  * Shutdown routines for the quill logging library.
@@ -133,6 +136,26 @@ void libcachemgr::init_logging(const logging_config &config)
     log_cachemgr = libcachemgr::create_logger("cachemgr", config);
     log_config =   libcachemgr::create_logger("config", config);
     log_test =     libcachemgr::create_logger("test", config);
+
+    LOG_INFO(log_main, "starting {} {}", program_metadata::application_name, program_metadata::full_application_version());
+
+    if (config.log_os_release_on_startup)
+    {
+        freedesktop::os_release_t os_release;
+        if (os_release.has_os_release())
+        {
+            std::string os_name = os_release.unified_name();
+            if (os_name.empty())
+            {
+                os_name = program_metadata::platform_name;
+            }
+            LOG_INFO(log_main, "OS: {} {}", os_name, os_release.unified_version());
+        }
+        else
+        {
+            LOG_WARNING(log_main, "could not obtain OS release information");
+        }
+    }
 }
 
 quill::Logger *libcachemgr::create_logger(const std::string &name, const logging_config &config)

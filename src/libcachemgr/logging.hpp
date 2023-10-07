@@ -38,6 +38,11 @@ struct logging_config
      * The log file path.
      */
     std::string log_file_path = "cachemgr.log"; // in working directory by default
+
+    /**
+     * Constructs a {utils::freedesktop::os_release_t} instance and logs its info upon logging startup.
+     */
+    bool log_os_release_on_startup = true;
 };
 
 /**

@@ -227,10 +227,9 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     if (parser.exists(cli_opt_help))
     {
         *abort = true;
-        fmt::print("{} {} (Platform: {})\n\n  Options:\n{}\n",
+        fmt::print("{} {}\n\n  Options:\n{}\n",
             program_metadata::application_name,
             program_metadata::full_application_version(),
-            program_metadata::platform_name,
             parser.help());
         return 0;
     }
@@ -239,10 +238,9 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     if (parser.exists(cli_opt_version))
     {
         *abort = true;
-        fmt::print("{} {} (Platform: {})\n",
+        fmt::print("{} {}\n",
             program_metadata::application_name,
-            program_metadata::full_application_version(),
-            program_metadata::platform_name);
+            program_metadata::full_application_version());
         return 0;
     }
 
@@ -282,6 +280,9 @@ int main(int argc, char **argv)
 
     // initialize logging subsystem (includes os_utils function calls)
     libcachemgr::init_logging(libcachemgr::logging_config{
+        // silence info logs in the console
+        .log_level_console = quill::LogLevel::Warning,
+
         // store the log file in $XDG_CACHE_HOME/cachemgr.log for now
         .log_file_path = freedesktop::xdg_paths::get_xdg_cache_home() + "/cachemgr.log",
     });
