@@ -2,6 +2,8 @@
 
 #include <string>
 #include <cstdint>
+#include <tuple>
+#include <system_error>
 
 namespace os_utils {
 
@@ -63,6 +65,16 @@ bool is_mount_point(const std::string &path);
  * @return false the given path is a regular directory on the same filesystem
  */
 bool is_mount_point(const std::string &path, std::string *mount_target);
+
+/**
+ * Calculate the used disk space of the given directory.
+ *
+ * On errors the disk space will be set to 0 and the std::error_code will contain the error.
+ *
+ * @param path the directory to calculate
+ * @return disk space in bytes and an optional error code on failure
+ */
+std::tuple<std::uintmax_t, std::error_code> get_used_disk_space_of(const std::string &path) noexcept;
 
 /**
  * Get the current user id.

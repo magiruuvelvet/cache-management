@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <cerrno>
+#include <filesystem>
 
 #include "logging_helper.hpp"
 
@@ -136,6 +137,30 @@ bool is_mount_point(const std::string &path, std::string *mount_target)
     // assume that the given path is a regular directory
     return false;
 #endif
+}
+
+std::tuple<std::uintmax_t, std::error_code> get_used_disk_space_of(const std::string &path) noexcept
+{
+    namespace fs = std::filesystem;
+
+    std::error_code ec;
+    if (!fs::is_directory(path, ec))
+    {
+        return std::make_tuple(0, ec);
+    }
+
+    std::uintmax_t total_size = 0;
+
+    // note: don't enable {follow_directory_symlink} here
+    for (const auto &entry : fs::recursive_directory_iterator(path, fs::directory_options::skip_permission_denied, ec))
+    {
+        if (entry.is_regular_file())
+        {
+            total_size += entry.file_size();
+        }
+    }
+
+    return std::make_tuple(total_size, ec);
 }
 
 std::uint64_t get_user_id()
