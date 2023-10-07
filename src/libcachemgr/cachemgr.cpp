@@ -41,7 +41,7 @@ bool cachemgr_t::find_symlinked_cache_directories(const std::string &path, const
     // clear previous results
     if (this->_clear_previous_list)
     {
-        this->_symlinked_cache_directories.clear();
+        this->_mapped_cache_directories.clear();
     }
 
     // input path must be a directory
@@ -91,16 +91,47 @@ bool cachemgr_t::find_symlinked_cache_directories(const std::string &path, const
             }
 
             // add the symlinked directory to the list
-            this->_symlinked_cache_directories.emplace_back(symlinked_cache_directory_t{
+            this->_mapped_cache_directories.emplace_back(mapped_cache_directory_t{
                 .directory_type = directory_type_t::symbolic_link,
                 .original_path = entry.path(),
                 .target_path = symlink_target,
             });
         }
-        // else if (os_utils::is_mount_point(entry.path()))
-        // {
-        //     TODO: is_mount_point() needs to return the mount destination to check against symlink_target_prefix
-        // }
+        else if (entry.is_directory(this->_last_system_error))
+        {
+            if (this->_last_system_error)
+            {
+                LOG_ERROR(libcachemgr::log_cachemgr,
+                    "cachemgr_t::find_symlinked_cache_directories(): failed to stat directory: '{}' error_code: {}",
+                    entry.path(), this->_last_system_error);
+                return false;
+            }
+
+            // skip this entry if it can't be accessed, avoids unnecessary aborts on permission errors
+            if (!os_utils::can_access_file(entry.path(), std::filesystem::perms::owner_exec))
+            {
+                LOG_DEBUG(libcachemgr::log_cachemgr,
+                    "cachemgr_t::find_symlinked_cache_directories(): skipping inaccessible directory: '{}'",
+                    entry.path());
+                continue;
+            }
+
+            // TODO: before this code is enabled, we need the ability to discard certain directories
+            //       based on the user configuration file
+            //       this is because we can't receive the mount point location
+            //       resulting in directories to be added to the list which shouldn't be there
+            // DEV NOTE: this is actually the case on my system, I bind mount XDG_ directories to another physical disk
+            // if (os_utils::is_mount_point(entry.path()))
+            // {
+            //     LOG_DEBUG(libcachemgr::log_cachemgr, "found mount point: '{}'", entry.path());
+            //     // ignore the target path for mount points (as it can't be received easily)
+            //     this->_mapped_cache_directories.emplace_back(mapped_cache_directory_t{
+            //         .directory_type = directory_type_t::bind_mount,
+            //         .original_path = entry.path(),
+            //         .target_path = entry.path(),
+            //     });
+            // }
+        }
     }
 
     return true;
@@ -110,7 +141,7 @@ bool cachemgr_t::find_symlinked_cache_directories(
     const std::initializer_list<std::string> &paths, const std::string &symlink_target_prefix) noexcept
 {
     // clear previous results
-    this->_symlinked_cache_directories.clear();
+    this->_mapped_cache_directories.clear();
 
     // iterate over all given paths and search for symlinked directories
     for (const auto &path : paths)
@@ -136,8 +167,8 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::compare_cache_mappings(
     cache_mappings_compare_results_t compare_results;
 
     // allow for fast lookup
-    std::unordered_map<std::string_view, std::list<symlinked_cache_directory_t>::const_iterator> unordered_cache_directories;
-    for (auto it = this->_symlinked_cache_directories.begin(); it != this->_symlinked_cache_directories.end(); ++it)
+    std::unordered_map<std::string_view, std::list<mapped_cache_directory_t>::const_iterator> unordered_cache_directories;
+    for (auto it = this->_mapped_cache_directories.begin(); it != this->_mapped_cache_directories.end(); ++it)
     {
         unordered_cache_directories[it->original_path] = it;
     }
@@ -154,7 +185,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::compare_cache_mappings(
          *
          * @param cache_directory actual cache directory
          */
-        const auto push_compare_result = [&compare_results, &cache_mapping](const symlinked_cache_directory_t &cache_directory) {
+        const auto push_compare_result = [&compare_results, &cache_mapping](const mapped_cache_directory_t &cache_directory) {
             // push difference to the result list
             compare_results.add_result(cache_mappings_compare_result_t{
                 // cache directory is actually this
@@ -198,7 +229,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::compare_cache_mappings(
                 cache_mapping.target);
 
             // push difference to the result list
-            push_compare_result(symlinked_cache_directory_t{});
+            push_compare_result(mapped_cache_directory_t{});
         }
     }
 

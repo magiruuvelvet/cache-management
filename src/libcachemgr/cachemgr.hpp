@@ -102,7 +102,7 @@ public:
     /**
      * Structure containing information about a cache directory mapping.
      */
-    struct symlinked_cache_directory_t
+    struct mapped_cache_directory_t
     {
         /**
          * The type of the cache directory {original_path}.
@@ -168,9 +168,9 @@ public:
     /**
      * Returns the symlinked cache directories.
      */
-    inline constexpr const std::list<symlinked_cache_directory_t> &symlinked_cache_directories() const
+    inline constexpr const std::list<mapped_cache_directory_t> &symlinked_cache_directories() const
     {
-        return this->_symlinked_cache_directories;
+        return this->_mapped_cache_directories;
     }
 
     /**
@@ -185,7 +185,7 @@ private:
     /**
      * List of symlinked cache directories.
      */
-    std::list<symlinked_cache_directory_t> _symlinked_cache_directories;
+    std::list<mapped_cache_directory_t> _mapped_cache_directories;
 
     /**
      * Last system error encountered by the cache manager.
