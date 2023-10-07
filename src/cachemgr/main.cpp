@@ -56,12 +56,6 @@ static int cachemgr_cli()
         return 1;
     }
 
-    // print all found symlinked cache directories
-    // for (const auto &dir : cachemgr.symlinked_cache_directories())
-    // {
-    //     fmt::print("{} -> {}\n", dir.original_path, dir.target_path);
-    // }
-
     // validate that all cache mappings exist
     const auto compare_results = cachemgr.compare_cache_mappings(config.cache_mappings());
     if (compare_results)
@@ -90,6 +84,8 @@ static int cachemgr_cli()
         // collect usage statistics and print the results of individual directories
         for (const auto &dir : cachemgr.symlinked_cache_directories())
         {
+            LOG_INFO(libcachemgr::log_main, "calculating usage statistics for directory: {}", dir.target_path);
+
             if (dir.original_path.size() > max_length_of_source_path)
             {
                 max_length_of_source_path = dir.original_path.size();
