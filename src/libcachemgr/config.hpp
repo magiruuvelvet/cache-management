@@ -34,9 +34,6 @@ public:
         parse_error = 4,
     };
 
-    /// receive a human-readable error message for a file error
-    //static std::string get_error_message(file_error error) noexcept;
-
     /**
      * Possible error codes related to the configuration file semantics.
      */
@@ -52,9 +49,6 @@ public:
         invalid_value = 3,
     };
 
-    /// receive a human-readable error message for a parse error
-    //static std::string get_error_message(parse_error error) noexcept;
-
     /**
      * Constructs a new configuration instance and loads the given configuration file.
      *
@@ -68,10 +62,16 @@ public:
     virtual ~configuration_t() = default;
 
     /**
+     * Returns the user-configured cache root.
+     */
+    inline constexpr const std::string &cache_root() const noexcept {
+        return this->_env_cache_root;
+    }
+
+    /**
      * Returns all registered cache mappings.
      */
-    inline constexpr const cache_mappings_t &cache_mappings() const noexcept
-    {
+    inline constexpr const cache_mappings_t &cache_mappings() const noexcept {
         return this->_cache_mappings;
     }
 

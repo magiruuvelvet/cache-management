@@ -207,7 +207,7 @@ libcachemgr::configuration_t::configuration_t(
     // if any of the mandatory keys are missing, abort
     if (has_any_errors()) {
         return;
-    };
+    }
 
     // get env map
     const auto &env = tree[key_map_env];
@@ -220,7 +220,7 @@ libcachemgr::configuration_t::configuration_t(
     // if any of the mandatory keys are missing, abort
     if (has_any_errors()) {
         return;
-    };
+    }
 
     // get the cache root path
     const auto &cache_root = env[key_str_cache_root].val();
@@ -330,11 +330,3 @@ std::string libcachemgr::configuration_t::parse_path(const std::string &path_wit
 
     return normalized_path;
 }
-
-// std::string libcachemgr::configuration_t::get_error_message(file_error error) noexcept
-// {
-// }
-
-// std::string libcachemgr::configuration_t::get_error_message(parse_error error) noexcept
-// {
-// }
