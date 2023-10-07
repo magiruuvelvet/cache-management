@@ -26,6 +26,8 @@ struct program_metadata final
      *    not intended for public consumption, so it doesn't need to adhere to semver.
      */
     static const std::string_view application_version;
+    // examples: dev, alpha, beta, rc.1, rc.2, rc.3, rc.4, rc.5
+    static const std::string_view application_version_suffix;
 
     /// retrieve the full semver compliant application version string (including git version information)
     static const std::string &full_application_version() noexcept;
