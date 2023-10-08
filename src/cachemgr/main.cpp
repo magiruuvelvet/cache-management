@@ -2,7 +2,7 @@
 #include <string_view>
 #include <array>
 
-#include <fmt/printf.h>
+#include <fmt/format.h>
 #include <fmt/ostream.h>
 
 #include <utils/logging_helper.hpp>
@@ -85,8 +85,11 @@ static int cachemgr_cli()
         }
         for (const auto &dir : cachemgr.mapped_cache_directories())
         {
-            fmt::print("{:<{}} -> {:<{}} : {:>8} ({} bytes)\n",
+            const auto separator = dir.directory_type == cachemgr_t::directory_type_t::standalone ?
+                "  " : "->";
+            fmt::print("{:<{}} {} {:<{}} : {:>8} ({} bytes)\n",
                 dir.original_path, max_length_of_source_path,
+                separator,
                 dir.target_path, max_length_of_target_path,
                 human_readable_file_size{dir.disk_size}, dir.disk_size);
         }
