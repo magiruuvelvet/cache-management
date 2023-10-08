@@ -78,7 +78,7 @@ public:
     /**
      * Constructs and initializes a new cache manager.
      *
-     * Once initialized, the {find_symlinked_cache_directories} method should be called
+     * Once initialized, the {find_mapped_cache_directories} method should be called
      * to populate the state of the cache manager. This method can also be called to
      * update the state of the cache manager at any time.
      */
@@ -178,12 +178,13 @@ public:
      * @param cache_mappings the cache mapping list from the configuration file
      * @return comparison results
      */
-    cache_mappings_compare_results_t compare_cache_mappings(const libcachemgr::cache_mappings_t &cache_mappings) const noexcept;
+    [[deprecated("use {find_mapped_cache_directories} instead")]] cache_mappings_compare_results_t compare_cache_mappings(
+        const libcachemgr::cache_mappings_t &cache_mappings) const noexcept;
 
     /**
-     * Returns the symlinked cache directories.
+     * Returns the mapped cache directories.
      */
-    inline constexpr const std::list<mapped_cache_directory_t> &symlinked_cache_directories() const
+    inline constexpr const std::list<mapped_cache_directory_t> &mapped_cache_directories() const
     {
         return this->_mapped_cache_directories;
     }
@@ -198,7 +199,7 @@ public:
 
 private:
     /**
-     * List of symlinked cache directories.
+     * List of mapped cache directories.
      */
     std::list<mapped_cache_directory_t> _mapped_cache_directories;
 
@@ -208,7 +209,7 @@ private:
     std::error_code _last_system_error;
 
     /**
-     * Helper boolean to determine if the previous {_symlinked_cache_directories} should be cleared
+     * Helper boolean to determine if the previous {_mapped_cache_directories} should be cleared
      * before rescanning the given directories.
      */
     bool _clear_previous_list = true;

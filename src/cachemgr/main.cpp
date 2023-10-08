@@ -43,32 +43,12 @@ static int cachemgr_cli()
     const auto home_dir = os_utils::get_home_directory();
     const auto xdg_cache_home = freedesktop::xdg_paths::get_xdg_cache_home();
 
-    // scan HOME and XDG_CACHE_HOME for symlinked cache directories
-    const bool result = cachemgr.find_symlinked_cache_directories({home_dir, xdg_cache_home},
-        config.cache_root());
-
-    // abort if there was an error scanning the cache directories
-    if (!result)
+    // find and validate all configured cache mappings
+    if (const auto compare_results = cachemgr.find_mapped_cache_directories(config.cache_mappings()); compare_results)
     {
-        // most errors are reported to the user via the logger
-        const auto &ec = cachemgr.get_last_system_error();
-        LOG_ERROR(libcachemgr::log_cachemgr, "last system error: {}", ec);
-        return 1;
-    }
-
-    // validate that all cache mappings exist
-    const auto compare_results = cachemgr.compare_cache_mappings(config.cache_mappings());
-    if (compare_results)
-    {
-        LOG_WARNING(libcachemgr::log_main, "found differences between expected and actual cache mappings");
-
-        LOG_WARNING(libcachemgr::log_main, "count of differences: {}", compare_results.count());
-
-        for (const auto &diff : compare_results.differences())
-        {
-            LOG_WARNING(libcachemgr::log_main, "difference: {} <=> {}",
-                diff.actual.target, diff.expected.target);
-        }
+        LOG_WARNING(libcachemgr::log_cachemgr,
+            "found {} differences between expected and actual cache mappings",
+            compare_results.count());
     }
 
     if (libcachemgr::user_configuration()->show_usage_stats())
@@ -82,7 +62,7 @@ static int cachemgr_cli()
         std::uint32_t max_length_of_target_path = 0;
 
         // collect usage statistics and print the results of individual directories
-        for (const auto &dir : cachemgr.symlinked_cache_directories())
+        for (const auto &dir : cachemgr.mapped_cache_directories())
         {
             LOG_INFO(libcachemgr::log_main, "calculating usage statistics for directory: {}", dir.target_path);
 
@@ -103,7 +83,7 @@ static int cachemgr_cli()
             total_size += dir_size;
             dir.disk_size = dir_size;
         }
-        for (const auto &dir : cachemgr.symlinked_cache_directories())
+        for (const auto &dir : cachemgr.mapped_cache_directories())
         {
             fmt::print("{:<{}} -> {:<{}} : {:>8} ({} bytes)\n",
                 dir.original_path, max_length_of_source_path,
