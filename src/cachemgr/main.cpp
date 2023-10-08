@@ -39,10 +39,6 @@ static int cachemgr_cli()
     // create the cache manager
     cachemgr_t cachemgr;
 
-    // receive essential directories
-    const auto home_dir = os_utils::get_home_directory();
-    const auto xdg_cache_home = freedesktop::xdg_paths::get_xdg_cache_home();
-
     // find and validate all configured cache mappings
     if (const auto compare_results = cachemgr.find_mapped_cache_directories(config.cache_mappings()); compare_results)
     {
