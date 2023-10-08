@@ -96,11 +96,11 @@ private:
      *   %u = uid (user id)
      *   %g = gid (group id)
      *
-     * Supported environment variables are:
+     * Supported system environment variables are:
      *   $HOME
      *   $XDG_CACHE_HOME
      *
-     * There is no general support for environment variable expansion.
+     * There is no general support for system environment variable expansion.
      * The list of allowed environment variables is hardcoded in this function.
      *
      * @param path_with_placeholders

@@ -235,27 +235,38 @@ libcachemgr::configuration_t::configuration_t(
     {
         ++i;
 
+        /// get the value for the requested key in a safe manner.
+        /// if the {cache_mapping} object goes out of scope, the string_view becomes dangling
+        const auto get_value = [&cache_mapping](const char *key) -> std::string_view {
+            if (cache_mapping.has_child(key))
+            {
+                const auto &value_ref = cache_mapping[key].val();
+                return std::string_view(value_ref.str, value_ref.len);
+            }
+            else
+            {
+                return std::string_view{};
+            }
+        };
+
         // sequence entry must be a map and have all required keys
         if (cache_mapping.is_map() &&
-            cache_mapping.has_child(key_str_source) &&
             cache_mapping.has_child(key_str_target))
         {
             // get a reference to all required keys
-            const auto &type = cache_mapping[key_str_type].val();
-            const auto &source = cache_mapping[key_str_source].val();
-            const auto &target = cache_mapping[key_str_target].val();
+            const auto type = get_value(key_str_type);
+            const auto source = get_value(key_str_source);
+            const auto target = get_value(key_str_target);
 
             LOG_DEBUG(libcachemgr::log_config,
                 "found cache_mapping: source='{}', target='{}', type='{}'",
-                std::string(source.str, source.len).c_str(),
-                std::string(target.str, target.len).c_str(),
-                std::string(type.str, type.len).c_str());
+                source, target, type);
 
-            // add the cache mapping to the list of cache mappings
+            // add the cache mapping to the list of cache mappings (copy values)
             this->_cache_mappings.emplace_back(cache_mapping_t{
-                .type = std::string(type.str, type.len),
-                .source = parse_path(std::string(source.str, source.len)),
-                .target = parse_path(std::string(target.str, target.len)),
+                .type = std::string{type},
+                .source = parse_path(std::string{source}),
+                .target = parse_path(std::string{target}),
             });
         }
         else

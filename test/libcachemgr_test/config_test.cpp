@@ -18,13 +18,13 @@ TEST_CASE("parse config file", tag_name_config) {
         REQUIRE(file_error == configuration_t::file_error::no_error);
         REQUIRE(parse_error == configuration_t::parse_error::no_error);
 
-        REQUIRE(config.cache_mappings().size() == 15);
+        REQUIRE(config.cache_mappings().size() == 16);
 
         const auto home_dir = os_utils::get_home_directory();
         const auto uid = os_utils::get_user_id();
         const auto caches_dir = "/caches/" + std::to_string(uid);
 
-        // test the find method, all 15 cache mappings must be found
+        // test the find method, all 16 cache mappings must be found
         REQUIRE(config.find_cache_mapping("does-not-exist") == nullptr);
         REQUIRE(config.find_cache_mapping("ruby-bundler") != nullptr);
         REQUIRE(config.find_cache_mapping("rust-cargo") != nullptr);
@@ -41,6 +41,7 @@ TEST_CASE("parse config file", tag_name_config) {
         REQUIRE(config.find_cache_mapping("dart-pub") != nullptr);
         REQUIRE(config.find_cache_mapping("zig-cache") != nullptr);
         REQUIRE(config.find_cache_mapping("zig-lsp") != nullptr);
+        REQUIRE(config.find_cache_mapping("example-standalone") != nullptr);
 
         const auto assert_cache_mapping = [&config](
             const std::string &type,
@@ -71,6 +72,9 @@ TEST_CASE("parse config file", tag_name_config) {
         assert_cache_mapping("dart-pub", home_dir + "/.pub-cache", caches_dir + "/pub-cache");
         assert_cache_mapping("zig-cache", home_dir + "/.cache/zig", caches_dir + "/zig");
         assert_cache_mapping("zig-lsp", home_dir + "/.cache/zls", caches_dir + "/zls");
+        assert_cache_mapping("example-standalone", {}, caches_dir + "/standalone_cache");
+
+        REQUIRE(config.cache_root() == "/caches/" + std::to_string(uid));
     }
 }
 

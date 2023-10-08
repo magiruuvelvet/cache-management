@@ -32,6 +32,18 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         // TODO: handle errors properly
         std::error_code ec;
 
+        // empty source means this entry only has a target directory
+        if (mapping.source.empty())
+        {
+            // add source-less directory to list
+            this->_mapped_cache_directories.emplace_back(mapped_cache_directory_t{
+                .directory_type = directory_type_t::standalone,
+                .original_path = {},
+                .target_path = mapping.target,
+            });
+            continue;
+        }
+
         // source is a symbolic link
         if (std::filesystem::is_symlink(mapping.source, ec))
         {

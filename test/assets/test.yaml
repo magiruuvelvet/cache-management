@@ -103,3 +103,7 @@ cache_mappings:
   - type: zig-lsp
     source: ~/.cache/zls
     target: $env.cache_root/zls
+
+  # standalone cache directory example
+  - type: example-standalone
+    target: $env.cache_root/standalone_cache
