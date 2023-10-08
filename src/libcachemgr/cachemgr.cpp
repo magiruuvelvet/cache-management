@@ -160,6 +160,12 @@ bool cachemgr_t::find_symlinked_cache_directories(
     return true;
 }
 
+cachemgr_t::cache_mappings_compare_results_t find_mapped_cache_directories(
+    const libcachemgr::cache_mappings_t &cache_mappings) noexcept
+{
+    return {};
+}
+
 cachemgr_t::cache_mappings_compare_results_t cachemgr_t::compare_cache_mappings(
     const libcachemgr::cache_mappings_t &cache_mappings) const noexcept
 {

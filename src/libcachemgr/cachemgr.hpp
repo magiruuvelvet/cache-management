@@ -131,29 +131,44 @@ public:
      *
      * Only symbolic links which point to directories starting with the {symlink_target_prefix} are used.
      *
-     * The results are stored in {_symlinked_cache_directories}.
+     * The results are stored in {_mapped_cache_directories}.
      *
      * @param path directory in which symlinked cache directories should be searched
      * @param symlink_target_prefix the prefix of the symlink target, empty to include all symlink targets
      * @return true search was successful
      * @return false error accessing directory, see {get_last_system_error} for an explanation
      */
-    bool find_symlinked_cache_directories(const std::string &path, const std::string &symlink_target_prefix = {}) noexcept;
+    [[deprecated("use {find_mapped_cache_directories} instead")]] bool find_symlinked_cache_directories(
+        const std::string &path, const std::string &symlink_target_prefix = {}) noexcept;
 
     /**
      * Searches the given directories for any symlinked cache directories.
      *
      * Only symbolic links which point to directories starting with the {symlink_target_prefix} are used.
      *
-     * The results are stored in {_symlinked_cache_directories}.
+     * The results are stored in {_mapped_cache_directories}.
      *
      * @param paths directories in which symlinked cache directories should be searched
      * @param symlink_target_prefix the prefix of the symlink target, empty to include all symlink targets
      * @return true search was successful
      * @return false error accessing directory, see {get_last_system_error} for an explanation
+     * @deprecated use {find_mapped_cache_directories} instead
      */
-    bool find_symlinked_cache_directories(
+    [[deprecated("use {find_mapped_cache_directories} instead")]] bool find_symlinked_cache_directories(
         const std::initializer_list<std::string> &paths, const std::string &symlink_target_prefix = {}) noexcept;
+
+    /**
+     * Finds all configured @p cache_mappings and validates if all of them exist on disk
+     * and point to the expected target directories.
+     *
+     * Every cache mapping which differs from the expectations, will be added to the
+     * comparison results for further inspection.
+     *
+     * @param cache_mappings the cache mapping list from the configuration file
+     * @return comparison results (only contains differences)
+     */
+    cache_mappings_compare_results_t find_mapped_cache_directories(
+        const libcachemgr::cache_mappings_t &cache_mappings) noexcept;
 
     /**
      * Compares the given cache mapping list (from the configuration file) with the found symlinked cache directories.
