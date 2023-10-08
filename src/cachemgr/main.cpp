@@ -83,15 +83,15 @@ static int cachemgr_cli()
             total_size += dir_size;
             dir.disk_size = dir_size;
         }
-        for (const auto &dir : cachemgr.mapped_cache_directories())
+        for (const auto &dir : cachemgr.sorted_mapped_cache_directories())
         {
-            const auto separator = dir.directory_type == cachemgr_t::directory_type_t::standalone ?
+            const auto separator = dir->directory_type == cachemgr_t::directory_type_t::standalone ?
                 "  " : "->";
             fmt::print("{:<{}} {} {:<{}} : {:>8} ({} bytes)\n",
-                dir.original_path, max_length_of_source_path,
+                dir->original_path, max_length_of_source_path,
                 separator,
-                dir.target_path, max_length_of_target_path,
-                human_readable_file_size{dir.disk_size}, dir.disk_size);
+                dir->target_path, max_length_of_target_path,
+                human_readable_file_size{dir->disk_size}, dir->disk_size);
         }
 
         // print the total size of all cache directories

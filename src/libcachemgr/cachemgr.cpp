@@ -145,3 +145,20 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
 
     return compare_results;
 }
+
+const std::list<const cachemgr_t::mapped_cache_directory_t*> cachemgr_t::sorted_mapped_cache_directories() const noexcept
+{
+    std::list<const cachemgr_t::mapped_cache_directory_t*> sorted_list;
+
+    for (const auto &cache_dir : this->_mapped_cache_directories)
+    {
+        sorted_list.emplace_back(&cache_dir);
+    }
+
+    // TODO: user configurable sort behavior
+    sorted_list.sort([](const mapped_cache_directory_t *lhs, const mapped_cache_directory_t *rhs){
+        return lhs->disk_size > rhs->disk_size;
+    });
+
+    return sorted_list;
+}

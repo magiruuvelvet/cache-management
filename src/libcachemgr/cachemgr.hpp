@@ -149,6 +149,16 @@ public:
         return this->_mapped_cache_directories;
     }
 
+    /**
+     * Receive a list of mapped cache directories, sorted by disk usage.
+     *
+     * Implementation notice:
+     *   The returned list is a lightweight copy of const pointers to the original list.
+     *   If {this} goes out of scope, all pointers in this list become dangling and accessing
+     *   them results in undefined behavior.
+     */
+    const std::list<const mapped_cache_directory_t*> sorted_mapped_cache_directories() const noexcept;
+
 private:
     /**
      * List of mapped cache directories.
