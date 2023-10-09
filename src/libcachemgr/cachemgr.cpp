@@ -146,7 +146,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
     return compare_results;
 }
 
-const std::list<const cachemgr_t::mapped_cache_directory_t*> cachemgr_t::sorted_mapped_cache_directories(
+const std::list<observer_ptr<cachemgr_t::mapped_cache_directory_t>> cachemgr_t::sorted_mapped_cache_directories(
     sort_behavior sort_behavior) const noexcept
 {
     std::list<const cachemgr_t::mapped_cache_directory_t*> sorted_list;

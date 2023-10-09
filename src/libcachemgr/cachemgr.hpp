@@ -7,6 +7,8 @@
 #include <initializer_list>
 #include <system_error>
 
+#include <utils/types/pointer.hpp>
+
 /**
  * Cache Manager
  */
@@ -170,7 +172,7 @@ public:
      *   If {this} goes out of scope, all pointers in this list become dangling and accessing
      *   them results in undefined behavior.
      */
-    const std::list<const mapped_cache_directory_t*> sorted_mapped_cache_directories(
+    const std::list<observer_ptr<mapped_cache_directory_t>> sorted_mapped_cache_directories(
         sort_behavior sort_behavior = sort_behavior::disk_usage_descending) const noexcept;
 
 private:

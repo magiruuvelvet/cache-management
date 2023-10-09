@@ -7,7 +7,7 @@
 
 #include <utils/logging_helper.hpp>
 #include <utils/os_utils.hpp>
-#include <utils/types.hpp>
+#include <utils/types/file_size_units.hpp>
 #include <utils/freedesktop/xdg_paths.hpp>
 
 #include <libcachemgr/logging.hpp>
