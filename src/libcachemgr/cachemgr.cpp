@@ -146,7 +146,8 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
     return compare_results;
 }
 
-const std::list<const cachemgr_t::mapped_cache_directory_t*> cachemgr_t::sorted_mapped_cache_directories() const noexcept
+const std::list<const cachemgr_t::mapped_cache_directory_t*> cachemgr_t::sorted_mapped_cache_directories(
+    sort_behavior sort_behavior) const noexcept
 {
     std::list<const cachemgr_t::mapped_cache_directory_t*> sorted_list;
 
@@ -155,10 +156,22 @@ const std::list<const cachemgr_t::mapped_cache_directory_t*> cachemgr_t::sorted_
         sorted_list.emplace_back(&cache_dir);
     }
 
-    // TODO: user configurable sort behavior
-    sorted_list.sort([](const mapped_cache_directory_t *lhs, const mapped_cache_directory_t *rhs){
-        return lhs->disk_size > rhs->disk_size;
-    });
+    if (sort_behavior == sort_behavior::unsorted)
+    {
+        return sorted_list;
+    }
+    else if (sort_behavior == sort_behavior::disk_usage_descending)
+    {
+        sorted_list.sort([](const mapped_cache_directory_t *lhs, const mapped_cache_directory_t *rhs){
+            return lhs->disk_size > rhs->disk_size;
+        });
+    }
+    else if (sort_behavior == sort_behavior::disk_usage_ascending)
+    {
+        sorted_list.sort([](const mapped_cache_directory_t *lhs, const mapped_cache_directory_t *rhs){
+            return lhs->disk_size < rhs->disk_size;
+        });
+    }
 
     return sorted_list;
 }

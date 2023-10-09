@@ -102,6 +102,19 @@ public:
     };
 
     /**
+     * Controls the sorting behavior of the {sorted_mapped_cache_directories} method.
+     */
+    enum class sort_behavior : unsigned
+    {
+        /// disable sorting (preserve order of elements as they are in the configuration file)
+        unsorted = 0,
+        /// elements with the least used disk space come first
+        disk_usage_ascending = 1,
+        /// elements with the most used disk space come first
+        disk_usage_descending = 2,
+    };
+
+    /**
      * Structure containing information about a cache directory mapping.
      */
     struct mapped_cache_directory_t
@@ -157,7 +170,8 @@ public:
      *   If {this} goes out of scope, all pointers in this list become dangling and accessing
      *   them results in undefined behavior.
      */
-    const std::list<const mapped_cache_directory_t*> sorted_mapped_cache_directories() const noexcept;
+    const std::list<const mapped_cache_directory_t*> sorted_mapped_cache_directories(
+        sort_behavior sort_behavior = sort_behavior::disk_usage_descending) const noexcept;
 
 private:
     /**
