@@ -187,6 +187,31 @@ std::tuple<std::uintmax_t, std::error_code> get_used_disk_space_of(const std::st
     return std::make_tuple(total_size, ec);
 }
 
+std::tuple<std::uintmax_t, std::error_code> get_available_disk_space_of(const std::string &path) noexcept
+{
+    namespace fs = std::filesystem;
+
+    std::error_code ec;
+    fs::space_info info = fs::space(path, ec);
+    return std::make_tuple(info.available, ec);
+
+// #if defined(PROJECT_PLATFORM_WINDOWS)
+// #error os_utils::get_available_disk_space_of not implemented for this platform
+// #else
+//     struct ::statfs64 fs_info;
+//     if (::statfs64(path.c_str(), &fs_info) == 0)
+//     {
+//         const auto free_disk_space = std::uintmax_t(fs_info.f_bfree) * std::uintmax_t(fs_info.f_bsize);
+//         return std::make_tuple(free_disk_space, std::error_code());
+//     }
+//     else
+//     {
+//         // translate POSIX errno to std::error_code
+//         return std::make_tuple(0, std::make_error_code(static_cast<std::errc>(errno)));
+//     }
+// #endif
+}
+
 std::uint64_t get_user_id()
 {
 #if defined(PROJECT_PLATFORM_WINDOWS)

@@ -83,9 +83,19 @@ bool can_access_file(const std::string &path, std::filesystem::perms mode);
  * On errors the disk space will be set to 0 and the std::error_code will contain the error.
  *
  * @param path the directory to calculate
- * @return disk space in bytes and an optional error code on failure
+ * @return used disk space in bytes and an optional error code on failure
  */
 std::tuple<std::uintmax_t, std::error_code> get_used_disk_space_of(const std::string &path) noexcept;
+
+/**
+ * Calculate the available disk space on the filesystem where the given directory is located.
+ *
+ * On errors the disk space will be set to 0 and the std::error_code will contain the error.
+ *
+ * @param path the directory to calculate
+ * @return available disk space in bytes and an optional error code on failure
+ */
+std::tuple<std::uintmax_t, std::error_code> get_available_disk_space_of(const std::string &path) noexcept;
 
 /**
  * Get the current user id.
