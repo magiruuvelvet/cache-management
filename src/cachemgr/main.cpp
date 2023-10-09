@@ -94,6 +94,12 @@ static int cachemgr_cli()
             max_length_of_source_path + max_length_of_target_path - 7,
             human_readable_file_size{total_size}, total_size);
 
+        // print the available space on the filesystem where cache_root resides
+        const auto [free_disk_space, ec] = os_utils::get_available_disk_space_of(config.cache_root());
+        fmt::print("{:>{}} available space on cache root : {:>8} ({} bytes)\n", " ",
+            max_length_of_source_path + max_length_of_target_path - 26,
+            human_readable_file_size{free_disk_space}, free_disk_space);
+
         return 0;
     }
 
