@@ -26,7 +26,7 @@ static int cachemgr_cli()
     // parse the configuration file
     configuration_t::file_error file_error;
     configuration_t::parse_error parse_error;
-    configuration_t config(libcachemgr::user_configuration()->configuration_file(), &file_error, &parse_error);
+    const configuration_t config(libcachemgr::user_configuration()->configuration_file(), &file_error, &parse_error);
 
     // abort if there was an error parsing the configuration file
     if (file_error != configuration_t::file_error::no_error || parse_error != configuration_t::parse_error::no_error)
@@ -165,8 +165,12 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         }
     }
 
+    // FIXME: this should be improved in the future, maybe switch to a more advanced command line parser.
+    // if this is true, the program will be executed with the determined action, otherwise exit it.
+    bool has_cli_action = false;
+
     // print cli help message and exit
-    if (parser.exists(cli_opt_help))
+    if (argc <= 1 || parser.exists(cli_opt_help))
     {
         *abort = true;
         fmt::print("{} {}\n\n  Options:\n{}\n",
@@ -177,7 +181,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     }
 
     // print application version and exit
-    if (parser.exists(cli_opt_version))
+    else if (parser.exists(cli_opt_version))
     {
         *abort = true;
         fmt::print("{} {}\n",
@@ -199,7 +203,17 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     // does the user want to show the usage statistics of the caches?
     if (parser.exists(cli_opt_usage_stats))
     {
+        has_cli_action = true;
         libcachemgr::user_configuration()->set_show_usage_stats(true);
+    }
+
+    // abort if no valid action was determined
+    if (!has_cli_action)
+    {
+        // be extra safe and assume argv[0] can somehow not exist
+        const auto prog_name = argc > 0 ? argv[0] : program_metadata::application_name;
+        fmt::print("no valid action specified, please run `{} --help` for available actions\n", prog_name);
+        return 0;
     }
 
     return 0;
