@@ -2,7 +2,7 @@
 
 #include <utils/freedesktop/os-release.hpp>
 
-#include "../../test_helpers.hpp"
+#include <test_helper.hpp>
 
 static constexpr const char *tag_name_os_release = "[freedesktop::os-release]";
 

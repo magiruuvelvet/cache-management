@@ -1,5 +1,6 @@
 # create executable
 add_executable(cachemgr-tests
+    include/test_helper.hpp
     libcachemgr_test/config_test.cpp
     utils_test/freedesktop_test/os-release_test.cpp
     utils_test/freedesktop_test/xdg_paths_test.cpp
@@ -14,6 +15,8 @@ target_link_libraries(cachemgr-tests PRIVATE cachemgr-utils)
 target_link_libraries(cachemgr-tests PRIVATE libcachemgr)
 target_link_libraries(cachemgr-tests PRIVATE Catch2) # Catch2 without default main()
 target_link_libraries(cachemgr-tests PRIVATE quill::quill)
+
+target_include_directories(cachemgr-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # get absolute directory to test assets
 set(CACHEMGR_TESTS_ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
