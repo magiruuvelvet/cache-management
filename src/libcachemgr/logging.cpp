@@ -71,7 +71,7 @@ namespace {
  *
  * Log messages are forwarded to the quill logging library.
  */
-class quill_utils_logger : public logging_helper
+class quill_utils_logger final : public logging_helper
 {
 public:
     quill_utils_logger(const libcachemgr::logging_config &config)

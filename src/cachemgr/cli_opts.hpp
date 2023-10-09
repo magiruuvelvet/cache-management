@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <array>
 
@@ -59,21 +61,21 @@ struct cli_option
 };
 
 /**
-    * compile-time command line option definition for the `-c, --config` option
-    */
+ * compile-time command line option definition for the `-c, --config` option
+ */
 struct config_cli_option final : public cli_option
 {
     // inherit parent constructor
     using cli_option::cli_option;
 
     /// get the default configuration file location
-    std::string get_config_file_location() const {
+    inline std::string get_config_file_location() const {
         static const std::string default_value = freedesktop::xdg_paths::get_xdg_config_home() + "/cachemgr.yaml";
         return default_value;
     }
 
     bool has_runtime_description() const override { return true; }
-    std::string get_runtime_description() const override {
+    inline std::string get_runtime_description() const override {
         return fmt::format("(defaults to {})", this->get_config_file_location());
     }
 };
