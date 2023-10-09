@@ -210,10 +210,11 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     // abort if no valid action was determined
     if (!has_cli_action)
     {
+        *abort = true;
         // be extra safe and assume argv[0] can somehow not exist
         const auto prog_name = argc > 0 ? argv[0] : program_metadata::application_name;
         fmt::print("no valid action specified, please run `{} --help` for available actions\n", prog_name);
-        return 0;
+        return 1;
     }
 
     return 0;
