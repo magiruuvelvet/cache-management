@@ -89,3 +89,15 @@ bool user_configuration_t::show_usage_stats() const noexcept
     mutex_lock_t lock{user_configuration_mutex};
     return this->_show_usage_stats;
 }
+
+void user_configuration_t::set_print_pm_cache_locations(bool print_pm_cache_locations) noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    this->_print_pm_cache_locations = print_pm_cache_locations;
+}
+
+bool user_configuration_t::print_pm_cache_locations() const noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    return this->_print_pm_cache_locations;
+}

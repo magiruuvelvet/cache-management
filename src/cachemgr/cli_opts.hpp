@@ -92,12 +92,18 @@ static constexpr const auto cli_opt_config =
 static constexpr const auto cli_opt_usage_stats =
     cli_option("usage", "u", "show the usage statistics of caches", cli_option::boolean_type);
 
+// print the predicted cache location of package managers
+static constexpr const auto cli_opt_print_pm_cache_locations =
+    cli_option("print-pm-cache-locations", "", "print the predicted cache location of package managers",
+        cli_option::boolean_type);
+
 // array of command line options for easy registration in the parser
-static constexpr const std::array<observer_ptr<cli_option>, 4> cli_options = {
+static constexpr const std::array<observer_ptr<cli_option>, 5> cli_options = {
     &cli_opt_help,
     &cli_opt_version,
     &cli_opt_config,
     &cli_opt_usage_stats,
+    &cli_opt_print_pm_cache_locations,
 };
 
 } // anonymous namespace

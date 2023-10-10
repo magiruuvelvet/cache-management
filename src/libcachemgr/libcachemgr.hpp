@@ -77,11 +77,15 @@ public:
     void set_show_usage_stats(bool show_usage_stats) noexcept;
     bool show_usage_stats() const noexcept;
 
+    void set_print_pm_cache_locations(bool print_pm_cache_locations) noexcept;
+    bool print_pm_cache_locations() const noexcept;
+
 private:
     user_configuration_t() = default;
 
     std::string _configuration_file{};
     bool _show_usage_stats{false};
+    bool _print_pm_cache_locations{false};
 };
 
 /**

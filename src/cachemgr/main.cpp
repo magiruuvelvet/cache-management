@@ -13,6 +13,7 @@
 #include <libcachemgr/config.hpp>
 #include <libcachemgr/cachemgr.hpp>
 #include <libcachemgr/libcachemgr.hpp>
+#include <libcachemgr/package_manager_support/pm_registry.hpp>
 
 #include "cli_opts.hpp"
 
@@ -103,6 +104,34 @@ static int cachemgr_cli()
         fmt::print("{:>{}} available space on cache root : {:>8} ({} bytes)\n", " ",
             max_length_of_source_path + max_length_of_target_path - 26,
             human_readable_file_size{available_disk_space}, available_disk_space);
+
+        return 0;
+    }
+
+    else if (libcachemgr::user_configuration()->print_pm_cache_locations())
+    {
+        // TODO: only print the package managers which the user is actually using
+
+        using pm_registry = libcachemgr::package_manager_support::pm_registry;
+
+        // populate the package manager registry
+        pm_registry::populate_registry();
+
+        std::string_view::size_type max_length_of_package_manager = 0;
+
+        for (const auto &pm : pm_registry::registry())
+        {
+            if (pm.first.size() > max_length_of_package_manager)
+            {
+                max_length_of_package_manager = pm.first.size();
+            }
+        }
+        for (const auto &pm : pm_registry::registry())
+        {
+            fmt::print("{:<{}} : {}\n",
+                pm.first, max_length_of_package_manager,
+                pm.second->get_cache_directory_path());
+        }
 
         return 0;
     }
@@ -215,6 +244,13 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     {
         has_cli_action = true;
         libcachemgr::user_configuration()->set_show_usage_stats(true);
+    }
+
+    // does the user want to print the predicted cache location of package managers?
+    if (parser.exists(cli_opt_print_pm_cache_locations))
+    {
+        has_cli_action = true;
+        libcachemgr::user_configuration()->set_print_pm_cache_locations(true);
     }
 
     // abort if no valid action was determined
