@@ -1,0 +1,25 @@
+#include "pm_template.hpp"
+
+#include <utils/os_utils.hpp>
+
+using namespace libcachemgr::package_manager_support;
+
+std::string_view your_package_manager::pm_name() const
+{
+    return "your-package-manager";
+}
+
+bool your_package_manager::is_cache_directory_configurable() const
+{
+    return true;
+}
+
+bool your_package_manager::is_cache_directory_symlink_compatible() const
+{
+    return true;
+}
+
+std::string your_package_manager::get_cache_directory_path() const
+{
+    return {};
+}

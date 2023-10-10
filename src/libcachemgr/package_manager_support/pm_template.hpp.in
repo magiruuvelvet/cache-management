@@ -1,0 +1,21 @@
+#pragma once
+
+// use this as a template for new package manager integrations
+
+#include <libcachemgr/package_manager_support/pm_base.hpp>
+
+namespace libcachemgr {
+namespace package_manager_support {
+
+class your_package_manager : public pm_base
+{
+public:
+    pm_name_type pm_name() const;
+    static pm_name_type pm_name_static();
+    bool is_cache_directory_configurable() const;
+    bool is_cache_directory_symlink_compatible() const;
+    std::string get_cache_directory_path() const;
+};
+
+} // namespace package_manager_support
+} // namespace libcachemgr

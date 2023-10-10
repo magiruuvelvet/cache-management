@@ -13,6 +13,12 @@ set(libcachemgr_shared_sources
     logging.hpp
 )
 
+# include all package manager sources
+file(GLOB_RECURSE libcachemgr_package_manager_sources
+    "${CMAKE_CURRENT_SOURCE_DIR}/package_manager_support/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/package_manager_support/*.hpp"
+)
+
 # enable git version tracking if git is available
 set(__libcachemgr_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 file(MAKE_DIRECTORY "${__libcachemgr_generated_dir}/private")
@@ -52,6 +58,7 @@ endif()
 add_library(libcachemgr-private STATIC
     ${libcachemgr_shared_sources}
     ${libcachemgr_fs_watcher_backend_sources}
+    ${libcachemgr_package_manager_sources}
 )
 
 SetupTarget(libcachemgr-private "libcachemgr")

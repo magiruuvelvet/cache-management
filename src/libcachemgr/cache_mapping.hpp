@@ -10,6 +10,7 @@ namespace libcachemgr {
  */
 struct cache_mapping_t
 {
+    // TODO: optional package manager mapping
     const std::string type; // unused for now, type might change in the future
     const std::string source;
     const std::string target;
