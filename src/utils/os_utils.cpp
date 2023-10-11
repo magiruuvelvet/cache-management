@@ -29,7 +29,7 @@ namespace os_utils {
 std::string getenv(const char *name, bool *exists)
 {
     // call the real implementation with an empty string as default value
-    return getenv(name, {}, exists);
+    return getenv(name, std::string{}, exists);
 }
 
 std::string getenv(const char *name, const std::string &default_value, bool *exists)
@@ -58,6 +58,32 @@ std::string getenv(const char *name, const std::string &default_value, bool *exi
         return std::string{value};
     }
 #endif
+}
+
+std::string getenv(const char *name, const std::function<std::string()> &default_value_provider, bool *exists)
+{
+    // we need to know the status of {exists} internally for this function
+    bool internal_exists = false;
+    const auto env_var = getenv(name, std::string{}, &internal_exists);
+
+    // environment variable not found, set exists to false and evaluate the default value provider
+    if (!internal_exists)
+    {
+        if (exists != nullptr)
+        {
+            *exists = false;
+        }
+        return default_value_provider();
+    }
+    // environment variable found, set exists to true and return the value
+    else
+    {
+        if (exists != nullptr)
+        {
+            *exists = true;
+        }
+        return env_var;
+    }
 }
 
 std::string get_home_directory()

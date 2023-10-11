@@ -5,6 +5,7 @@
 #include <tuple>
 #include <system_error>
 #include <filesystem>
+#include <functional>
 
 namespace os_utils {
 
@@ -12,7 +13,7 @@ namespace os_utils {
  * Get a managed string of the given environment variable.
  *
  * If you need to know whenever the environment variable exists or not,
- * use the optional {exists} parameter. By default this function just
+ * use the optional @p exists parameter. By default this function just
  * returns an empty string if the environment variable does not exist.
  *
  * @param name name of the environment variable
@@ -25,7 +26,7 @@ std::string getenv(const char *name, bool *exists = nullptr);
  * Get a managed string of the given environment variable.
  *
  * If you need to know whenever the environment variable exists or not,
- * use the optional {exists} parameter. If the environment variable does not
+ * use the optional @p exists parameter. If the environment variable does not
  * exist, the default value is returned.
  *
  * @param name name of the environment variable
@@ -34,6 +35,28 @@ std::string getenv(const char *name, bool *exists = nullptr);
  * @return the value of the environment variable or the default value
  */
 std::string getenv(const char *name, const std::string &default_value, bool *exists = nullptr);
+
+/**
+ * Get a managed string of the given environment variable.
+ *
+ * If you need to know whenever the environment variable exists or not,
+ * use the optional @p exists parameter. If the environment variable does not
+ * exist, the default value provider is lazy evaluated and the result is returned.
+ *
+ * This overload is useful when the default value is expensive to compute and you
+ * don't want to overcomplicate your code with if statements.
+ *
+ * Implementation notice:
+ *  The default value provider is not thread safe, nor is it executed in a thread safe manner.
+ *  The default value provider should only be a small local lambda function in the same scope
+ *  as the invocation of this function.
+ *
+ * @param name name of the environment variable
+ * @param default_value_provider the default value provider to lazy evaluate and return if the environment variable does not exist
+ * @param exists whether the variable exists or not
+ * @return the value of the environment variable or the value of the default value provider
+ */
+std::string getenv(const char *name, const std::function<std::string()> &default_value_provider, bool *exists = nullptr);
 
 /**
  * Get the home directory of the current user.
