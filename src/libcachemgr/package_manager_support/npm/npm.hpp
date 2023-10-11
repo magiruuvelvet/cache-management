@@ -9,7 +9,6 @@ class npm : public pm_base
 {
 public:
     pm_name_type pm_name() const;
-    static pm_name_type pm_name_static();
 
     /// using a configuration file, see {npmrc_cache_path}
     bool is_cache_directory_configurable() const;

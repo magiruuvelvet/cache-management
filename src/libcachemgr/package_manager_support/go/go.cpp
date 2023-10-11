@@ -7,11 +7,6 @@ using namespace libcachemgr::package_manager_support;
 
 pm_base::pm_name_type go::pm_name() const
 {
-    return pm_name_static();
-}
-
-pm_base::pm_name_type go::pm_name_static()
-{
     return "go";
 }
 

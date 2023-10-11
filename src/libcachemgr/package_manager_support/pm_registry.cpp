@@ -11,25 +11,18 @@ namespace {
 
 static pm_registry::pm_registry_t _pm_registry{};
 
-} // anonymous namespace
-
 /// concept which checks if the type is a base of pm_base
 template<typename T>
 concept pm_base_concept = std::is_base_of<pm_base, T>::value;
 
-/** just a failed experiment */
-// /// register multiple package managers using a variadic template
-// template<pm_base_concept pm_type, typename... Args>
-// constexpr void register_package_managers()
-// {
-//     (_pm_registry[pm_type::pm_name_static()] = std::make_unique<pm_type>());
-// }
-
 template<pm_base_concept T>
 inline constexpr void register_package_manager()
 {
-    _pm_registry[T::pm_name_static()] = std::make_unique<T>();
+    // need to make a temporary instance to receive the pm_name()
+    _pm_registry[T().pm_name()] = std::make_unique<T>();
 }
+
+} // anonymous namespace
 
 void pm_registry::populate_registry()
 {

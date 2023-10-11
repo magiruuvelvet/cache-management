@@ -37,11 +37,6 @@ std::string find_cache_in_npmrc(std::string_view npmrc_path)
 
 pm_base::pm_name_type npm::pm_name() const
 {
-    return pm_name_static();
-}
-
-pm_base::pm_name_type npm::pm_name_static()
-{
     return "npm";
 }
 

@@ -22,7 +22,6 @@ public:
      * The name of the package manager.
      */
     virtual pm_name_type pm_name() const = 0;
-    static pm_name_type pm_name_static();
 
     /**
      * This method should return whether the package manager allows its
