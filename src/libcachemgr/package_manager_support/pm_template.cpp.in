@@ -4,7 +4,7 @@
 
 using namespace libcachemgr::package_manager_support;
 
-std::string_view your_package_manager::pm_name() const
+pm_base::pm_name_type your_package_manager::pm_name() const
 {
     return "your-package-manager";
 }
