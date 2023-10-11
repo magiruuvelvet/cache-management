@@ -27,13 +27,7 @@ bool go::is_cache_directory_symlink_compatible() const
 
 std::string go::get_cache_directory_path() const
 {
-    bool env_exists = false;
-    if (const auto gocache = os_utils::getenv("GOCACHE", &env_exists); env_exists)
-    {
-        return gocache;
-    }
-    else
-    {
+    return os_utils::getenv("GOCACHE", []{
         return freedesktop::xdg_paths::get_xdg_cache_home() + "/go-build";
-    }
+    });
 }
