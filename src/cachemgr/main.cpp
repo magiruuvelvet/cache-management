@@ -129,7 +129,7 @@ static int cachemgr_cli()
         for (const auto &pm : pm_registry::registry())
         {
             fmt::print("{:<{}} : {}\n",
-                pm.first, max_length_of_package_manager,
+                pm.second->pm_name(), max_length_of_package_manager,
                 pm.second->get_cache_directory_path());
         }
 

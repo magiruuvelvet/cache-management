@@ -4,6 +4,7 @@ add_executable(cachemgr-tests
     libcachemgr_test/config_test.cpp
     package_manager_support_test/go_test.cpp
     package_manager_support_test/npm_test.cpp
+    package_manager_support_test/pub_test.cpp
     utils_test/freedesktop_test/os-release_test.cpp
     utils_test/freedesktop_test/xdg_paths_test.cpp
     utils_test/os_utils_test.cpp

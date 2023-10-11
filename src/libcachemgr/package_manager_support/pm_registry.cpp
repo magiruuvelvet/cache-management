@@ -1,9 +1,10 @@
 #include "pm_registry.hpp"
 
-//#include <type_traits>
+#include <type_traits>
 
 #include "go/go.hpp"
 #include "npm/npm.hpp"
+#include "pub/pub.hpp"
 
 using namespace libcachemgr::package_manager_support;
 
@@ -26,13 +27,9 @@ inline constexpr void register_package_manager()
 
 void pm_registry::populate_registry()
 {
-    // register_package_managers<
-    //     go,
-    //     npm
-    // >();
-
     register_package_manager<go>();
     register_package_manager<npm>();
+    register_package_manager<pub>();
 }
 
 const pm_registry::pm_registry_t &pm_registry::registry() noexcept
