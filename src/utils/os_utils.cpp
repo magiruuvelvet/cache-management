@@ -37,7 +37,7 @@ std::string getenv(const char *name, const std::string &default_value, bool *exi
 #if defined(PROJECT_PLATFORM_WINDOWS)
 #error os_utils::getenv not implemented for this platform
 #else
-    char *value = ::getenv(name);
+    char *value = std::getenv(name);
 
     // environment variable not found, set exists to false and return default value
     if (value == nullptr)

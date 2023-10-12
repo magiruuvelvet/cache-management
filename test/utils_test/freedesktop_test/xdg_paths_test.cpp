@@ -6,4 +6,4 @@
 
 static constexpr const char *tag_name_xdg = "[xdg_paths::xdg]";
 
-// TODO: somehow mock ::getenv() to test all edge cases
+// TODO: somehow mock std::getenv() to test all edge cases
