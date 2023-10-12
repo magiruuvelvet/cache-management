@@ -1,6 +1,7 @@
 #include "pm_template.hpp"
 
 #include <utils/os_utils.hpp>
+#include <utils/freedesktop/xdg_paths.hpp>
 
 using namespace libcachemgr::package_manager_support;
 

@@ -2,6 +2,7 @@
 add_executable(cachemgr-tests
     include/test_helper.hpp
     libcachemgr_test/config_test.cpp
+    package_manager_support_test/composer_test.cpp
     package_manager_support_test/go_test.cpp
     package_manager_support_test/npm_test.cpp
     package_manager_support_test/pub_test.cpp

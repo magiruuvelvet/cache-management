@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+#include "composer/composer.hpp"
 #include "go/go.hpp"
 #include "npm/npm.hpp"
 #include "pub/pub.hpp"
@@ -27,6 +28,7 @@ inline constexpr void register_package_manager()
 
 void pm_registry::populate_registry()
 {
+    register_package_manager<composer>();
     register_package_manager<go>();
     register_package_manager<npm>();
     register_package_manager<pub>();

@@ -7,6 +7,7 @@ namespace libcachemgr {
 extern quill::Logger *log_main;
 extern quill::Logger *log_cachemgr;
 extern quill::Logger *log_config;
+extern quill::Logger *log_pm;
 extern quill::Logger *log_test;
 
 /**
