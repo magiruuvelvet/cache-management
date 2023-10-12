@@ -27,3 +27,18 @@ add_subdirectory(quill EXCLUDE_FROM_ALL SYSTEM)
 
 # argparse-cpp (MIT)
 add_subdirectory(argparse-cpp/src EXCLUDE_FROM_ALL SYSTEM)
+
+# simdjson (Apache-2.0)
+set(SIMDJSON_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/simdjson/include")
+add_library(3rdparty_simdjson STATIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/simdjson/src/simdjson.cpp"
+    "${SIMDJSON_INCLUDE_DIR}/simdjson.h")
+target_include_directories(3rdparty_simdjson PRIVATE "${SIMDJSON_INCLUDE_DIR}")
+target_include_directories(3rdparty_simdjson PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/simdjson/src")
+# use generic fallback implementation until there is proper runtime cpu detection support
+target_compile_definitions(3rdparty_simdjson PRIVATE "-DSIMDJSON_IMPLEMENTATION_FALLBACK")
+target_compile_definitions(3rdparty_simdjson PRIVATE SIMDJSON_EXCEPTIONS=OFF)
+add_library(simdjson INTERFACE)
+target_link_libraries(simdjson INTERFACE 3rdparty_simdjson)
+target_include_directories(simdjson SYSTEM INTERFACE "${SIMDJSON_INCLUDE_DIR}")
+target_compile_definitions(simdjson INTERFACE SIMDJSON_EXCEPTIONS=OFF)

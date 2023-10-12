@@ -13,3 +13,6 @@
 [submodule "libs/quill"]
 	path = libs/quill
 	url = https://github.com/magiruuvelvet/quill
+[submodule "libs/simdjson"]
+	path = libs/simdjson
+	url = https://github.com/simdjson/simdjson
