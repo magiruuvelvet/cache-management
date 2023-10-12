@@ -79,6 +79,7 @@ set_source_files_properties(libcachemgr.cpp PROPERTIES
 target_link_libraries(libcachemgr-private PRIVATE Threads::Threads)
 target_link_libraries(libcachemgr-private PRIVATE cachemgr-utils)
 target_link_libraries(libcachemgr-private PRIVATE ryml) # rapidyaml
+target_link_libraries(libcachemgr-private PRIVATE simdjson)
 target_link_libraries(libcachemgr-private PRIVATE quill::quill)
 
 # create interface
