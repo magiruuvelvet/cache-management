@@ -63,6 +63,9 @@ add_library(libcachemgr-private STATIC
 
 SetupTarget(libcachemgr-private "libcachemgr")
 
+# ensure the git version file is generated before building libcachemgr
+add_dependencies(libcachemgr-private generate_git_version_file)
+
 # setup filesystem watcher backend compiler options
 if (FILESYSTEM_WATCHER_BACKEND)
     # only expose this macro to this single source file where it is actually needed
