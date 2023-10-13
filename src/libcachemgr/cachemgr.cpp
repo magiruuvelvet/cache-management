@@ -59,12 +59,14 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
+                        .package_manager = libcachemgr::package_manager_t(nullptr),
                         .source = mapping.source,
                         .target = symlink_target,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
+                        .package_manager = libcachemgr::package_manager_t(nullptr),
                         .source = mapping.source,
                         .target = mapping.target,
                     },
@@ -95,12 +97,14 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
+                        .package_manager = libcachemgr::package_manager_t(nullptr),
                         .source = mapping.source,
                         .target = mapping.source,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
+                        .package_manager = libcachemgr::package_manager_t(nullptr),
                         .source = mapping.source,
                         .target = mapping.target,
                     },
@@ -129,12 +133,14 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
+                        .package_manager = libcachemgr::package_manager_t(nullptr),
                         .source = {},
                         .target = {},
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
+                        .package_manager = libcachemgr::package_manager_t(nullptr),
                         .source = mapping.source,
                         .target = mapping.target,
                     },

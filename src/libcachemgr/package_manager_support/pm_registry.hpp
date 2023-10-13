@@ -15,6 +15,9 @@ public:
 
     /// get the package manager registry
     static const pm_registry_t &registry() noexcept;
+
+    /// finds the package manager with the given name or returns nullptr
+    static const pm_base *const find_package_manager(std::string_view name) noexcept;
 };
 
 } // namespace package_manager_support

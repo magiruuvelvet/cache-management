@@ -1,6 +1,8 @@
 #include "config.hpp"
 #include "logging.hpp"
 
+#include "package_manager_support/pm_registry.hpp"
+
 #include <cstdio>
 #include <fstream>
 #include <filesystem>
@@ -52,6 +54,7 @@ namespace {
     ///     target: symlinked cache location inside the compressed filesystem
     constexpr const char *key_seq_cache_mappings = "cache_mappings";
     constexpr const char *key_str_type = "type";
+    constexpr const char *key_str_package_manager = "package_manager";
     constexpr const char *key_str_source = "source";
     constexpr const char *key_str_target = "target";
 } // anonymous namespace
@@ -255,6 +258,7 @@ libcachemgr::configuration_t::configuration_t(
         {
             // get a reference to all required keys
             const auto type = get_value(key_str_type);
+            const auto package_manager = get_value(key_str_package_manager);
             const auto source = get_value(key_str_source);
             const auto target = get_value(key_str_target);
 
@@ -262,9 +266,20 @@ libcachemgr::configuration_t::configuration_t(
                 "found cache_mapping: source='{}', target='{}', type='{}'",
                 source, target, type);
 
+            // find the associated package manager for this cache mapping
+            const auto pm = libcachemgr::package_manager_support::pm_registry::find_package_manager(package_manager);
+
+            if (pm != nullptr)
+            {
+                LOG_INFO(libcachemgr::log_config,
+                    "found package manager for cache mapping with source='{}' and target='{}': {}",
+                    source, target, pm->pm_name());
+            }
+
             // add the cache mapping to the list of cache mappings (copy values)
             this->_cache_mappings.emplace_back(cache_mapping_t{
                 .type = std::string{type},
+                .package_manager = libcachemgr::package_manager_t(pm),
                 .source = parse_path(std::string{source}),
                 .target = parse_path(std::string{target}),
             });

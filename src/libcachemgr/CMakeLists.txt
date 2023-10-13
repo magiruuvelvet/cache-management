@@ -2,7 +2,6 @@
 set(libcachemgr_shared_sources
     fs_watcher/fs_watcher.cpp
     fs_watcher/fs_watcher.hpp
-    cache_mapping.hpp
     cachemgr.cpp
     cachemgr.hpp
     config.cpp
@@ -11,6 +10,7 @@ set(libcachemgr_shared_sources
     libcachemgr.hpp
     logging.cpp
     logging.hpp
+    types.hpp
 )
 
 # include all package manager sources

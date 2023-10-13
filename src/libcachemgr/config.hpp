@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cache_mapping.hpp"
+#include "types.hpp"
 
 #include <string>
 #include <list>

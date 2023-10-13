@@ -12,10 +12,6 @@
 
 # mandatory environment settings
 env:
-  # the mount point for the compressed cache filesystem
-  # (this setting is currently not utilized and might change in the future)
-  cache_drive_mount_point: /caches
-
   # the root directory where caches should be stored
   #
   # access this variable with "$env.cache_root" in paths
@@ -46,6 +42,7 @@ cache_mappings:
 
   # PHP Composer
   - type: php-composer
+    package_manager: composer
     source: ~/.cache/composer
     target: $env.cache_root/composer
 
@@ -66,6 +63,7 @@ cache_mappings:
 
   # go build cache
   - type: go-build-cache
+    package_manager: go
     source: ~/.cache/go-build
     target: $env.cache_root/go-build
 
@@ -86,11 +84,13 @@ cache_mappings:
 
   # Node package manager
   - type: node-npm
+    package_manager: npm
     source: ~/.npm
     target: $env.cache_root/npm
 
   # Dart pub package manager
   - type: dart-pub
+    package_manager: pub
     source: ~/.pub-cache
     target: $env.cache_root/pub-cache
 
@@ -106,4 +106,5 @@ cache_mappings:
 
   # standalone cache directory example
   - type: example-standalone
+    package_manager: invalid
     target: $env.cache_root/standalone_cache

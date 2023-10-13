@@ -40,3 +40,15 @@ const pm_registry::pm_registry_t &pm_registry::registry() noexcept
 {
     return _pm_registry;
 }
+
+const pm_base *const pm_registry::find_package_manager(std::string_view name) noexcept
+{
+    if (const auto &pm = _pm_registry.find(name); pm != _pm_registry.end())
+    {
+        return pm->second.get();
+    }
+    else
+    {
+        return nullptr;
+    }
+}
