@@ -16,9 +16,9 @@ static pm_registry::pm_user_registry_t _pm_user_registry{};
 
 /// concept which checks if the type is a base of pm_base
 template<typename T>
-concept pm_base_concept = std::is_base_of<pm_base, T>::value;
+concept is_package_manager = std::is_base_of<pm_base, T>::value;
 
-template<pm_base_concept T>
+template<is_package_manager T>
 inline constexpr void register_package_manager()
 {
     // need to make a temporary instance to receive the pm_name()
