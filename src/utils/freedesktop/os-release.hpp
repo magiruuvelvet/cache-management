@@ -45,7 +45,7 @@ public:
      *  - `NAME`
      *  - `PRETTY_NAME`
      */
-    std::string unified_name() const;
+    const std::string &unified_name() const;
 
     /**
      * Returns the version of the distribution.
@@ -55,7 +55,7 @@ public:
      *  - `VERSION_CODENAME`
      *  - `VERSION`
      */
-    std::string unified_version() const;
+    const std::string &unified_version() const;
 
 private:
     std::string _name;

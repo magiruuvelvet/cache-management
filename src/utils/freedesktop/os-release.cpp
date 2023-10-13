@@ -8,6 +8,9 @@ namespace freedesktop {
 
 namespace {
 
+/// blank string to allow returning references on else cases
+static const std::string blank{};
+
 static constexpr const auto default_locations = {
     "/etc/os-release",
     "/usr/lib/os-release",
@@ -115,7 +118,7 @@ os_release_t::os_release_t(const std::string &path)
     }
 }
 
-std::string os_release_t::unified_name() const
+const std::string &os_release_t::unified_name() const
 {
     // usually a short name
     if (this->_name.size() > 0)
@@ -130,11 +133,11 @@ std::string os_release_t::unified_name() const
     // this distribution does not have a name
     else
     {
-        return {};
+        return blank;
     }
 }
 
-std::string os_release_t::unified_version() const
+const std::string &os_release_t::unified_version() const
 {
     // usually a short version
     if (this->_version_id.size() > 0)
@@ -154,7 +157,7 @@ std::string os_release_t::unified_version() const
     // this distribution does not have a version
     else
     {
-        return {};
+        return blank;
     }
 }
 
