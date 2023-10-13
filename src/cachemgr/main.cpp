@@ -54,8 +54,9 @@ static int cachemgr_cli()
         std::uintmax_t total_size = 0;
 
         // used to pad the output
-        std::uint32_t max_length_of_source_path = 0;
-        std::uint32_t max_length_of_target_path = 0;
+        using mcd_t = cachemgr_t::mapped_cache_directory_t;
+        decltype(mcd_t::original_path)::size_type max_length_of_source_path = 0;
+        decltype(mcd_t::target_path)::size_type max_length_of_target_path = 0;
 
         // collect usage statistics and print the results of individual directories
         for (const auto &dir : cachemgr.mapped_cache_directories())
@@ -110,9 +111,10 @@ static int cachemgr_cli()
 
     else if (libcachemgr::user_configuration()->print_pm_cache_locations())
     {
+        using pm_base = libcachemgr::package_manager_support::pm_base;
         using pm_registry = libcachemgr::package_manager_support::pm_registry;
 
-        std::string_view::size_type max_length_of_package_manager = 0;
+        pm_base::pm_name_type::size_type max_length_of_package_manager = 0;
 
         for (const auto &pm : pm_registry::user_registry())
         {
