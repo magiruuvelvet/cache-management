@@ -1,0 +1,5 @@
+{
+  "config": {
+    "cache-dir-404": "/tmp/cachemgr-composer/cache"
+  }
+}

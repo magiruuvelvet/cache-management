@@ -1,3 +1,7 @@
+/**
+ * ENSURE THE TEST ENTRY POINT CAN BE SHARED BETWEEN MULTIPLE TEST EXECUTABLES!
+ */
+
 #include <catch2/catch_all.hpp>
 #include <catch2/internal/catch_leak_detector.hpp>
 #include <catch2/catch_test_macros.hpp>
