@@ -12,6 +12,7 @@ using namespace libcachemgr::package_manager_support;
 namespace {
 
 static pm_registry::pm_registry_t _pm_registry{};
+static pm_registry::pm_user_registry_t _pm_user_registry{};
 
 /// concept which checks if the type is a base of pm_base
 template<typename T>
@@ -51,4 +52,14 @@ const pm_base *const pm_registry::find_package_manager(std::string_view name) no
     {
         return nullptr;
     }
+}
+
+void pm_registry::register_user_package_manager(const pm_base *const pm) noexcept
+{
+    _pm_user_registry.emplace(pm->pm_name(), pm);
+}
+
+const pm_registry::pm_user_registry_t &pm_registry::user_registry() noexcept
+{
+    return _pm_user_registry;
 }

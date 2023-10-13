@@ -274,6 +274,9 @@ libcachemgr::configuration_t::configuration_t(
                 LOG_INFO(libcachemgr::log_config,
                     "found package manager for cache mapping with source='{}' and target='{}': {}",
                     source, target, pm->pm_name());
+
+                // add this package manager to the user's package manager registry
+                libcachemgr::package_manager_support::pm_registry::register_user_package_manager(pm);
             }
 
             // add the cache mapping to the list of cache mappings (copy values)

@@ -110,20 +110,18 @@ static int cachemgr_cli()
 
     else if (libcachemgr::user_configuration()->print_pm_cache_locations())
     {
-        // TODO: only print the package managers which the user is actually using
-
         using pm_registry = libcachemgr::package_manager_support::pm_registry;
 
         std::string_view::size_type max_length_of_package_manager = 0;
 
-        for (const auto &pm : pm_registry::registry())
+        for (const auto &pm : pm_registry::user_registry())
         {
             if (pm.first.size() > max_length_of_package_manager)
             {
                 max_length_of_package_manager = pm.first.size();
             }
         }
-        for (const auto &pm : pm_registry::registry())
+        for (const auto &pm : pm_registry::user_registry())
         {
             fmt::print("{:<{}} : {}\n",
                 pm.second->pm_name(), max_length_of_package_manager,
