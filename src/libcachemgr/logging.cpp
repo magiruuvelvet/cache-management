@@ -56,7 +56,7 @@ static void crash_signal_handler(int signal)
  *
  * @param signal
  */
-static void normal_signal_handler(int signal)
+[[noreturn]] static void normal_signal_handler(int signal)
 {
     // call std::atexit functions before terminating the application
     std::exit(signal);
