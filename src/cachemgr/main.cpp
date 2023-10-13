@@ -114,9 +114,6 @@ static int cachemgr_cli()
 
         using pm_registry = libcachemgr::package_manager_support::pm_registry;
 
-        // populate the package manager registry
-        pm_registry::populate_registry();
-
         std::string_view::size_type max_length_of_package_manager = 0;
 
         for (const auto &pm : pm_registry::registry())

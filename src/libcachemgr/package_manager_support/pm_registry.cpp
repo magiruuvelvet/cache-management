@@ -24,15 +24,17 @@ inline constexpr void register_package_manager()
     _pm_registry[T().pm_name()] = std::make_unique<T>();
 }
 
-} // anonymous namespace
-
-void pm_registry::populate_registry()
-{
+/// register all package managers before main()
+static const bool _pm_registry_init = [](){
     register_package_manager<composer>();
     register_package_manager<go>();
     register_package_manager<npm>();
     register_package_manager<pub>();
-}
+
+    return true;
+}();
+
+} // anonymous namespace
 
 const pm_registry::pm_registry_t &pm_registry::registry() noexcept
 {

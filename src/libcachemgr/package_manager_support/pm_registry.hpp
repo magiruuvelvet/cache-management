@@ -13,11 +13,7 @@ struct pm_registry final
 public:
     using pm_registry_t = std::unordered_map<pm_base::pm_name_type, std::unique_ptr<pm_base>>;
 
-    /// use on-demand initialization instead of static initialization.
-    /// the registry will be empty until this function is called.
-    static void populate_registry();
-
-    /// get the registry
+    /// get the package manager registry
     static const pm_registry_t &registry() noexcept;
 };
 
