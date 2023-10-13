@@ -148,20 +148,19 @@ void libcachemgr::init_logging(const logging_config &config)
 
     if (config.log_os_release_on_startup)
     {
-        freedesktop::os_release_t os_release;
-        if (os_release.has_os_release())
+        std::string os_name, os_version;
+        if (const freedesktop::os_release_t os_release; os_release.has_os_release())
         {
-            std::string os_name = os_release.unified_name();
-            if (os_name.empty())
-            {
-                os_name = program_metadata::platform_name;
-            }
-            LOG_INFO(log_main, "OS: {} {}", os_name, os_release.unified_version());
+            os_name = os_release.unified_name();
+            os_version = os_release.unified_version();
         }
         else
         {
-            LOG_WARNING(log_main, "could not obtain OS release information");
+            //LOG_WARNING(log_main, "could not obtain OS release information");
+            os_name = program_metadata::platform_name;
         }
+
+        LOG_INFO(log_main, "OS: {} {}", os_name, os_version);
     }
 }
 
