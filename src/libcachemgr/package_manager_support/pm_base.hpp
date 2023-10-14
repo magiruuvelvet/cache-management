@@ -52,6 +52,9 @@ public:
      * This method should return the path to the package manager's cache directory
      * which is currently in use.
      *
+     * Some package managers might return different paths depending on the current
+     * context (like the process working directory for example).
+     *
      * This method should parse a configuration file or fetch an environment variable
      * according to the specifications of the package manager.
      *

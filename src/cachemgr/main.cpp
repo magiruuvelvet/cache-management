@@ -125,18 +125,18 @@ static int cachemgr_cli()
                 max_length_of_package_manager = pm.first.size();
             }
         }
-        // FIXME: this could be simplified
         for (const auto &pm : pm_registry::user_registry())
         {
-            // find the corresponding cache mapping for this package manager
-            const auto &cache_mapping = cachemgr.find_mapped_cache_directory_for_package_manager(pm.first);
+            // get the current contextual cache directory from the package manager
             const auto cache_directory_path = pm.second->get_cache_directory_path();
 
+            std::error_code ec;
             std::string symlink_target, separator{"  "};
-            if (cache_mapping && cache_mapping->target_path != cache_directory_path)
+            if (std::filesystem::is_symlink(cache_directory_path, ec))
             {
-                // the symbolic link target is already verified, just print it
-                symlink_target = cache_mapping->target_path;
+                // the {cache_directory_path} might not match the user-configured cache directory
+                //   example: a package manager allows a per-project cache directory
+                symlink_target = std::filesystem::read_symlink(cache_directory_path, ec);
                 separator = "->";
             }
 
