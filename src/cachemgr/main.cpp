@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <string>
+#include <filesystem>
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -115,6 +116,7 @@ static int cachemgr_cli()
         using pm_registry = libcachemgr::package_manager_support::pm_registry;
 
         pm_base::pm_name_type::size_type max_length_of_package_manager = 0;
+        // std::string::size_type max_length_of_cache_directory_path = 0;
 
         for (const auto &pm : pm_registry::user_registry())
         {
@@ -122,12 +124,38 @@ static int cachemgr_cli()
             {
                 max_length_of_package_manager = pm.first.size();
             }
+
+            // const auto size = pm.second->get_cache_directory_path().size();
+            // if (size > max_length_of_cache_directory_path)
+            // {
+            //     max_length_of_cache_directory_path = size;
+            // }
         }
+        // FIXME: this could be simplified
         for (const auto &pm : pm_registry::user_registry())
         {
-            fmt::print("{:<{}} : {}\n",
-                pm.second->pm_name(), max_length_of_package_manager,
-                pm.second->get_cache_directory_path());
+            std::error_code ec;
+            std::string symlink_target, separator{"  "};
+            const auto cache_directory_path = pm.second->get_cache_directory_path();
+            if (std::filesystem::is_symlink(cache_directory_path, ec))
+            {
+                symlink_target = std::filesystem::read_symlink(cache_directory_path, ec);
+                separator = "->";
+            }
+
+            if (symlink_target.empty())
+            {
+                fmt::print("{:<{}} : {}\n",
+                    pm.second->pm_name(), max_length_of_package_manager,
+                    cache_directory_path);
+            }
+            else
+            {
+                fmt::print("{:<{}} : {:<{}} {} {}\n",
+                    pm.second->pm_name(), max_length_of_package_manager,
+                    cache_directory_path, 0, // max_length_of_cache_directory_path
+                    separator, symlink_target);
+            }
         }
 
         return 0;
