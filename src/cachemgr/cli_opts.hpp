@@ -5,6 +5,7 @@
 
 #include <fmt/format.h>
 
+#include <utils/os_utils.hpp>
 #include <utils/freedesktop/xdg_paths.hpp>
 #include <utils/types/pointer.hpp>
 
@@ -68,7 +69,8 @@ struct config_cli_option final : public cli_option
     // inherit parent constructor
     using cli_option::cli_option;
 
-    /// get the default configuration file location
+    /// get the default configuration file location.
+    /// NOTE: this path is used and must be valid, don't alter or decorate it.
     inline std::string get_config_file_location() const {
         static const std::string default_value = freedesktop::xdg_paths::get_xdg_config_home() + "/cachemgr.yaml";
         return default_value;
@@ -76,7 +78,19 @@ struct config_cli_option final : public cli_option
 
     bool has_runtime_description() const override { return true; }
     inline std::string get_runtime_description() const override {
-        return fmt::format("(defaults to {})", this->get_config_file_location());
+        return fmt::format("(defaults to {})", [=]{
+            // shorten the path to fit narrow terminal windows
+            // $HOME is replaced with a tilde (~)
+            const auto home_dir = os_utils::get_home_directory();
+            if (this->get_config_file_location().starts_with(home_dir))
+            {
+                return "~" + this->get_config_file_location().substr(home_dir.size());
+            }
+            else
+            {
+                return this->get_config_file_location();
+            }
+        }());
     }
 };
 
