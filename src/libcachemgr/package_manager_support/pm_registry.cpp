@@ -2,6 +2,7 @@
 
 #include <type_traits>
 
+#include "cargo/cargo.hpp"
 #include "composer/composer.hpp"
 #include "go/go.hpp"
 #include "npm/npm.hpp"
@@ -27,6 +28,7 @@ inline constexpr void register_package_manager()
 
 /// register all package managers before main()
 static const bool _pm_registry_init = [](){
+    register_package_manager<cargo>();
     register_package_manager<composer>();
     register_package_manager<go>();
     register_package_manager<npm>();

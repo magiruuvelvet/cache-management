@@ -65,7 +65,7 @@ TEST_CASE("parse config file", tag_name_config) {
 
         // assert all cache mappings in the test configuration file
         assert_cache_mapping("ruby-bundler", home_dir + "/.bundle", caches_dir + "/bundle");
-        assert_cache_mapping("rust-cargo", home_dir + "/.cargo", caches_dir + "/cargo");
+        assert_cache_mapping("rust-cargo", home_dir + "/.cargo", caches_dir + "/cargo", true, "cargo");
         assert_cache_mapping("clangd-cache", home_dir + "/.cache/clangd", caches_dir + "/clangd");
         assert_cache_mapping("php-composer", home_dir + "/.cache/composer", caches_dir + "/composer", true, "composer");
         assert_cache_mapping("dart-lsp", home_dir + "/.dartServer", caches_dir + "/dartServer");

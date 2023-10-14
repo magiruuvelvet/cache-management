@@ -32,6 +32,7 @@ cache_mappings:
 
   # Rust cargo package manager
   - type: rust-cargo
+    package_manager: cargo
     source: ~/.cargo
     target: $env.cache_root/cargo
 
