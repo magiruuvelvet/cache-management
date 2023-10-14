@@ -23,10 +23,12 @@ public:
      * `$COMPOSER_HOME` seems to default to `$XDG_CONFIG_HOME/composer` when not set.
      *
      * TODO: Need to check composer source code for correct behavior.
+     * TODO: Respect `$COMPOSER_CACHE_DIR`
      *
      * References:
      *  - https://getcomposer.org/doc/06-config.md#cache-dir
      *  - https://getcomposer.org/doc/03-cli.md#composer-home
+     *  - https://getcomposer.org/doc/03-cli.md#composer-cache-dir
      *  - `composer config --global --help`
      *  - `composer config --global --list`
      *  - `composer config --global cache-dir`
