@@ -140,6 +140,11 @@ static int cachemgr_cli()
                 separator = "->";
             }
 
+            if (ec)
+            {
+                LOG_WARNING(libcachemgr::log_main, "failed to stat file '{}': {}", cache_directory_path, ec);
+            }
+
             if (symlink_target.empty())
             {
                 fmt::print("{:<{}} : {}\n",
