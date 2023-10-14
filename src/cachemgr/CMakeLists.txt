@@ -1,5 +1,6 @@
 # create executable
 add_executable(cachemgr
+    basic_utils_logger.hpp
     cli_opts.hpp
     main.cpp
 )

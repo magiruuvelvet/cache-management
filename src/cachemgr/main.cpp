@@ -5,7 +5,6 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
-#include <utils/logging_helper.hpp>
 #include <utils/os_utils.hpp>
 #include <utils/types/file_size_units.hpp>
 #include <utils/freedesktop/xdg_paths.hpp>
@@ -16,6 +15,7 @@
 #include <libcachemgr/libcachemgr.hpp>
 #include <libcachemgr/package_manager_support/pm_registry.hpp>
 
+#include "basic_utils_logger.hpp"
 #include "cli_opts.hpp"
 
 template<> struct fmt::formatter<human_readable_file_size> : ostream_formatter{};
@@ -163,24 +163,6 @@ static int cachemgr_cli()
 
     return 0;
 }
-
-namespace {
-    /// basic console logger for early program initialization
-    /// used until the logging subsystem is initialized
-    class basic_utils_logger final : public logging_helper
-    {
-    public:
-        void log_info(const std::string &message) override {
-            fmt::print(stderr, "[inf] {}\n", message);
-        }
-        void log_warning(const std::string &message) override {
-            fmt::print(stderr, "[wrn] {}\n", message);
-        }
-        void log_error(const std::string &message) override {
-            fmt::print(stderr, "[err] {}\n", message);
-        }
-    };
-} // anonymous namespace
 
 static int parse_cli_options(int argc, char **argv, bool *abort)
 {
