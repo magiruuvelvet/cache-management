@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.hpp"
+#include "package_manager_support/pm_base.hpp"
 
 #include <string>
 #include <list>
@@ -137,6 +138,11 @@ public:
         const std::string target_path;
 
         /**
+         * Read-only pointer to the corresponding package manager.
+         */
+        const libcachemgr::package_manager_t package_manager;
+
+        /**
          * The size on disk of the target directory {target_path}.
          * This property can be mutated in const contexts.
          */
@@ -174,6 +180,15 @@ public:
      */
     const std::list<observer_ptr<mapped_cache_directory_t>> sorted_mapped_cache_directories(
         sort_behavior sort_behavior = sort_behavior::disk_usage_descending) const noexcept;
+
+    /**
+     * Finds the corresponding cache mapping for the given @p pm_name (package manager).
+     *
+     * @param pm_name the name of the package manager
+     * @return pointer to the corresponding cache mapping or nullptr if not found
+     */
+    const observer_ptr<mapped_cache_directory_t> find_mapped_cache_directory_for_package_manager(
+        libcachemgr::package_manager_support::pm_base::pm_name_type pm_name) const noexcept;
 
 private:
     /**

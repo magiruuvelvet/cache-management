@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <unordered_map>
 #include <string_view>
+#include <algorithm>
 
 #include <utils/os_utils.hpp>
 
@@ -40,6 +41,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                 .directory_type = directory_type_t::standalone,
                 .original_path = {},
                 .target_path = mapping.target,
+                .package_manager = mapping.package_manager,
             });
             continue;
         }
@@ -59,14 +61,14 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
-                        .package_manager = libcachemgr::package_manager_t(nullptr),
+                        .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = symlink_target,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
-                        .package_manager = libcachemgr::package_manager_t(nullptr),
+                        .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
                     },
@@ -80,6 +82,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     .directory_type = directory_type_t::symbolic_link,
                     .original_path = mapping.source,
                     .target_path = symlink_target,
+                    .package_manager = mapping.package_manager,
                 });
             }
         }
@@ -97,14 +100,14 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
-                        .package_manager = libcachemgr::package_manager_t(nullptr),
+                        .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.source,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
-                        .package_manager = libcachemgr::package_manager_t(nullptr),
+                        .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
                     },
@@ -119,6 +122,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                    .original_path = mapping.source,
                    // treat the target path as the mount point location
                    .target_path = mapping.source,
+                   .package_manager = mapping.package_manager,
                 });
             }
         }
@@ -133,14 +137,14 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
-                        .package_manager = libcachemgr::package_manager_t(nullptr),
+                        .package_manager = mapping.package_manager,
                         .source = {},
                         .target = {},
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .type = mapping.type,
-                        .package_manager = libcachemgr::package_manager_t(nullptr),
+                        .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
                     },
@@ -180,4 +184,22 @@ const std::list<observer_ptr<cachemgr_t::mapped_cache_directory_t>> cachemgr_t::
     }
 
     return sorted_list;
+}
+
+const observer_ptr<cachemgr_t::mapped_cache_directory_t> cachemgr_t::find_mapped_cache_directory_for_package_manager(
+        libcachemgr::package_manager_support::pm_base::pm_name_type pm_name) const noexcept
+{
+    const auto it = std::find_if(this->_mapped_cache_directories.cbegin(), this->_mapped_cache_directories.cend(),
+        [&pm_name](const mapped_cache_directory_t &cache_mapping){
+            return cache_mapping.package_manager && cache_mapping.package_manager()->pm_name() == pm_name;
+        });
+
+    if (it != this->_mapped_cache_directories.cend())
+    {
+        return &(*it);
+    }
+    else
+    {
+        return nullptr;
+    }
 }
