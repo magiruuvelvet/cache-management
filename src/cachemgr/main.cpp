@@ -117,7 +117,6 @@ static int cachemgr_cli()
         using pm_registry = libcachemgr::package_manager_support::pm_registry;
 
         pm_base::pm_name_type::size_type max_length_of_package_manager = 0;
-        // std::string::size_type max_length_of_cache_directory_path = 0;
 
         for (const auto &pm : pm_registry::user_registry())
         {
@@ -125,22 +124,19 @@ static int cachemgr_cli()
             {
                 max_length_of_package_manager = pm.first.size();
             }
-
-            // const auto size = pm.second->get_cache_directory_path().size();
-            // if (size > max_length_of_cache_directory_path)
-            // {
-            //     max_length_of_cache_directory_path = size;
-            // }
         }
         // FIXME: this could be simplified
         for (const auto &pm : pm_registry::user_registry())
         {
-            std::error_code ec;
-            std::string symlink_target, separator{"  "};
+            // find the corresponding cache mapping for this package manager
+            const auto &cache_mapping = cachemgr.find_mapped_cache_directory_for_package_manager(pm.first);
             const auto cache_directory_path = pm.second->get_cache_directory_path();
-            if (std::filesystem::is_symlink(cache_directory_path, ec))
+
+            std::string symlink_target, separator{"  "};
+            if (cache_mapping && cache_mapping->target_path != cache_directory_path)
             {
-                symlink_target = std::filesystem::read_symlink(cache_directory_path, ec);
+                // the symbolic link target is already verified, just print it
+                symlink_target = cache_mapping->target_path;
                 separator = "->";
             }
 
@@ -152,9 +148,9 @@ static int cachemgr_cli()
             }
             else
             {
-                fmt::print("{:<{}} : {:<{}} {} {}\n",
+                fmt::print("{:<{}} : {} {} {}\n",
                     pm.second->pm_name(), max_length_of_package_manager,
-                    cache_directory_path, 0, // max_length_of_cache_directory_path
+                    cache_directory_path,
                     separator, symlink_target);
             }
         }
