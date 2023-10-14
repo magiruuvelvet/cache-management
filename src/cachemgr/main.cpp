@@ -18,6 +18,7 @@
 #include "basic_utils_logger.hpp"
 #include "cli_opts.hpp"
 
+using human_readable_file_size = file_size_units::human_readable_file_size;
 template<> struct fmt::formatter<human_readable_file_size> : ostream_formatter{};
 
 using program_metadata = libcachemgr::program_metadata;
