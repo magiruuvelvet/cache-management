@@ -4,13 +4,13 @@
 #include "package_manager_support/pm_registry.hpp"
 
 #include <cstdio>
-#include <fstream>
 #include <filesystem>
 #include <string_view>
 #include <regex>
 #include <unordered_map>
 
 #include <utils/os_utils.hpp>
+#include <utils/fs_utils.hpp>
 #include <utils/freedesktop/xdg_paths.hpp>
 
 namespace {
@@ -89,16 +89,7 @@ libcachemgr::configuration_t::configuration_t(
     }
 
     // read the configuration file into memory
-    std::string buffer;
-    {
-        // TODO: handle read errors
-        std::ifstream config_file_stream(config_file, std::ios::in);
-        config_file_stream.seekg(0, std::ios::end);
-        buffer.resize(config_file_stream.tellg());
-        config_file_stream.seekg(0);
-        config_file_stream.read(buffer.data(), buffer.size());
-        config_file_stream.close();
-    }
+    std::string buffer = fs_utils::read_text_file(config_file);
 
     // parse the configuration file
     // TODO: handle parse errors (?)
