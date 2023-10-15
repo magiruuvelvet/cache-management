@@ -78,6 +78,18 @@ const std::string &user_configuration_t::configuration_file() const noexcept
     return this->_configuration_file;
 }
 
+void user_configuration_t::set_verify_cache_mappings(bool verify_cache_mappings) noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    this->_verify_cache_mappings = verify_cache_mappings;
+}
+
+bool user_configuration_t::verify_cache_mappings() const noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    return this->_verify_cache_mappings;
+}
+
 void user_configuration_t::set_show_usage_stats(bool show_usage_stats) noexcept
 {
     mutex_lock_t lock{user_configuration_mutex};

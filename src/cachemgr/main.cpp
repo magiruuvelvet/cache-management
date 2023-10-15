@@ -42,14 +42,21 @@ static int cachemgr_cli()
     cachemgr_t cachemgr;
 
     // find and validate all configured cache mappings
+    cachemgr_t::cache_mappings_compare_results_t::difference_size_type cache_mappings_difference = 0;
     if (const auto compare_results = cachemgr.find_mapped_cache_directories(config.cache_mappings()); compare_results)
     {
+        cache_mappings_difference = compare_results.count();
         LOG_WARNING(libcachemgr::log_cachemgr,
             "found {} differences between expected and actual cache mappings",
             compare_results.count());
     }
 
-    if (libcachemgr::user_configuration()->show_usage_stats())
+    if (libcachemgr::user_configuration()->verify_cache_mappings())
+    {
+        return cache_mappings_difference > 0 ? 1 : 0;
+    }
+
+    else if (libcachemgr::user_configuration()->show_usage_stats())
     {
         fmt::print("Calculating usage statistics...\n");
 
@@ -246,6 +253,13 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     else
     {
         libcachemgr::user_configuration()->set_configuration_file(cli_opt_config.get_config_file_location());
+    }
+
+    // does the user want to verify cache mappings?
+    if (parser.exists(cli_opt_verify_cache_mappings))
+    {
+        has_cli_actions += 1;
+        libcachemgr::user_configuration()->set_verify_cache_mappings(true);
     }
 
     // does the user want to show the usage statistics of the caches?

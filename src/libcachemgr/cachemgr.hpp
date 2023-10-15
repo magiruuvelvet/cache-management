@@ -33,6 +33,9 @@ public:
             const libcachemgr::cache_mapping_t expected;
         };
 
+        using difference_t = std::list<const cache_mappings_compare_result_t>;
+        using difference_size_type = difference_t::size_type;
+
         /**
          * Push a new comparison result to the internal list.
          *
@@ -75,7 +78,7 @@ public:
         /**
          * List of {cache_mappings_compare_result_t}.
          */
-        std::list<const cache_mappings_compare_result_t> _differences;
+        difference_t _differences;
     };
 
     /**

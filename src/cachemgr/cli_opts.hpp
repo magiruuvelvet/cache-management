@@ -102,6 +102,11 @@ static constexpr const auto cli_opt_version = // -v is reserved for verbose outp
 static constexpr const auto cli_opt_config =
     config_cli_option("config", "c", "path to the configuration file", cli_option::string_type);
 
+// verify cache mappings and exit with an appropriate status code
+static constexpr const auto cli_opt_verify_cache_mappings =
+    cli_option("verify-cache-mappings", "", "verify that all cache mappings are correct",
+        cli_option::boolean_type);
+
 // print usage statistics of caches and exit program
 static constexpr const auto cli_opt_usage_stats =
     cli_option("usage", "u", "show the usage statistics of caches", cli_option::boolean_type);
@@ -112,10 +117,11 @@ static constexpr const auto cli_opt_print_pm_cache_locations =
         cli_option::boolean_type);
 
 // array of command line options for easy registration in the parser
-static constexpr const std::array<observer_ptr<cli_option>, 5> cli_options = {
+static constexpr const std::array<observer_ptr<cli_option>, 6> cli_options = {
     &cli_opt_help,
     &cli_opt_version,
     &cli_opt_config,
+    &cli_opt_verify_cache_mappings,
     &cli_opt_usage_stats,
     &cli_opt_print_pm_cache_locations,
 };
