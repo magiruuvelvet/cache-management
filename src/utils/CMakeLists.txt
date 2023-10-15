@@ -4,6 +4,8 @@ add_library(cachemgr-utils-private STATIC
     freedesktop/os-release.hpp
     freedesktop/xdg_paths.cpp
     freedesktop/xdg_paths.hpp
+    fs_utils.cpp
+    fs_utils.hpp
     logging_helper.cpp
     logging_helper.hpp
     os_utils.cpp
