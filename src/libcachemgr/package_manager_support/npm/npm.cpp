@@ -12,8 +12,6 @@ using namespace libcachemgr::package_manager_support;
 
 namespace {
 
-static constexpr const char *LOG_TAG = "npm";
-
 std::string find_cache_in_npmrc(std::string_view npmrc_path)
 {
     std::string out;
@@ -36,8 +34,8 @@ std::string find_cache_in_npmrc(std::string_view npmrc_path)
 
     if (ec)
     {
-        LOG_WARNING(libcachemgr::log_pm,
-            "[{}] failed to read file: '{}'. error_code: {}", LOG_TAG, npmrc_path, ec);
+        LOG_WARNING(libcachemgr::log_npm,
+            "failed to read file: '{}'. error_code: {}", npmrc_path, ec);
     }
 
     return out;

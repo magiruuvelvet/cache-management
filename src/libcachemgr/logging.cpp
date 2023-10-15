@@ -108,6 +108,8 @@ quill::Logger *libcachemgr::log_main = nullptr;
 quill::Logger *libcachemgr::log_cachemgr = nullptr;
 quill::Logger *libcachemgr::log_config = nullptr;
 quill::Logger *libcachemgr::log_pm = nullptr;
+  quill::Logger *libcachemgr::log_composer = nullptr;
+  quill::Logger *libcachemgr::log_npm = nullptr;
 quill::Logger *libcachemgr::log_test = nullptr;
 
 void libcachemgr::init_logging(const logging_config &config)
@@ -142,6 +144,8 @@ void libcachemgr::init_logging(const logging_config &config)
     log_cachemgr = libcachemgr::create_logger("cachemgr", config);
     log_config =   libcachemgr::create_logger("config", config);
     log_pm =       libcachemgr::create_logger("pm", config);
+      log_composer = libcachemgr::create_logger("composer", config);
+      log_npm =      libcachemgr::create_logger("npm", config);
     log_test =     libcachemgr::create_logger("test", config);
 
     LOG_INFO(log_main, "starting {} {}", program_metadata::application_name, program_metadata::full_application_version());
