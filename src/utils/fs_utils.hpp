@@ -30,7 +30,7 @@ std::string read_text_file(std::string_view path, std::error_code *ec = nullptr)
  * will be written to the @p out paramter of this function.
  *
  * Your callback function should not throw exceptions. If you are calling throwable code inside
- * your callback function, you should catch and handle all expections internally.
+ * your callback function, you should catch and handle all exceptions internally.
  *
  * Errors are returned as `std::error_code` and are sent to the logger.
  *
