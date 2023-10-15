@@ -14,15 +14,22 @@ namespace {
 
 std::string find_cache_in_npmrc(std::string_view npmrc_path)
 {
+    LOG_DEBUG(libcachemgr::log_npm,
+        "looking for a cache= entry in '{}'", npmrc_path);
+
     std::string out;
     const auto ec = fs_utils::find_in_text_file(npmrc_path, out,
-        [](std::string_view line, std::string &cb_out)
+        [&npmrc_path](std::string_view line, std::string &cb_out)
     {
         if (line.starts_with("cache="))
         {
             if (const auto pos = line.find_first_of('='); pos != std::string::npos)
             {
                 cb_out = std::string{line.substr(pos + 1)};
+
+                LOG_DEBUG(libcachemgr::log_npm,
+                    "found cache= entry in '{}': {}", npmrc_path, cb_out);
+
                 // found the cache location, abort searching
                 return true;
             }
@@ -66,6 +73,8 @@ std::string npm::get_cache_directory_path() const
     }
     else
     {
+        LOG_INFO(libcachemgr::log_npm, "using default npm cache location");
+
         // the default location is $HOME/.npm if no npmrc file is found
         return os_utils::get_home_directory() + "/.npm";
     }
