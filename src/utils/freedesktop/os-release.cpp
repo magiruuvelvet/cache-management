@@ -1,8 +1,9 @@
 #include "os-release.hpp"
 
 #include <filesystem>
-#include <fstream>
 #include <unordered_map>
+
+#include "../fs_utils.hpp"
 
 namespace freedesktop {
 
@@ -18,7 +19,7 @@ static constexpr const auto default_locations = {
 
 } // anonymous namespace
 
-os_release_t::os_release_t(const std::string &path)
+os_release_t::os_release_t(const std::string &path) noexcept
 {
     std::string path_to_os_release = path;
 
@@ -66,56 +67,55 @@ os_release_t::os_release_t(const std::string &path)
 
     std::unordered_map<std::string, std::string> key_value_map;
 
-    std::ifstream os_release_file(path_to_os_release, std::ios::in);
-
-    if (os_release_file.is_open())
+    std::string _; // discard output
+    const auto ec = fs_utils::find_in_text_file(path_to_os_release, _,
+        [&key_value_map, &keys_of_interest](std::string_view line, std::string &_)
     {
-        std::string line;
-        while (std::getline(os_release_file, line))
+        // find the position of '=' in the line
+        const auto equal_sign_pos = line.find('=');
+
+        if (equal_sign_pos != std::string::npos)
         {
-            // find the position of '=' in the line
-            const auto equal_sign_pos = line.find('=');
+            // extract the key
+            const std::string_view key = line.substr(0, equal_sign_pos);
 
-            if (equal_sign_pos != std::string::npos)
+            // check if the key is in the list of keys of interest
+            if (std::find(keys_of_interest.begin(), keys_of_interest.end(), key) != keys_of_interest.end())
             {
-                // extract the key
-                const std::string key = line.substr(0, equal_sign_pos);
+                // extract the value
+                std::string_view value = line.substr(equal_sign_pos + 1);
 
-                // check if the key is in the list of keys of interest
-                if (std::find(keys_of_interest.begin(), keys_of_interest.end(), key) != keys_of_interest.end())
+                // remove quotes from the value if they exist
+                if (value.size() > 1 && value.front() == '"' && value.back() == '"')
                 {
-                    // extract the value
-                    std::string value = line.substr(equal_sign_pos + 1);
-
-                    // remove quotes from the value if they exist
-                    if (value.size() > 1 && value.front() == '"' && value.back() == '"')
-                    {
-                        value = value.substr(1, value.length() - 2);
-                    }
-
-                    // push the key-value pair into the map
-                    key_value_map[key] = value;
+                    value = value.substr(1, value.length() - 2);
                 }
+
+                // push the key-value pair into the map
+                key_value_map[std::string{key}] = std::string{value};
             }
         }
 
-        // close the file
-        os_release_file.close();
+        // process file until the end
+        return false;
+    });
 
-        this->_has_os_release = true;
-    }
-
-    if (this->_has_os_release)
+    if (ec)
     {
-        this->_name = key_value_map["NAME"];
-        this->_id = key_value_map["ID"];
-        this->_id_like = key_value_map["ID_LIKE"];
-        this->_pretty_name = key_value_map["PRETTY_NAME"];
-        this->_version = key_value_map["VERSION"];
-        this->_version_id = key_value_map["VERSION_ID"];
-        this->_version_codename = key_value_map["VERSION_CODENAME"];
-        this->_build_id = key_value_map["BUILD_ID"];
+        // errors are already sent to the logger here
+        this->_has_os_release = false;
+        return;
     }
+
+    this->_has_os_release = true;
+    this->_name = key_value_map["NAME"];
+    this->_id = key_value_map["ID"];
+    this->_id_like = key_value_map["ID_LIKE"];
+    this->_pretty_name = key_value_map["PRETTY_NAME"];
+    this->_version = key_value_map["VERSION"];
+    this->_version_id = key_value_map["VERSION_ID"];
+    this->_version_codename = key_value_map["VERSION_CODENAME"];
+    this->_build_id = key_value_map["BUILD_ID"];
 }
 
 const std::string &os_release_t::unified_name() const

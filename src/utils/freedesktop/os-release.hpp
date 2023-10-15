@@ -23,7 +23,7 @@ public:
      *
      * If no custom location is given, the default locations are tried in order.
      */
-    os_release_t(const std::string &path = {});
+    os_release_t(const std::string &path = {}) noexcept;
 
     inline constexpr const std::string &name() const { return _name; }
     inline constexpr const std::string &id() const { return _id; }
