@@ -305,9 +305,11 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
  */
 int main(int argc, char **argv)
 {
+#ifndef CACHEMGR_PROFILING_BUILD
     // catch errors early during first os_utils function calls
     // NOTE: parse_cli_options() and freedesktop::xdg_paths::get_xdg_cache_home() make calls to os_utils internally
     logging_helper::set_logger(std::make_shared<basic_utils_logger>());
+#endif
 
     // parse command line arguments
     {
@@ -319,6 +321,7 @@ int main(int argc, char **argv)
         }
     }
 
+#ifndef CACHEMGR_PROFILING_BUILD
     // initialize logging subsystem (includes os_utils function calls)
     libcachemgr::init_logging(libcachemgr::logging_config{
         // silence info logs in the console
@@ -327,6 +330,7 @@ int main(int argc, char **argv)
         // store the log file in $XDG_CACHE_HOME/cachemgr.log for now
         .log_file_path = freedesktop::xdg_paths::get_xdg_cache_home() + "/cachemgr.log",
     });
+#endif
 
     return cachemgr_cli();
 }

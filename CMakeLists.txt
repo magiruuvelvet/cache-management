@@ -2,13 +2,34 @@
 # see https://cmake.org/cmake/help/latest/command/add_subdirectory.html
 cmake_minimum_required(VERSION 3.25)
 
-# create options here (everything at a centralized location)
+#######################################################################################
+# create options here (everything at a centralized location)                          #
+#######################################################################################
+
+# compile live git version tracking into the application
 option(ENABLE_GIT_VERSION_TRACKING "embed live git version information" ON)
 
-# process early option dependencies here
+# enable this to perform profiling without the quill logging library (profiling quill is extremely slow)
+option(COMPILE_PROFILING_BUILD "compile a version optimized for profiling (completley disables logging)" OFF)
+
+#######################################################################################
+# process early option dependencies here                                              #
+#######################################################################################
+
+# live git version tracking requires the git command line to be installed
 if (ENABLE_GIT_VERSION_TRACKING)
     find_package(Git)
 endif()
+
+# enable optimizations for profiling builds
+if (COMPILE_PROFILING_BUILD)
+    # disable all logging macros to disable logging entirely
+    add_compile_definitions(QUILL_ACTIVE_LOG_LEVEL=QUILL_LOG_LEVEL_NONE)
+    # add macro to disable log initialization at compile-time
+    add_compile_definitions(CACHEMGR_PROFILING_BUILD)
+endif()
+
+#######################################################################################
 
 # register custom cmake modules
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_CURRENT_LIST_DIR}/cmake/modules")

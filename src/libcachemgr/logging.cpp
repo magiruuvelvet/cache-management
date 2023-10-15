@@ -114,6 +114,7 @@ quill::Logger *libcachemgr::log_test = nullptr;
 
 void libcachemgr::init_logging(const logging_config &config)
 {
+#ifndef CACHEMGR_PROFILING_BUILD
     // configure quill logging
     quill::configure(([]{
         quill::Config cfg;
@@ -166,6 +167,7 @@ void libcachemgr::init_logging(const logging_config &config)
 
         LOG_INFO(log_main, "OS: {} {}", os_name, os_version);
     }
+#endif // CACHEMGR_PROFILING_BUILD
 }
 
 quill::Logger *libcachemgr::create_logger(const std::string &name, const logging_config &config)
