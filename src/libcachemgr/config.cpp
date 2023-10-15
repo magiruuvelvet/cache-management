@@ -89,7 +89,16 @@ libcachemgr::configuration_t::configuration_t(
     }
 
     // read the configuration file into memory
-    std::string buffer = fs_utils::read_text_file(config_file);
+    std::error_code ec_file_read_error;
+    std::string buffer = fs_utils::read_text_file(config_file, &ec_file_read_error);
+    if (ec_file_read_error)
+    {
+        LOG_ERROR(libcachemgr::log_config,
+            "failed to read configuration file '{}'. error_code: {}",
+            config_file, ec_file_read_error);
+        if (file_error != nullptr) { *file_error = file_error::read_error; }
+        return;
+    }
 
     // parse the configuration file
     // TODO: handle parse errors (?)
