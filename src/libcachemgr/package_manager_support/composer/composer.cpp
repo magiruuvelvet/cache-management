@@ -27,7 +27,8 @@ static std::string cache_dir_from_json(std::string_view filename) noexcept
     std::error_code ec;
     if (!std::filesystem::is_regular_file(filename, ec))
     {
-        LOG_WARNING(libcachemgr::log_pm, "[{}] not a regular file: {}", LOG_TAG, filename);
+        // also log the error_code in the same message when it is available
+        LOG_WARNING(libcachemgr::log_pm, "[{}] not a regular file: {}. error_code: {}", LOG_TAG, filename, ec);
         return {};
     }
 
@@ -98,6 +99,10 @@ std::string composer::get_cache_directory_path() const
                 LOG_INFO(libcachemgr::log_pm, "[{}] using composer.json cache-dir: {}", LOG_TAG, cache_dir);
                 return cache_dir;
             }
+        }
+        if (ec)
+        {
+            LOG_WARNING(libcachemgr::log_pm, "[{}] failed to stat composer.json file: {}", LOG_TAG, ec);
         }
     }
 
