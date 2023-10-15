@@ -215,7 +215,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
 
     // FIXME: this should be improved in the future, maybe switch to a more advanced command line parser.
     // if this is true, the program will be executed with the determined action, otherwise exit it.
-    bool has_cli_action = false;
+    std::uint8_t has_cli_actions = 0;
 
     // print cli help message and exit
     if (argc <= 1 || parser.exists(cli_opt_help))
@@ -251,24 +251,32 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     // does the user want to show the usage statistics of the caches?
     if (parser.exists(cli_opt_usage_stats))
     {
-        has_cli_action = true;
+        has_cli_actions += 1;
         libcachemgr::user_configuration()->set_show_usage_stats(true);
     }
 
     // does the user want to print the predicted cache location of package managers?
     if (parser.exists(cli_opt_print_pm_cache_locations))
     {
-        has_cli_action = true;
+        has_cli_actions += 1;
         libcachemgr::user_configuration()->set_print_pm_cache_locations(true);
     }
 
     // abort if no valid action was determined
-    if (!has_cli_action)
+    if (has_cli_actions == 0)
     {
         *abort = true;
         // be extra safe and assume argv[0] can somehow not exist
         const auto prog_name = argc > 0 ? argv[0] : program_metadata::application_name;
         fmt::print("no valid action specified, please run `{} --help` for available actions\n", prog_name);
+        return 1;
+    }
+    else if (has_cli_actions > 1)
+    {
+        *abort = true;
+        // be extra safe and assume argv[0] can somehow not exist
+        const auto prog_name = argc > 0 ? argv[0] : program_metadata::application_name;
+        fmt::print("multiple actions specified, please run `{} --help` for available actions\n", prog_name);
         return 1;
     }
 
