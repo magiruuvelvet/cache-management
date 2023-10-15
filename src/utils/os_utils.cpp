@@ -157,6 +157,7 @@ bool is_mount_point(const std::string &path, std::string *mount_target)
 
     if (errno != 0)
     {
+        // TODO: use <format> once it is more available across different C++ standard libaries
         logging_helper::get_logger()->log_error(path + ": " + strerror(errno));
     }
 

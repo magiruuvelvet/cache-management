@@ -17,7 +17,9 @@ std::string read_text_file(std::string_view path, std::error_code *ec) noexcept
         {
             (*ec) = std::make_error_code(std::errc{errno});
         }
-        logging_helper::get_logger()->log_error("failed to open file: " + std::string{path});
+        // TODO: use <format> once it is more available across different C++ standard libaries
+        logging_helper::get_logger()->log_error("failed to open file: " + std::string{path} +
+            " (" + strerror(errno) + ")");
         return {};
     }
 
