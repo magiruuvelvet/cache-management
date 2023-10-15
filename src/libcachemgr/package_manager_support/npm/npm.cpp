@@ -1,36 +1,46 @@
 #include "npm.hpp"
 
 #include <utils/os_utils.hpp>
+#include <utils/fs_utils.hpp>
 
 #include <fstream>
 #include <string_view>
+
+#include <libcachemgr/logging.hpp>
 
 using namespace libcachemgr::package_manager_support;
 
 namespace {
 
+static constexpr const char *LOG_TAG = "npm";
+
 std::string find_cache_in_npmrc(std::string_view npmrc_path)
 {
-    std::ifstream npmrc_file(npmrc_path.data(), std::ios::in);
-
-    if (npmrc_file.is_open())
+    std::string out;
+    const auto ec = fs_utils::find_in_text_file(npmrc_path, out,
+        [](std::string_view line, std::string &cb_out)
     {
-        std::string line;
-        while (std::getline(npmrc_file, line))
+        if (line.starts_with("cache="))
         {
-            if (line.starts_with("cache="))
+            if (const auto pos = line.find_first_of('='); pos != std::string::npos)
             {
-                if (const auto pos = line.find_first_of('='); pos != std::string::npos)
-                {
-                    return line.substr(pos + 1);
-                }
+                cb_out = std::string{line.substr(pos + 1)};
+                // found the cache location, abort searching
+                return true;
             }
         }
 
-        npmrc_file.close();
+        // continue searching
+        return false;
+    });
+
+    if (ec)
+    {
+        LOG_WARNING(libcachemgr::log_pm,
+            "[{}] failed to read file: '{}'. error_code: {}", LOG_TAG, npmrc_path, ec);
     }
 
-    return {};
+    return out;
 }
 
 } // anonymous namespace
