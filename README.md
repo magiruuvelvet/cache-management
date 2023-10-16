@@ -1,9 +1,6 @@
 # Cache Management
 
-> **Note:**\
-> See the [Concept Document](./CONCEPT.md) for details.
-
-A work-in-progress utility to automate cache management.
+A work-in-progress utility to tame package managers and keep your caches under control.
 Because your storage is not free real estate.
 
 *I highly recommend reading the [Concept Document](./CONCEPT.md) on why this utility exists.*
@@ -39,9 +36,28 @@ Calculating usage statistics...
 - C++ standard library with `<filesystem>` support
 - CMake 3.25 or higher
 
+### Bundled dependencies
+
+This project uses git submodules to manage its bundled dependencies.
+Ensure to make a recursive clone with `git clone --recursive`.
+If you have already cloned the repository without submodules, you can run `git submodule update --init --recursive` instead.
+
+ - **[rapidyaml](https://github.com/biojppm/rapidyaml)**: YAML is used to configure this application.
+ - **[{fmt}](https://github.com/fmtlib/fmt)**: Modern formatting library.
+ - **[quill](https://github.com/odygrd/quill)**: used for logging.
+ - **[simdjson](https://github.com/simdjson/simdjson)**: This library was chosen for the JSON parsing support in the package manager module. It works without exceptions and is also super fast.
+ - **[argparse-cpp](https://github.com/magiruuvelvet/argparse-cpp)**: Simple stupid command line parser for C++
+
+### Testing dependencies
+
+ - **[Catch2](https://github.com/catchorg/Catch2)**: Testing framework
+
 ## Supported Operating Systems
 
 As of right now, this utility only works on Linux, but it might compile and run on BSD platforms too.
+
+To add support for other operating system, you technically only need to extend [`src/utils`](./src/utils).
+If changes to the remaining codebase are needed, then this is considered a bug in the architecture of the application.
 
 ## Building
 
