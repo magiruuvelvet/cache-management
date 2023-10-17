@@ -47,6 +47,10 @@ public:
         invalid_datatype = 2,
         /// indicates that a key has an invalid value
         invalid_value = 3,
+        /// indicates that the target for a non-wildcard cache mapping is missing
+        missing_target_for_non_wildcard = 4,
+        /// indicates that a target for a wildcard cache mapping was provided
+        target_provided_for_wildcard = 5,
     };
 
     /**
@@ -153,6 +157,8 @@ template<> struct fmt::formatter<libcachemgr::configuration_t::parse_error> : fo
             case fe::missing_key:      name = "parse_error::missing_key"; break;
             case fe::invalid_datatype: name = "parse_error::invalid_datatype"; break;
             case fe::invalid_value:    name = "parse_error::invalid_value"; break;
+            case fe::missing_target_for_non_wildcard: name = "parse_error::missing_target_for_non_wildcard"; break;
+            case fe::target_provided_for_wildcard: name = "parse_error::target_provided_for_wildcard"; break;
         }
         return formatter<string_view>::format(name, ctx);
     }

@@ -81,13 +81,26 @@ static int cachemgr_cli()
                 max_length_of_target_path = dir.target_path.size();
             }
 
-            const auto [dir_size, ec] = os_utils::get_used_disk_space_of(dir.target_path);
-            if (ec)
+            // only obtain used disk space if the target path is not empty
+            if (dir.target_path.size() > 0)
             {
-                LOG_WARNING(libcachemgr::log_main, "failed to get used disk space of '{}': {}", dir.target_path, ec);
+                const auto [dir_size, ec] = os_utils::get_used_disk_space_of(dir.target_path);
+                if (ec)
+                {
+                    LOG_WARNING(libcachemgr::log_main, "failed to get used disk space of '{}': {}", dir.target_path, ec);
+                }
+                total_size += dir_size;
+                dir.disk_size = dir_size;
             }
-            total_size += dir_size;
-            dir.disk_size = dir_size;
+            // obtain used disk space for a list of source files
+            else if (dir.resolved_source_files.size() > 0)
+            {
+                // TODO
+            }
+            else
+            {
+                LOG_ERROR(libcachemgr::log_main, "unreachable code reached");
+            }
         }
         for (const auto &dir : cachemgr.sorted_mapped_cache_directories())
         {

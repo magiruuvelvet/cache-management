@@ -70,6 +70,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = symlink_target,
+                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
@@ -77,6 +78,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
+                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                 });
                 continue;
@@ -109,6 +111,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.source,
+                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
@@ -116,6 +119,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
+                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                 });
                 continue;
@@ -157,6 +161,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .package_manager = mapping.package_manager,
                         .source = {},
                         .target = {},
+                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
@@ -164,6 +169,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
+                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                 });
             continue;

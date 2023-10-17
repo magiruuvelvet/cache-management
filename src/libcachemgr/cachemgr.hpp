@@ -146,6 +146,11 @@ public:
         const libcachemgr::package_manager_t package_manager;
 
         /**
+         * List of resolved source files when wildcard matching is used.
+         */
+        const std::list<std::string> resolved_source_files;
+
+        /**
          * The size on disk of the target directory {target_path}.
          * This property can be mutated in const contexts.
          */
@@ -168,9 +173,15 @@ public:
     /**
      * Returns the mapped cache directories.
      */
-    inline constexpr const std::list<mapped_cache_directory_t> &mapped_cache_directories() const
-    {
+    inline constexpr const std::list<mapped_cache_directory_t> &mapped_cache_directories() const {
         return this->_mapped_cache_directories;
+    }
+
+    /**
+     * Get the count of mapped cache directories.
+     */
+    inline constexpr auto mapped_cache_directories_count() const {
+        return this->_mapped_cache_directories.size();
     }
 
     /**

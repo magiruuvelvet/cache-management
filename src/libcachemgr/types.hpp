@@ -40,6 +40,9 @@ struct cache_mapping_t final
     const package_manager_t package_manager;
     const std::string source;
     const std::string target;
+
+    // this key is calculated (not present in the configuration file)
+    const bool has_wildcard_matching;
 };
 
 /**

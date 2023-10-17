@@ -252,9 +252,8 @@ libcachemgr::configuration_t::configuration_t(
             }
         };
 
-        // sequence entry must be a map and have all required keys
-        if (cache_mapping.is_map() &&
-            cache_mapping.has_child(key_str_target))
+        // sequence entry must be a map
+        if (cache_mapping.is_map())
         {
             // get a reference to all required keys
             const auto type = get_value(key_str_type);
@@ -279,12 +278,44 @@ libcachemgr::configuration_t::configuration_t(
                 libcachemgr::package_manager_support::pm_registry::register_user_package_manager(pm);
             }
 
+            // TODO: check the type of the source
+            bool has_wildcard_matching = false;
+
+            // if the source doesn't use wildcard matching, the target is required
+            if (!has_wildcard_matching && target.empty())
+            {
+                LOG_ERROR(libcachemgr::log_config,
+                    "source='{}' doesn't use wildcard matching, target is required",
+                    source);
+
+                if (parse_error != nullptr) { *parse_error = parse_error::missing_target_for_non_wildcard; }
+
+                // clear previously added cache mappings and abort
+                this->_cache_mappings.clear();
+                return;
+            }
+
+            // if the source uses wildcard matching, the target must be empty
+            if (has_wildcard_matching && target.size() > 0)
+            {
+                LOG_ERROR(libcachemgr::log_config,
+                    "source='{}' uses wildcard matching, target must be empty",
+                    source);
+
+                if (parse_error!= nullptr) { *parse_error = parse_error::target_provided_for_wildcard; }
+
+                // clear previously added cache mappings and abort
+                this->_cache_mappings.clear();
+                return;
+            }
+
             // add the cache mapping to the list of cache mappings (copy values)
             this->_cache_mappings.emplace_back(cache_mapping_t{
                 .type = std::string{type},
                 .package_manager = libcachemgr::package_manager_t(pm),
                 .source = parse_path(std::string{source}),
                 .target = parse_path(std::string{target}),
+                .has_wildcard_matching = has_wildcard_matching,
             });
         }
         else
