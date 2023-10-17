@@ -2,6 +2,7 @@
 
 #include <string>
 #include <string_view>
+#include <list>
 #include <system_error>
 #include <functional>
 
@@ -41,5 +42,28 @@ std::string read_text_file(std::string_view path, std::error_code *ec = nullptr)
  */
 std::error_code find_in_text_file(std::string_view path, std::string &out,
     std::function<bool(std::string_view line, std::string &cb_out)> line_callback) noexcept;
+
+/// Resolves the given wildcard pattern into a list of file paths.
+///
+/// Only simple singular `*` wildcards are supported.
+/// Globbing is not supported.
+///
+/// Example directory:
+///  - /path/file1.txt
+///  - /path/file2.log
+///  - /path/file3.yaml
+///  - /path/sub/unreachable
+///
+/// The wildcard pattern `/path/*` would return all 3 files in `/path`.
+/// The wildcard pattern `/path/file*` would return all 3 files `/path`.
+/// The wildcard pattern `/path/*.txt` would only return `/path/file1.txt`.
+///
+/// Implementation notice:
+///  Going up one directory with `..` is not supported.
+///
+/// @param pattern the wildcard pattern
+/// @param ec optional error_code for error handling
+/// @return list of file paths
+std::list<std::string> resolve_wildcard_pattern(const std::string &pattern, std::error_code *ec = nullptr) noexcept;
 
 } // namespace fs_utils
