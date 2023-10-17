@@ -6,6 +6,7 @@
 #include <string_view>
 #include <algorithm>
 
+#include <utils/fs_utils.hpp>
 #include <utils/os_utils.hpp>
 
 namespace fs = std::filesystem;
@@ -45,8 +46,33 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
             continue;
         }
 
+        // resolve wildcard pattern into a list of files
+        else if (mapping.has_wildcard_matching)
+        {
+            std::error_code ec_wildcard_resolve;
+            const auto resolved_files = fs_utils::resolve_wildcard_pattern(mapping.source, &ec_wildcard_resolve);
+
+            if (ec_wildcard_resolve)
+            {
+                LOG_WARNING(libcachemgr::log_cachemgr,
+                    "failed to resolve wildcard pattern for source '{}': {}",
+                    mapping.source, ec_wildcard_resolve);
+                continue;
+            }
+            else
+            {
+                this->_mapped_cache_directories.emplace_back(mapped_cache_directory_t{
+                    .directory_type = directory_type_t::wildcard,
+                    .original_path = mapping.source,
+                    .target_path = {},
+                    .package_manager = mapping.package_manager,
+                    .resolved_source_files = resolved_files,
+                });
+            }
+        }
+
         // source is a symbolic link
-        if (std::filesystem::is_symlink(mapping.source, ec_is_symlink))
+        else if (std::filesystem::is_symlink(mapping.source, ec_is_symlink))
         {
             // resolve the symbolic link
             std::error_code ec_read_symlink;

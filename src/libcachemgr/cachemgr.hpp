@@ -105,6 +105,8 @@ public:
         bind_mount = 1,
         /// standalone cache target without source directory
         standalone = 2,
+        /// wildcard match without target directory
+        wildcard = 3,
     };
 
     /**

@@ -278,8 +278,8 @@ libcachemgr::configuration_t::configuration_t(
                 libcachemgr::package_manager_support::pm_registry::register_user_package_manager(pm);
             }
 
-            // TODO: check the type of the source
-            bool has_wildcard_matching = false;
+            // check if the source has wildcard matching
+            bool has_wildcard_matching = std::find(source.begin(), source.end(), '*') != source.end();
 
             // if the source doesn't use wildcard matching, the target is required
             if (!has_wildcard_matching && target.empty())
