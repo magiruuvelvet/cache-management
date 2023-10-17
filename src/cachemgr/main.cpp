@@ -70,6 +70,7 @@ static int cachemgr_cli()
         // collect usage statistics and print the results of individual directories
         for (const auto &dir : cachemgr.mapped_cache_directories())
         {
+            // FIXME: simplify this code
             LOG_INFO(libcachemgr::log_main, "calculating usage statistics for directory: {}", dir.target_path);
 
             if (dir.original_path.size() > max_length_of_source_path)
@@ -95,7 +96,18 @@ static int cachemgr_cli()
             // obtain used disk space for a list of source files
             else if (dir.resolved_source_files.size() > 0)
             {
-                // TODO
+                // FIXME: simplify this code
+                for (const auto &source_file : dir.resolved_source_files)
+                {
+                    std::error_code ec;
+                    const auto file_size = std::filesystem::file_size(source_file, ec);
+                    if (ec)
+                    {
+                        LOG_WARNING(libcachemgr::log_main, "failed to get used disk space of '{}': {}", source_file, ec);
+                    }
+                    total_size += file_size;
+                    dir.disk_size += file_size;
+                }
             }
             else
             {
@@ -104,7 +116,9 @@ static int cachemgr_cli()
         }
         for (const auto &dir : cachemgr.sorted_mapped_cache_directories())
         {
-            const auto separator = dir->directory_type == cachemgr_t::directory_type_t::standalone ?
+            // FIXME: simplify this code
+            using dt = cachemgr_t::directory_type_t;
+            const auto separator = dir->directory_type == dt::standalone || dir->directory_type == dt::wildcard ?
                 "  " : "->";
             fmt::print("{:<{}} {} {:<{}} : {:>8} ({} bytes)\n",
                 dir->original_path, max_length_of_source_path,
