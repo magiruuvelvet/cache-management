@@ -99,10 +99,13 @@ std::list<std::string> resolve_wildcard_pattern(const std::string &pattern, std:
             // check if the entry is a regular file and matches the wildcard pattern
             if (fs::is_regular_file(entry, ec))
             {
-                logging_helper::get_logger()->log_info(
-                    "matching file: '" + entry.path().string() + "' against pattern: " + file_wildcard_pattern);
+                const auto has_match = std::regex_match(entry.path().filename().string(), regex_pattern);
 
-                if (std::regex_match(entry.path().filename().string(), regex_pattern))
+                logging_helper::get_logger()->log_info(
+                    "matching file: '" + entry.path().string() + "' against pattern: " + file_wildcard_pattern +
+                    " (" + (has_match ? "match" : "no match") + ")");
+
+                if (has_match)
                 {
                     file_paths.emplace_back(entry.path().string());
                 }
