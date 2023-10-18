@@ -24,6 +24,47 @@ template<> struct fmt::formatter<human_readable_file_size> : ostream_formatter{}
 using program_metadata = libcachemgr::program_metadata;
 using configuration_t = libcachemgr::configuration_t;
 
+/// small helper function to calculate disk usage and handle errors
+static std::uintmax_t get_used_disk_space_of_safe(const std::string &path)
+{
+    static const auto log_warning = [&path](const std::error_code &ec){
+        LOG_WARNING(libcachemgr::log_main, "failed to get used disk space of '{}': {}", path, ec);
+    };
+
+    std::error_code ec;
+
+    // the given path is more likely to be a directory
+    [[likely]] if (std::filesystem::is_directory(path, ec))
+    {
+        const auto [dir_size, ec_dir] = os_utils::get_used_disk_space_of(path);
+        if (ec_dir)
+        {
+            log_warning(ec);
+        }
+        return dir_size;
+    }
+    else if (ec)
+    {
+        log_warning(ec);
+    }
+
+    if (std::filesystem::is_regular_file(path, ec))
+    {
+        const auto file_size = std::filesystem::file_size(path, ec);
+        if (ec)
+        {
+            log_warning(ec);
+        }
+        return file_size;
+    }
+    else if (ec)
+    {
+        log_warning(ec);
+    }
+
+    return 0;
+}
+
 static int cachemgr_cli()
 {
     // parse the configuration file
@@ -60,6 +101,8 @@ static int cachemgr_cli()
     {
         fmt::print("Calculating usage statistics...\n");
 
+        using directory_type = cachemgr_t::directory_type_t;
+
         std::uintmax_t total_size = 0;
 
         // used to pad the output
@@ -70,7 +113,6 @@ static int cachemgr_cli()
         // collect usage statistics and print the results of individual directories
         for (const auto &dir : cachemgr.mapped_cache_directories())
         {
-            // FIXME: simplify this code
             LOG_INFO(libcachemgr::log_main, "calculating usage statistics for directory: {}", dir.target_path);
 
             if (dir.original_path.size() > max_length_of_source_path)
@@ -83,28 +125,18 @@ static int cachemgr_cli()
             }
 
             // only obtain used disk space if the target path is not empty
-            if (dir.target_path.size() > 0)
+            if (dir.target_path.size() > 0 && dir.directory_type != directory_type::wildcard)
             {
-                const auto [dir_size, ec] = os_utils::get_used_disk_space_of(dir.target_path);
-                if (ec)
-                {
-                    LOG_WARNING(libcachemgr::log_main, "failed to get used disk space of '{}': {}", dir.target_path, ec);
-                }
+                const auto dir_size = get_used_disk_space_of_safe(dir.target_path);
                 total_size += dir_size;
                 dir.disk_size = dir_size;
             }
             // obtain used disk space for a list of source files
             else if (dir.resolved_source_files.size() > 0)
             {
-                // FIXME: simplify this code
                 for (const auto &source_file : dir.resolved_source_files)
                 {
-                    std::error_code ec;
-                    const auto file_size = std::filesystem::file_size(source_file, ec);
-                    if (ec)
-                    {
-                        LOG_WARNING(libcachemgr::log_main, "failed to get used disk space of '{}': {}", source_file, ec);
-                    }
+                    const auto file_size = get_used_disk_space_of_safe(source_file);
                     total_size += file_size;
                     dir.disk_size += file_size;
                 }
@@ -116,9 +148,8 @@ static int cachemgr_cli()
         }
         for (const auto &dir : cachemgr.sorted_mapped_cache_directories())
         {
-            // FIXME: simplify this code
-            using dt = cachemgr_t::directory_type_t;
-            const auto separator = dir->directory_type == dt::standalone || dir->directory_type == dt::wildcard ?
+            const auto separator = dir->directory_type ==
+                directory_type::standalone || dir->directory_type == directory_type::wildcard ?
                 "  " : "->";
             fmt::print("{:<{}} {} {:<{}} : {:>8} ({} bytes)\n",
                 dir->original_path, max_length_of_source_path,
