@@ -265,6 +265,19 @@ libcachemgr::configuration_t::configuration_t(
                 "found cache_mapping: source='{}', target='{}', type='{}'",
                 source, target, type);
 
+            // the target is always required, log it as such
+            if (target.empty())
+            {
+                LOG_ERROR(libcachemgr::log_config,
+                    "the cache mapping at position {} is missing the required key '{}'.",
+                    i, key_str_target);
+                if (parse_error != nullptr) { *parse_error = parse_error::missing_key; }
+
+                // clear previously added cache mappings and abort
+                this->_cache_mappings.clear();
+                return;
+            }
+
             // find the associated package manager for this cache mapping
             const auto pm = libcachemgr::package_manager_support::pm_registry::find_package_manager(package_manager);
 
@@ -278,36 +291,8 @@ libcachemgr::configuration_t::configuration_t(
                 libcachemgr::package_manager_support::pm_registry::register_user_package_manager(pm);
             }
 
-            // check if the source has wildcard matching
-            bool has_wildcard_matching = std::find(source.begin(), source.end(), '*') != source.end();
-
-            // if the source doesn't use wildcard matching, the target is required
-            if (!has_wildcard_matching && target.empty())
-            {
-                LOG_ERROR(libcachemgr::log_config,
-                    "source='{}' doesn't use wildcard matching, target is required",
-                    source);
-
-                if (parse_error != nullptr) { *parse_error = parse_error::missing_target_for_non_wildcard; }
-
-                // clear previously added cache mappings and abort
-                this->_cache_mappings.clear();
-                return;
-            }
-
-            // if the source uses wildcard matching, the target must be empty
-            if (has_wildcard_matching && target.size() > 0)
-            {
-                LOG_ERROR(libcachemgr::log_config,
-                    "source='{}' uses wildcard matching, target must be empty",
-                    source);
-
-                if (parse_error!= nullptr) { *parse_error = parse_error::target_provided_for_wildcard; }
-
-                // clear previously added cache mappings and abort
-                this->_cache_mappings.clear();
-                return;
-            }
+            // check if the target has wildcard matching
+            bool has_wildcard_matching = std::find(target.begin(), target.end(), '*') != target.end();
 
             // add the cache mapping to the list of cache mappings (copy values)
             this->_cache_mappings.emplace_back(cache_mapping_t{

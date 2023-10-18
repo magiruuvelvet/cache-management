@@ -34,12 +34,12 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         std::error_code ec_is_symlink, ec_is_directory;
 
         // empty source means this entry only has a target directory
-        if (mapping.source.empty())
+        if (mapping.source.empty() && !mapping.has_wildcard_matching)
         {
             // add source-less directory to list
             this->_mapped_cache_directories.emplace_back(mapped_cache_directory_t{
                 .directory_type = directory_type_t::standalone,
-                .original_path = {},
+                .original_path = {}, // standalone doesn't have an original path
                 .target_path = mapping.target,
                 .package_manager = mapping.package_manager,
             });
@@ -47,24 +47,25 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         }
 
         // resolve wildcard pattern into a list of files
-        else if (mapping.has_wildcard_matching)
+        else if (mapping.source.empty() && mapping.has_wildcard_matching)
         {
             std::error_code ec_wildcard_resolve;
-            const auto resolved_files = fs_utils::resolve_wildcard_pattern(mapping.source, &ec_wildcard_resolve);
+            const auto resolved_files = fs_utils::resolve_wildcard_pattern(mapping.target, &ec_wildcard_resolve);
 
             if (ec_wildcard_resolve)
             {
                 LOG_WARNING(libcachemgr::log_cachemgr,
-                    "failed to resolve wildcard pattern for source '{}': {}",
-                    mapping.source, ec_wildcard_resolve);
+                    "failed to resolve wildcard pattern for target '{}': {}",
+                    mapping.target, ec_wildcard_resolve);
                 continue;
             }
             else
             {
                 this->_mapped_cache_directories.emplace_back(mapped_cache_directory_t{
                     .directory_type = directory_type_t::wildcard,
-                    .original_path = mapping.source,
-                    .target_path = {},
+                    // wildcard patterns don't have an original path and are similar to standalone directories
+                    .original_path = {},
+                    .target_path = mapping.target, // preserve the wildcard pattern
                     .package_manager = mapping.package_manager,
                     .resolved_source_files = resolved_files,
                 });
