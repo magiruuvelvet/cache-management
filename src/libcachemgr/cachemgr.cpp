@@ -36,7 +36,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         std::error_code ec_is_symlink, ec_is_directory;
 
         // empty source means this entry only has a target directory
-        if (mapping.source.empty() && !mapping.has_wildcard_matching)
+        if (mapping.type == directory_type_t::standalone)
         {
             // add source-less directory to list
             this->_mapped_cache_directories.emplace_back(mapped_cache_directory_t{
@@ -49,7 +49,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         }
 
         // resolve wildcard pattern into a list of files
-        else if (mapping.source.empty() && mapping.has_wildcard_matching)
+        else if (mapping.type == directory_type_t::wildcard)
         {
             std::error_code ec_wildcard_resolve;
             const auto resolved_files = fs_utils::resolve_wildcard_pattern(mapping.target, &ec_wildcard_resolve);
@@ -96,18 +96,18 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .id = mapping.id,
+                        .type = mapping.type,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = symlink_target,
-                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .id = mapping.id,
+                        .type = mapping.type,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
-                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                 });
                 continue;
@@ -137,18 +137,18 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .id = mapping.id,
+                        .type = mapping.type,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.source,
-                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .id = mapping.id,
+                        .type = mapping.type,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
-                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                 });
                 continue;
@@ -187,18 +187,18 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
                         .id = mapping.id,
+                        .type = mapping.type,
                         .package_manager = mapping.package_manager,
                         .source = {},
                         .target = {},
-                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
                         .id = mapping.id,
+                        .type = mapping.type,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
-                        .has_wildcard_matching = mapping.has_wildcard_matching,
                     },
                 });
             continue;

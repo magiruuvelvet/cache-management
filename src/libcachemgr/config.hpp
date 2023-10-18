@@ -107,7 +107,15 @@ private:
      * @param path_with_placeholders
      * @return normalized path without placeholders
      */
-    std::string parse_path(const std::string &path_with_placeholders);
+    std::string parse_path(const std::string &path_with_placeholders) const;
+
+    /**
+     * Parses a given string into a {directory_type_t} enum value.
+     *
+     * @param directory_type the name of the directory type
+     * @return corresponding enum value
+     */
+    directory_type_t parse_directory_type(std::string_view directory_type) const;
 
     /**
      * Root directory where caches are stored.

@@ -44,6 +44,9 @@ enum class directory_type_t : unsigned
     standalone = 2,
     /// wildcard match without target directory
     wildcard = 3,
+
+    /// invalid value
+    invalid = 255,
 };
 
 /**
@@ -56,9 +59,6 @@ struct cache_mapping_t final
     const package_manager_t package_manager;
     const std::string source;
     const std::string target;
-
-    // this key is calculated (not present in the configuration file)
-    const bool has_wildcard_matching;
 };
 
 /**

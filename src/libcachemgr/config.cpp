@@ -273,6 +273,16 @@ libcachemgr::configuration_t::configuration_t(
                 validate_key_in_node(key_seq_cache_mappings, cache_mapping, key_str_target, key_type::string, true),
             };
 
+            // parse the directory type of the cache mapping entry
+            const auto directory_type_enum = parse_directory_type(type);
+            if (directory_type_enum == libcachemgr::directory_type_t::invalid)
+            {
+                LOG_ERROR(libcachemgr::log_config,
+                    "invalid type '{}' for entry at position {}",
+                    type, i);
+                error_collection.emplace_back(false);
+            }
+
             // if any of the mandatory keys are missing, abort
             if (has_any_errors()) {
                 // clear previously added cache mappings and abort
@@ -293,16 +303,13 @@ libcachemgr::configuration_t::configuration_t(
                 libcachemgr::package_manager_support::pm_registry::register_user_package_manager(pm);
             }
 
-            // check if the target has wildcard matching
-            bool has_wildcard_matching = std::find(target.begin(), target.end(), '*') != target.end();
-
             // add the cache mapping to the list of cache mappings (copy values)
             this->_cache_mappings.emplace_back(cache_mapping_t{
                 .id = std::string{id},
+                .type = directory_type_enum,
                 .package_manager = libcachemgr::package_manager_t(pm),
                 .source = parse_path(std::string{source}),
                 .target = parse_path(std::string{target}),
-                .has_wildcard_matching = has_wildcard_matching,
             });
         }
         else
@@ -336,7 +343,7 @@ namespace {
     );
 } // anonymous namespace
 
-std::string libcachemgr::configuration_t::parse_path(const std::string &path_with_placeholders)
+std::string libcachemgr::configuration_t::parse_path(const std::string &path_with_placeholders) const
 {
     std::string normalized_path = path_with_placeholders;
 
@@ -376,4 +383,28 @@ std::string libcachemgr::configuration_t::parse_path(const std::string &path_wit
         path_with_placeholders, normalized_path);
 
     return normalized_path;
+}
+
+libcachemgr::directory_type_t libcachemgr::configuration_t::parse_directory_type(std::string_view directory_type) const
+{
+    if (directory_type == "symbolic_link")
+    {
+        return directory_type_t::symbolic_link;
+    }
+    else if (directory_type == "bind_mount")
+    {
+        return directory_type_t::bind_mount;
+    }
+    else if (directory_type == "standalone")
+    {
+        return directory_type_t::standalone;
+    }
+    else if (directory_type == "wildcard")
+    {
+        return directory_type_t::wildcard;
+    }
+    else
+    {
+        return directory_type_t::invalid;
+    }
 }
