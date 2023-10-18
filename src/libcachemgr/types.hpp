@@ -32,11 +32,27 @@ private:
 };
 
 /**
+ * Type of the cache directory.
+ */
+enum class directory_type_t : unsigned
+{
+    /// symbolic link to a directory
+    symbolic_link = 0,
+    /// bind mount
+    bind_mount = 1,
+    /// standalone cache target without source directory
+    standalone = 2,
+    /// wildcard match without target directory
+    wildcard = 3,
+};
+
+/**
  * Represents a cache mapping in the configuration file.
  */
 struct cache_mapping_t final
 {
-    const std::string type; // unused for now, type might change in the future
+    const std::string id; // unused for now, type might change in the future
+    const directory_type_t type;
     const package_manager_t package_manager;
     const std::string source;
     const std::string target;

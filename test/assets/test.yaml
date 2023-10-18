@@ -17,95 +17,122 @@ env:
   # access this variable with "$env.cache_root" in paths
   # example:
   #  cache_mappings:
-  #   - target: $env:cache_root/bundle
+  #   - target: $env.cache_root/bundle
   cache_root: /caches/%u
 
 # a sequence of cache mappings which should map a source path to a target path.
 # all mappings are verified, and in the unlikely event that the source path is no
 # longer a symbolic link or bind mount, the tool will issue a warning to the user.
 cache_mappings:
+  # mandatory keys:
+  #   type: one of (symbolic_link, bind_mount, standalone, wildcard)
+  #   target: absolute path
+  #
+  # conditional mandatory keys:
+  #   - if the type is one of (symbolic_link, bind_mount): source
 
   # Ruby bundler
-  - type: ruby-bundler
+  - id: ruby-bundler
+    type: symbolic_link
     source: ~/.bundle
     target: $env.cache_root/bundle
 
   # Rust cargo package manager
-  - type: rust-cargo
+  - id: rust-cargo
+    type: symbolic_link
     package_manager: cargo
     source: ~/.cargo
     target: $env.cache_root/cargo
 
   # global clangd cache `~/.cache/clangd`
-  - type: clangd-cache
+  - id: clangd-cache
+    type: symbolic_link
     source: ~/.cache/clangd
     target: $env.cache_root/clangd
 
   # PHP Composer
-  - type: php-composer
+  - id: php-composer
+    type: symbolic_link
     package_manager: composer
     source: ~/.cache/composer
     target: $env.cache_root/composer
 
   # Dart Language Server
-  - type: dart-lsp
+  - id: dart-lsp
+    type: symbolic_link
     source: ~/.dartServer
     target: $env.cache_root/dartServer
 
   # D dub package manager
-  - type: d-dub
+  - id: d-dub
+    type: symbolic_link
     source: ~/.dub
     target: $env.cache_root/dub
 
   # `~/.go` cache
-  - type: go-cache
+  - id: go-cache
+    type: symbolic_link
     source: ~/.go
     target: $env.cache_root/go
 
   # go build cache
-  - type: go-build-cache
+  - id: go-build-cache
+    type: symbolic_link
     package_manager: go
     source: ~/.cache/go-build
     target: $env.cache_root/go-build
 
   # Gradle cache
-  - type: gradle
+  - id: gradle
+    type: symbolic_link
     source: ~/.gradle
     target: $env.cache_root/gradle
 
   # Apache Maven cache
-  - type: maven
+  - id: maven
+    type: symbolic_link
     source: ~/.m2
     target: $env.cache_root/m2
 
   # Node development headers for building native extensions
-  - type: node-gyp
+  - id: node-gyp
+    type: symbolic_link
     source: ~/.node-gyp
     target: $env.cache_root/node-gyp
 
   # Node package manager
-  - type: node-npm
+  - id: node-npm
+    type: symbolic_link
     package_manager: npm
     source: ~/.npm
     target: $env.cache_root/npm
 
   # Dart pub package manager
-  - type: dart-pub
+  - id: dart-pub
+    type: symbolic_link
     package_manager: pub
     source: ~/.pub-cache
     target: $env.cache_root/pub-cache
 
   # Zig compiler cache
-  - type: zig-cache
+  - id: zig-cache
+    type: symbolic_link
     source: ~/.cache/zig
     target: $env.cache_root/zig
 
   # Zig language server
-  - type: zig-lsp
+  - id: zig-lsp
+    type: symbolic_link
     source: ~/.cache/zls
     target: $env.cache_root/zls
 
   # standalone cache directory example
-  - type: example-standalone
+  - id: example-standalone
+    type: standalone
     package_manager: invalid
     target: $env.cache_root/standalone_cache
+
+  # wildcard example
+  - id: clangd-pch-cache
+    type: wildcard
+    target: /tmp/preamble-*.pch

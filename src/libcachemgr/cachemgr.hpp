@@ -96,20 +96,6 @@ public:
     virtual ~cachemgr_t();
 
     /**
-     * Type of the cache directory.
-     */
-    enum class directory_type_t : unsigned {
-        /// symbolic link to a directory
-        symbolic_link = 0,
-        /// bind mount
-        bind_mount = 1,
-        /// standalone cache target without source directory
-        standalone = 2,
-        /// wildcard match without target directory
-        wildcard = 3,
-    };
-
-    /**
      * Controls the sorting behavior of the {sorted_mapped_cache_directories} method.
      */
     enum class sort_behavior : unsigned
@@ -130,7 +116,7 @@ public:
         /**
          * The type of the cache directory {original_path}.
          */
-        const directory_type_t directory_type;
+        const libcachemgr::directory_type_t directory_type;
 
         /**
          * The original path, which should be a symbolic link or bind mount.

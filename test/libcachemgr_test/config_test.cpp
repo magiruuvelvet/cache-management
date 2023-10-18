@@ -18,7 +18,7 @@ TEST_CASE("parse config file", tag_name_config) {
         REQUIRE(file_error == configuration_t::file_error::no_error);
         REQUIRE(parse_error == configuration_t::parse_error::no_error);
 
-        REQUIRE(config.cache_mappings().size() == 16);
+        REQUIRE(config.cache_mappings().size() == 17);
 
         const auto home_dir = os_utils::get_home_directory();
         const auto uid = os_utils::get_user_id();
@@ -44,15 +44,15 @@ TEST_CASE("parse config file", tag_name_config) {
         REQUIRE(config.find_cache_mapping("example-standalone") != nullptr);
 
         const auto assert_cache_mapping = [&config](
-            const std::string &type,
+            const std::string &id,
             const std::string &normalized_source,
             const std::string &normalized_target,
             bool must_have_pm = false, std::string_view pm_name = {})
         {
-            const auto cache_mapping = config.find_cache_mapping(type);
+            const auto cache_mapping = config.find_cache_mapping(id);
 
             REQUIRE(cache_mapping != nullptr);
-            REQUIRE(cache_mapping->type == type);
+            REQUIRE(cache_mapping->id == id);
             REQUIRE(cache_mapping->source == normalized_source);
             REQUIRE(cache_mapping->target == normalized_target);
             REQUIRE(bool{cache_mapping->package_manager} == must_have_pm);

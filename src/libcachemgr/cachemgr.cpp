@@ -11,6 +11,8 @@
 
 namespace fs = std::filesystem;
 
+using libcachemgr::directory_type_t;
+
 cachemgr_t::cachemgr_t()
 {
 }
@@ -93,7 +95,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                 compare_results.add_result(cache_mappings_compare_result_t{
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
-                        .type = mapping.type,
+                        .id = mapping.id,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = symlink_target,
@@ -101,7 +103,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
-                        .type = mapping.type,
+                        .id = mapping.id,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
@@ -134,7 +136,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                 compare_results.add_result(cache_mappings_compare_result_t{
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
-                        .type = mapping.type,
+                        .id = mapping.id,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.source,
@@ -142,7 +144,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
-                        .type = mapping.type,
+                        .id = mapping.id,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,
@@ -184,7 +186,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
             compare_results.add_result(cache_mappings_compare_result_t{
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
-                        .type = mapping.type,
+                        .id = mapping.id,
                         .package_manager = mapping.package_manager,
                         .source = {},
                         .target = {},
@@ -192,7 +194,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     },
                     // cache directory expected to be this
                     .expected = libcachemgr::cache_mapping_t{
-                        .type = mapping.type,
+                        .id = mapping.id,
                         .package_manager = mapping.package_manager,
                         .source = mapping.source,
                         .target = mapping.target,

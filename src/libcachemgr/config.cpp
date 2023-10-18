@@ -53,6 +53,7 @@ namespace {
     ///   - source: original cache location
     ///     target: symlinked cache location inside the compressed filesystem
     constexpr const char *key_seq_cache_mappings = "cache_mappings";
+    constexpr const char *key_str_id = "id";
     constexpr const char *key_str_type = "type";
     constexpr const char *key_str_package_manager = "package_manager";
     constexpr const char *key_str_source = "source";
@@ -256,23 +257,24 @@ libcachemgr::configuration_t::configuration_t(
         if (cache_mapping.is_map())
         {
             // get a reference to all required keys
+            const auto id = get_value(key_str_id);
             const auto type = get_value(key_str_type);
             const auto package_manager = get_value(key_str_package_manager);
             const auto source = get_value(key_str_source);
             const auto target = get_value(key_str_target);
 
             LOG_DEBUG(libcachemgr::log_config,
-                "found cache_mapping: source='{}', target='{}', type='{}'",
-                source, target, type);
+                "found cache_mapping: source='{}', target='{}', type='{}', id='{}'",
+                source, target, type, id);
 
-            // the target is always required, log it as such
-            if (target.empty())
-            {
-                LOG_ERROR(libcachemgr::log_config,
-                    "the cache mapping at position {} is missing the required key '{}'.",
-                    i, key_str_target);
-                if (parse_error != nullptr) { *parse_error = parse_error::missing_key; }
+            // check for mandatory keys in the cache mapping entry
+            error_collection = {
+                validate_key_in_node(key_seq_cache_mappings, cache_mapping, key_str_type, key_type::string, true),
+                validate_key_in_node(key_seq_cache_mappings, cache_mapping, key_str_target, key_type::string, true),
+            };
 
+            // if any of the mandatory keys are missing, abort
+            if (has_any_errors()) {
                 // clear previously added cache mappings and abort
                 this->_cache_mappings.clear();
                 return;
@@ -296,7 +298,7 @@ libcachemgr::configuration_t::configuration_t(
 
             // add the cache mapping to the list of cache mappings (copy values)
             this->_cache_mappings.emplace_back(cache_mapping_t{
-                .type = std::string{type},
+                .id = std::string{id},
                 .package_manager = libcachemgr::package_manager_t(pm),
                 .source = parse_path(std::string{source}),
                 .target = parse_path(std::string{target}),
@@ -312,11 +314,11 @@ libcachemgr::configuration_t::configuration_t(
 }
 
 const libcachemgr::configuration_t::cache_mapping_t *libcachemgr::configuration_t::find_cache_mapping(
-    const std::string &type) const noexcept
+    const std::string &id) const noexcept
 {
     for (const auto &cache_mapping : this->_cache_mappings)
     {
-        if (cache_mapping.type == type)
+        if (cache_mapping.id == id)
         {
             return &cache_mapping;
         }

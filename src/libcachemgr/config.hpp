@@ -83,10 +83,10 @@ public:
      *
      * **Note:** Pointers returned by this method are only valid for the lifetime of the {configuration_t} instance.
      *
-     * @param type the type of the cache mapping to find
+     * @param id the id of the cache mapping to find
      * @return the found cache mapping, or nullptr if not found
      */
-    const cache_mapping_t *find_cache_mapping(const std::string &type) const noexcept;
+    const cache_mapping_t *find_cache_mapping(const std::string &id) const noexcept;
 
 private:
     /**

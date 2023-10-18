@@ -101,7 +101,7 @@ static int cachemgr_cli()
     {
         fmt::print("Calculating usage statistics...\n");
 
-        using directory_type = cachemgr_t::directory_type_t;
+        using libcachemgr::directory_type_t;
 
         std::uintmax_t total_size = 0;
 
@@ -125,7 +125,7 @@ static int cachemgr_cli()
             }
 
             // only obtain used disk space if the target path is not empty
-            if (dir.target_path.size() > 0 && dir.directory_type != directory_type::wildcard)
+            if (dir.target_path.size() > 0 && dir.directory_type != directory_type_t::wildcard)
             {
                 const auto dir_size = get_used_disk_space_of_safe(dir.target_path);
                 total_size += dir_size;
@@ -149,7 +149,7 @@ static int cachemgr_cli()
         for (const auto &dir : cachemgr.sorted_mapped_cache_directories())
         {
             const auto separator = dir->directory_type ==
-                directory_type::standalone || dir->directory_type == directory_type::wildcard ?
+                directory_type_t::standalone || dir->directory_type == directory_type_t::wildcard ?
                 "  " : "->";
             fmt::print("{:<{}} {} {:<{}} : {:>8} ({} bytes)\n",
                 dir->original_path, max_length_of_source_path,
