@@ -86,6 +86,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
             }
             else if (ec_is_symlink)
             {
+                is_valid = false;
                 LOG_WARNING(libcachemgr::log_cachemgr,
                     "(is_symlink) failed to stat file '{}': {}", mapping.source, ec_is_symlink);
             }
@@ -121,13 +122,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .target = symlink_target,
                     },
                     // cache directory expected to be this
-                    .expected = libcachemgr::cache_mapping_t{
-                        .id = mapping.id,
-                        .type = mapping.type,
-                        .package_manager = mapping.package_manager,
-                        .source = mapping.source,
-                        .target = mapping.target,
-                    },
+                    .expected = libcachemgr::cache_mapping_t(mapping),
                 });
             }
             else
@@ -183,13 +178,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .target = mapping.source,
                     },
                     // cache directory expected to be this
-                    .expected = libcachemgr::cache_mapping_t{
-                        .id = mapping.id,
-                        .type = mapping.type,
-                        .package_manager = mapping.package_manager,
-                        .source = mapping.source,
-                        .target = mapping.target,
-                    },
+                    .expected = libcachemgr::cache_mapping_t(mapping),
                 });
             }
             else
