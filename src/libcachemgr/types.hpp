@@ -80,6 +80,11 @@ struct mapped_cache_directory_t
     const std::list<std::string> resolved_source_files;
 
     /**
+     * The original wildcard pattern which was used to build the list of resolved source files.
+     */
+    const std::string wildcard_pattern;
+
+    /**
      * The size on disk of the target directory {target_path}.
      * This property can be mutated in const contexts.
      */

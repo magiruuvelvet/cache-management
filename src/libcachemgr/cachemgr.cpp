@@ -63,9 +63,10 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                     .directory_type = directory_type_t::wildcard,
                     // wildcard patterns don't have an original path and are similar to standalone directories
                     .original_path = {},
-                    .target_path = mapping.target, // preserve the wildcard pattern
+                    .target_path = {}, // remove the target path as it is not technically a valid path
                     .package_manager = mapping.package_manager,
                     .resolved_source_files = resolved_files,
+                    .wildcard_pattern = mapping.target, // preserve the wildcard pattern
                 });
             }
         }
