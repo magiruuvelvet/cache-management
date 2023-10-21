@@ -14,6 +14,9 @@ option(CATCH_INSTALL_DOCS "" OFF)
 option(CATCH_INSTALL_EXTRAS "" OFF)
 option(CATCH_DEVELOPMENT_BUILD "" OFF)
 add_subdirectory(Catch2 EXCLUDE_FROM_ALL SYSTEM)
+target_precompile_headers(Catch2 PUBLIC
+    "$<$<COMPILE_LANGUAGE:CXX>:<catch2/catch_test_macros.hpp$<ANGLE-R>>"
+)
 
 # {fmt} (MIT)
 option(FMT_INSTALL "" OFF)
