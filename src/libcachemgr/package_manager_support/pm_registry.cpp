@@ -14,7 +14,6 @@ namespace {
 
 static pm_registry::pm_registry_t _pm_registry{};
 static pm_registry::pm_user_registry_t _pm_user_registry{};
-static pm_base::pm_name_type::size_type _pm_name_max_length{0};
 
 /// concept which checks if the type is a base of pm_base
 template<typename T>
@@ -27,21 +26,26 @@ inline constexpr void register_package_manager()
     _pm_registry[T().pm_name()] = std::make_unique<T>();
 }
 
-template<is_package_manager T>
-inline constexpr void determine_pm_name_max_length()
+template<is_package_manager... T>
+inline consteval pm_base::pm_name_type::size_type determine_pm_name_max_length()
 {
-    if (T().pm_name().length() > _pm_name_max_length)
-    {
-        _pm_name_max_length = T().pm_name().length();
-    }
+    return std::max({T().pm_name().length()...});
 }
 
 template<is_package_manager... T>
 inline constexpr void register_package_managers()
 {
     (register_package_manager<T>(), ...);
-    (determine_pm_name_max_length<T>(), ...);
 }
+
+/// determine the longest package manager name at compile time
+static constexpr pm_base::pm_name_type::size_type _pm_name_max_length = determine_pm_name_max_length<
+    cargo,
+    composer,
+    go,
+    npm,
+    pub
+>();
 
 /// register all package managers before main()
 static const bool _pm_registry_init = [](){
