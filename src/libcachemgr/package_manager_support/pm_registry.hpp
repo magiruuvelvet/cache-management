@@ -18,6 +18,9 @@ public:
     /// get the package manager registry
     static const pm_registry_t &registry() noexcept;
 
+    /// get the length of the package manager with the longest name in the registry
+    static const pm_base::pm_name_type::size_type pm_name_max_length() noexcept;
+
     /// finds the package manager with the given name or returns nullptr
     static const pm_base *const find_package_manager(std::string_view name) noexcept;
 
