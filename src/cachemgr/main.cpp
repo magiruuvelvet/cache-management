@@ -48,7 +48,7 @@ static std::uintmax_t get_used_disk_space_of_safe(const std::string &path)
         log_warning(ec);
     }
 
-    if (std::filesystem::is_regular_file(path, ec))
+    else if (std::filesystem::is_regular_file(path, ec))
     {
         const auto file_size = std::filesystem::file_size(path, ec);
         if (ec)
