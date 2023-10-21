@@ -1,4 +1,5 @@
 #include "config.hpp"
+#include "config_helper.hpp"
 #include "logging.hpp"
 
 #include "package_manager_support/pm_registry.hpp"
@@ -12,28 +13,6 @@
 #include <utils/os_utils.hpp>
 #include <utils/fs_utils.hpp>
 #include <utils/freedesktop/xdg_paths.hpp>
-
-namespace {
-    /// collection of yaml data types for generic validation
-    enum key_type
-    {
-        sequence,
-        map,
-        string,
-    };
-} // anonymous namespace
-
-template<> struct fmt::formatter<key_type> : formatter<string_view> {
-    auto format(key_type key_type, format_context &ctx) const {
-        string_view           name = "key_type::(unknown)";
-        switch (key_type) {
-            case sequence:    name = "key_type::sequence"; break;
-            case map:         name = "key_type::map"; break;
-            case string:      name = "key_type::string"; break;
-        }
-        return formatter<string_view>::format(name, ctx);
-    }
-};
 
 /**
  * Notes on the YAML parser used:
@@ -63,6 +42,8 @@ namespace {
 libcachemgr::configuration_t::configuration_t(
     const std::string &config_file, file_error *file_error, parse_error *parse_error) noexcept
 {
+    using namespace libcachemgr::detail;
+
     // assume no errors at the beginning
     if (file_error != nullptr) { *file_error = file_error::no_error; }
     if (parse_error != nullptr) { *parse_error = parse_error::no_error; }
@@ -126,14 +107,7 @@ libcachemgr::configuration_t::configuration_t(
         }
 
         // validate the datatype of the key
-        bool has_expected_type = false;
-        switch (expected_type)
-        {
-            case sequence: has_expected_type = tree[key].is_seq(); break;
-            case map:      has_expected_type = tree[key].is_map(); break;
-            case string:   has_expected_type = tree[key].is_keyval(); break;
-        }
-        if (!has_expected_type)
+        if (!detail::validate_expected_type(tree, key, expected_type))
         {
             LOG_ERROR(libcachemgr::log_config, "expected key='{}' to be of type {}, but found {} instead",
                 key, expected_type, tree[key].type_str());
@@ -164,14 +138,7 @@ libcachemgr::configuration_t::configuration_t(
         }
 
         // validate the datatype of the key
-        bool has_expected_type = false;
-        switch (expected_type)
-        {
-            case sequence: has_expected_type = node_ref[key].is_seq(); break;
-            case map:      has_expected_type = node_ref[key].is_map(); break;
-            case string:   has_expected_type = node_ref[key].is_keyval(); break;
-        }
-        if (!has_expected_type)
+        if (!detail::validate_expected_type(node_ref, key, expected_type))
         {
             LOG_ERROR(libcachemgr::log_config, "expected key='{}.{}' to be of type {}, but found {} instead",
                 node_name, key, expected_type, node_ref[key].type_str());

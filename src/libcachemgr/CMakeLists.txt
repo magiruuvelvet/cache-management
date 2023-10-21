@@ -4,6 +4,7 @@ set(libcachemgr_shared_sources
     fs_watcher/fs_watcher.hpp
     cachemgr.cpp
     cachemgr.hpp
+    config_helper.hpp
     config.cpp
     config.hpp
     libcachemgr.cpp
