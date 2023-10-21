@@ -87,8 +87,7 @@ libcachemgr::configuration_t::configuration_t(
     const ryml::Tree tree = ryml::parse_in_arena(buffer.c_str());
 
     /// helper function to check if a given key with the correct data type exists
-    // FIXME: simplify this whole process (the developer of rapidyaml has a library for yaml-based configurations)
-    // see https://github.com/biojppm/c4conf
+    // FIXME: simplify this whole process
     const auto validate_key = [&tree, &parse_error]
         (const char *key, key_type expected_type, bool is_key_required) -> bool {
 
@@ -162,12 +161,9 @@ libcachemgr::configuration_t::configuration_t(
         return true;
     };
 
+    // collect errors to determine if parsing was successful
+    // collect as many errors as possible before aborting to make the user experience better
     std::list<bool> error_collection;
-    const auto has_any_errors = [&error_collection]{
-        return std::any_of(error_collection.cbegin(), error_collection.cend(), [](bool success){
-            return !success;
-        });
-    };
 
     // check for mandatory keys, report as many errors as possible at once to the user
     error_collection = {
@@ -176,7 +172,7 @@ libcachemgr::configuration_t::configuration_t(
     };
 
     // if any of the mandatory keys are missing, abort
-    if (has_any_errors()) {
+    if (detail::has_any_errors(error_collection)) {
         return;
     }
 
@@ -189,13 +185,15 @@ libcachemgr::configuration_t::configuration_t(
     };
 
     // if any of the mandatory keys are missing, abort
-    if (has_any_errors()) {
+    if (detail::has_any_errors(error_collection)) {
         return;
     }
 
     // get the cache root path
-    const auto &cache_root = env[key_str_cache_root].val();
-    this->_env_cache_root = parse_path(std::string(cache_root.str, cache_root.len));
+    {
+        const auto &cache_root = env[key_str_cache_root].val();
+        this->_env_cache_root = parse_path(std::string_view(cache_root.str, cache_root.len));
+    }
 
     // get cache_mappings sequence
     const auto &cache_mappings = tree[key_seq_cache_mappings];
@@ -252,7 +250,7 @@ libcachemgr::configuration_t::configuration_t(
             }
 
             // if any of the mandatory keys are missing, abort
-            if (has_any_errors()) {
+            if (detail::has_any_errors(error_collection)) {
                 // clear previously added cache mappings and abort
                 this->_cache_mappings.clear();
                 return;
@@ -276,8 +274,8 @@ libcachemgr::configuration_t::configuration_t(
                 .id = std::string{id},
                 .type = directory_type_enum,
                 .package_manager = libcachemgr::package_manager_t(pm),
-                .source = parse_path(std::string{source}),
-                .target = parse_path(std::string{target}),
+                .source = parse_path(source),
+                .target = parse_path(target),
             });
         }
         else
@@ -311,9 +309,9 @@ namespace {
     );
 } // anonymous namespace
 
-std::string libcachemgr::configuration_t::parse_path(const std::string &path_with_placeholders) const
+std::string libcachemgr::configuration_t::parse_path(std::string_view path_with_placeholders) const
 {
-    std::string normalized_path = path_with_placeholders;
+    std::string normalized_path(path_with_placeholders);
 
     // values defined here should not change during the lifetime of the process
     static const auto home_dir = os_utils::get_home_directory();

@@ -3,6 +3,7 @@
 #include "types.hpp"
 
 #include <string>
+#include <string_view>
 #include <list>
 
 namespace libcachemgr {
@@ -120,7 +121,7 @@ private:
      * @param path_with_placeholders
      * @return normalized path without placeholders
      */
-    std::string parse_path(const std::string &path_with_placeholders) const;
+    std::string parse_path(std::string_view path_with_placeholders) const;
 
     /**
      * Parses a given string into a {directory_type_t} enum value.

@@ -22,6 +22,14 @@ namespace {
     };
 } // anonymous namespace
 
+template<typename ErrorCollectionType>
+inline auto has_any_errors(const ErrorCollectionType &error_collection) -> bool
+{
+    return std::any_of(error_collection.cbegin(), error_collection.cend(), [](bool success){
+        return !success;
+    });
+};
+
 /// validate the datatype of the key
 template<typename NodeType>
 inline auto validate_expected_type(const NodeType &node_ref, const char *key, key_type expected_type) -> bool
