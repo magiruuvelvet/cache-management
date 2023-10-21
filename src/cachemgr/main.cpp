@@ -107,21 +107,31 @@ static int cachemgr_cli()
 
         // used to pad the output
         using mcd_t = libcachemgr::mapped_cache_directory_t;
-        decltype(mcd_t::original_path)::size_type max_length_of_source_path = 0;
-        decltype(mcd_t::target_path)::size_type max_length_of_target_path = 0;
+        std::string::size_type max_length_of_source_path = 0;
+        std::string::size_type max_length_of_target_path = 0;
+        std::string::size_type max_length_of_display_line = 0;
 
         // collect usage statistics and print the results of individual directories
         for (const auto &dir : cachemgr.mapped_cache_directories())
         {
             LOG_INFO(libcachemgr::log_main, "calculating usage statistics for directory: {}", dir.target_path);
 
-            if (dir.original_path.size() > max_length_of_source_path)
+            // calculate the padding required for pretty printing
+            if (dir.directory_type == directory_type_t::symbolic_link)
             {
-                max_length_of_source_path = dir.original_path.size();
+                if (dir.original_path.size() > max_length_of_source_path)
+                {
+                    max_length_of_source_path = dir.original_path.size();
+                }
+                if (dir.target_path.size() > max_length_of_target_path)
+                {
+                    max_length_of_target_path = dir.target_path.size();
+                }
             }
-            if (dir.target_path.size() > max_length_of_target_path)
+            if (const auto line_display_entry_size = dir.line_display_entry().size();
+                line_display_entry_size > max_length_of_display_line)
             {
-                max_length_of_target_path = dir.target_path.size();
+                max_length_of_display_line = line_display_entry_size;
             }
 
             // only obtain used disk space if the target path is not empty
@@ -148,13 +158,20 @@ static int cachemgr_cli()
         }
         for (const auto &dir : cachemgr.sorted_mapped_cache_directories())
         {
-            const auto separator = dir->directory_type ==
-                directory_type_t::standalone || dir->directory_type == directory_type_t::wildcard ?
-                "  " : "->";
-            fmt::print("{:<{}} {} {:<{}} : {:>8} ({} bytes)\n",
-                dir->original_path, max_length_of_source_path,
-                separator,
-                dir->target_path, max_length_of_target_path,
+            std::string line_display_entry;
+            if (dir->directory_type == directory_type_t::symbolic_link)
+            {
+                line_display_entry = fmt::format("{}",
+                    dir->line_display_entry(max_length_of_source_path, max_length_of_target_path));
+            }
+            else
+            {
+                line_display_entry = fmt::format("{}",
+                    dir->line_display_entry(max_length_of_display_line + 2));
+            }
+
+            fmt::print("{} : {:>8} ({} bytes)\n",
+                line_display_entry,
                 human_readable_file_size{dir->disk_size}, dir->disk_size);
         }
 

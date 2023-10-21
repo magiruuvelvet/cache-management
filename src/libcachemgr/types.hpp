@@ -3,6 +3,8 @@
 #include <string>
 #include <list>
 
+#include <fmt/format.h>
+
 #include "package_manager_support/pm_base.hpp"
 
 namespace libcachemgr {
@@ -107,6 +109,33 @@ struct mapped_cache_directory_t
     inline constexpr bool has_wildcard_matches() const {
         return this->directory_type == libcachemgr::directory_type_t::wildcard &&
             this->resolved_source_files.size() > 0;
+    }
+
+    /**
+     * Returns a string optimized for printing to a terminal.
+     *
+     * The padding can be configured with the two padding parameters.
+     * Both paddings default to 0.
+     */
+    inline constexpr std::string line_display_entry(
+        unsigned original_path_padding = 0, unsigned target_path_padding = 0) const
+    {
+        if (this->directory_type == libcachemgr::directory_type_t::symbolic_link)
+        {
+            return fmt::format("{:<{}} -> {:<{}}",
+                this->original_path, original_path_padding,
+                this->target_path, target_path_padding);
+        }
+        else if (this->directory_type == libcachemgr::directory_type_t::wildcard)
+        {
+            return fmt::format("{:<{}}",
+                this->wildcard_pattern, original_path_padding);
+        }
+        else
+        {
+            return fmt::format("{:<{}}",
+                this->target_path, original_path_padding);
+        }
     }
 };
 
