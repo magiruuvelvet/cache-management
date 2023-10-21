@@ -194,10 +194,10 @@ static int cachemgr_cli()
         using pm_base = libcachemgr::package_manager_support::pm_base;
         using pm_registry = libcachemgr::package_manager_support::pm_registry;
 
-        for (const auto &pm : pm_registry::user_registry())
+        for (const auto &[_, pm] : pm_registry::user_registry())
         {
             // get the current contextual cache directory from the package manager
-            const auto cache_directory_path = pm.second->get_cache_directory_path();
+            const auto cache_directory_path = pm->get_cache_directory_path();
 
             std::error_code ec;
             std::string symlink_target, separator{"  "};
@@ -217,13 +217,13 @@ static int cachemgr_cli()
             if (symlink_target.empty())
             {
                 fmt::print("{:<{}} : {}\n",
-                    pm.second->pm_name(), pm_registry::pm_name_max_length(),
+                    pm->pm_name(), pm_registry::pm_name_max_length(),
                     cache_directory_path);
             }
             else
             {
                 fmt::print("{:<{}} : {} {} {}\n",
-                    pm.second->pm_name(), pm_registry::pm_name_max_length(),
+                    pm->pm_name(), pm_registry::pm_name_max_length(),
                     cache_directory_path,
                     separator, symlink_target);
             }
