@@ -194,15 +194,6 @@ static int cachemgr_cli()
         using pm_base = libcachemgr::package_manager_support::pm_base;
         using pm_registry = libcachemgr::package_manager_support::pm_registry;
 
-        pm_base::pm_name_type::size_type max_length_of_package_manager = 0;
-
-        for (const auto &pm : pm_registry::user_registry())
-        {
-            if (pm.first.size() > max_length_of_package_manager)
-            {
-                max_length_of_package_manager = pm.first.size();
-            }
-        }
         for (const auto &pm : pm_registry::user_registry())
         {
             // get the current contextual cache directory from the package manager
@@ -226,13 +217,13 @@ static int cachemgr_cli()
             if (symlink_target.empty())
             {
                 fmt::print("{:<{}} : {}\n",
-                    pm.second->pm_name(), max_length_of_package_manager,
+                    pm.second->pm_name(), pm_registry::pm_name_max_length(),
                     cache_directory_path);
             }
             else
             {
                 fmt::print("{:<{}} : {} {} {}\n",
-                    pm.second->pm_name(), max_length_of_package_manager,
+                    pm.second->pm_name(), pm_registry::pm_name_max_length(),
                     cache_directory_path,
                     separator, symlink_target);
             }
