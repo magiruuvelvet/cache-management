@@ -44,9 +44,6 @@ enum class directory_type_t : unsigned
     standalone = 2,
     /// wildcard match without target directory
     wildcard = 3,
-
-    /// invalid value
-    invalid = 255,
 };
 
 /**

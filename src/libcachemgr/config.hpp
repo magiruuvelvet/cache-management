@@ -126,9 +126,10 @@ private:
      * Parses a given string into a {directory_type_t} enum value.
      *
      * @param directory_type the name of the directory type
+     * @param error will be true if the given string is not a valid directory type
      * @return corresponding enum value
      */
-    directory_type_t parse_directory_type(std::string_view directory_type) const;
+    directory_type_t parse_directory_type(std::string_view directory_type, bool &error) const;
 
     /**
      * Root directory where caches are stored.

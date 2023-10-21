@@ -274,8 +274,9 @@ libcachemgr::configuration_t::configuration_t(
             };
 
             // parse the directory type of the cache mapping entry
-            const auto directory_type_enum = parse_directory_type(type);
-            if (directory_type_enum == libcachemgr::directory_type_t::invalid)
+            bool error;
+            const auto directory_type_enum = parse_directory_type(type, error);
+            if (error)
             {
                 LOG_ERROR(libcachemgr::log_config,
                     "invalid type '{}' for entry at position {}",
@@ -385,8 +386,11 @@ std::string libcachemgr::configuration_t::parse_path(const std::string &path_wit
     return normalized_path;
 }
 
-libcachemgr::directory_type_t libcachemgr::configuration_t::parse_directory_type(std::string_view directory_type) const
+libcachemgr::directory_type_t libcachemgr::configuration_t::parse_directory_type(
+    std::string_view directory_type, bool &error) const
 {
+    error = false;
+
     if (directory_type == "symbolic_link")
     {
         return directory_type_t::symbolic_link;
@@ -405,6 +409,7 @@ libcachemgr::directory_type_t libcachemgr::configuration_t::parse_directory_type
     }
     else
     {
-        return directory_type_t::invalid;
+        error = true;
+        return {}; // default initialized enum, should never be used
     }
 }
