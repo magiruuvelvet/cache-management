@@ -5,29 +5,30 @@ Because your storage is not free real estate.
 
 *I highly recommend reading the [Concept Document](./CONCEPT.md) on why this utility exists.*
 
-Example output ([*commit*](https://github.com/magiruuvelvet/cache-management/commit/243093e75a3692cf538521fbe834cefbb74e9865))
+Example output ([*commit*](https://github.com/magiruuvelvet/cache-management/commit/ec156a06cb2ee1a4ff5a8d221e010154e072bb82))
 
 ```
 Calculating usage statistics...
-/home/magiruuvelvet/.gradle         -> /caches/1000/gradle       :   4.26GB (4256997698 bytes)
-                                       /caches/1000/node_modules :   1.74GB (1742599173 bytes)
-/home/magiruuvelvet/.npm            -> /caches/1000/npm          : 293.63MB (293625259 bytes)
-/home/magiruuvelvet/.pub-cache      -> /caches/1000/pub-cache    : 247.70MB (247702518 bytes)
-/home/magiruuvelvet/.cargo          -> /caches/1000/cargo        : 191.27MB (191267914 bytes)
-/home/magiruuvelvet/.dartServer     -> /caches/1000/dartServer   : 180.35MB (180354868 bytes)
-/home/magiruuvelvet/.m2             -> /caches/1000/m2           : 106.89MB (106892892 bytes)
-                                       /caches/1000/cmake        :  23.09MB (23085920 bytes)
-/home/magiruuvelvet/.node-gyp       -> /caches/1000/node-gyp     :  12.23MB (12230361 bytes)
-/home/magiruuvelvet/.cache/composer -> /caches/1000/composer     :      13B (13 bytes)
-/home/magiruuvelvet/.bundle         -> /caches/1000/bundle       :       0B (0 bytes)
-/home/magiruuvelvet/.cache/clangd   -> /caches/1000/clangd       :       0B (0 bytes)
-/home/magiruuvelvet/.dub            -> /caches/1000/dub          :       0B (0 bytes)
-/home/magiruuvelvet/.go             -> /caches/1000/go           :       0B (0 bytes)
-/home/magiruuvelvet/.cache/go-build -> /caches/1000/go-build     :       0B (0 bytes)
-/home/magiruuvelvet/.cache/zig      -> /caches/1000/zig          :       0B (0 bytes)
-/home/magiruuvelvet/.cache/zls      -> /caches/1000/zls          :       0B (0 bytes)
-                                                      total size :   7.05GB (7054756616 bytes)
-                                   available space on cache root :  28.76GB (28759629824 bytes)
+/home/magiruuvelvet/.gradle         -> /caches/1000/gradle     :   4.79GB (4791587980 bytes)
+/caches/1000/node_modules                                      :   1.74GB (1742599173 bytes)
+/home/magiruuvelvet/.npm            -> /caches/1000/npm        : 299.15MB (299146736 bytes)
+/home/magiruuvelvet/.pub-cache      -> /caches/1000/pub-cache  : 282.39MB (282389093 bytes)
+/home/magiruuvelvet/.dartServer     -> /caches/1000/dartServer : 216.64MB (216636701 bytes)
+/tmp/preamble-*.pch                                            : 210.98MB (210975016 bytes)
+/home/magiruuvelvet/.cargo          -> /caches/1000/cargo      : 191.27MB (191267914 bytes)
+/home/magiruuvelvet/.m2             -> /caches/1000/m2         : 106.89MB (106892892 bytes)
+/caches/1000/cmake                                             :  23.10MB (23098756 bytes)
+/home/magiruuvelvet/.node-gyp       -> /caches/1000/node-gyp   :  12.23MB (12230361 bytes)
+/home/magiruuvelvet/.cache/composer -> /caches/1000/composer   :      13B (13 bytes)
+/home/magiruuvelvet/.bundle         -> /caches/1000/bundle     :       0B (0 bytes)
+/home/magiruuvelvet/.cache/clangd   -> /caches/1000/clangd     :       0B (0 bytes)
+/home/magiruuvelvet/.dub            -> /caches/1000/dub        :       0B (0 bytes)
+/home/magiruuvelvet/.go             -> /caches/1000/go         :       0B (0 bytes)
+/home/magiruuvelvet/.cache/go-build -> /caches/1000/go-build   :       0B (0 bytes)
+/home/magiruuvelvet/.cache/zig      -> /caches/1000/zig        :       0B (0 bytes)
+/home/magiruuvelvet/.cache/zls      -> /caches/1000/zls        :       0B (0 bytes)
+                                                    total size :   7.88GB (7876824635 bytes)
+                                 available space on cache root :  28.28GB (28276158464 bytes)
 ```
 
 ## Requirements
