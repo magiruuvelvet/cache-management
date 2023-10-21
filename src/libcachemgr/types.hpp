@@ -50,20 +50,62 @@ enum class directory_type_t : unsigned
 };
 
 /**
- * Represents a cache mapping in the configuration file.
+ * Structure containing information about a cache directory mapping.
  */
-struct cache_mapping_t final
+struct mapped_cache_directory_t
 {
-    const std::string id; // unused for now, type might change in the future
-    const directory_type_t type;
-    const package_manager_t package_manager;
-    const std::string source;
-    const std::string target;
-};
+    /**
+     * The type of the cache directory {original_path}.
+     */
+    const libcachemgr::directory_type_t directory_type;
 
-/**
- * List of cache mappings in the configuration file.
- */
-using cache_mappings_t = std::list<cache_mapping_t>;
+    /**
+     * The original path, which should be a symbolic link or bind mount.
+     */
+    const std::string original_path;
+
+    /**
+     * The target directory of the symbolic link or bind mount.
+     */
+    const std::string target_path;
+
+    /**
+     * Read-only pointer to the corresponding package manager.
+     */
+    const libcachemgr::package_manager_t package_manager;
+
+    /**
+     * List of resolved source files when wildcard matching is used.
+     */
+    const std::list<std::string> resolved_source_files;
+
+    /**
+     * The size on disk of the target directory {target_path}.
+     * This property can be mutated in const contexts.
+     */
+    mutable std::uintmax_t disk_size{0};
+
+    // Implementation details:
+    //  - use inclusive matching only for directory types
+
+    /**
+     * Checks if the mapping has a target directory.
+     */
+    inline constexpr bool has_target_directory() const {
+        return (
+            this->directory_type == libcachemgr::directory_type_t::symbolic_link ||
+            this->directory_type == libcachemgr::directory_type_t::bind_mount ||
+            this->directory_type == libcachemgr::directory_type_t::standalone
+        ) && this->target_path.size() > 0;
+    }
+
+    /**
+     * Checks if the mapping has wildcard matches.
+     */
+    inline constexpr bool has_wildcard_matches() const {
+        return this->directory_type == libcachemgr::directory_type_t::wildcard &&
+            this->resolved_source_files.size() > 0;
+    }
+};
 
 } // namespace libcachemgr

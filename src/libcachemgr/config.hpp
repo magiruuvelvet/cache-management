@@ -13,9 +13,22 @@ namespace libcachemgr {
 class configuration_t final
 {
 public:
-    // forward declarations
-    using cache_mapping_t = libcachemgr::cache_mapping_t;
-    using cache_mappings_t = libcachemgr::cache_mappings_t;
+    /**
+     * Represents a cache mapping in the configuration file.
+     */
+    struct cache_mapping_t final
+    {
+        const std::string id; // unused for now, type might change in the future
+        const directory_type_t type;
+        const package_manager_t package_manager;
+        const std::string source;
+        const std::string target;
+    };
+
+    /**
+     * List of cache mappings in the configuration file.
+     */
+    using cache_mappings_t = std::list<cache_mapping_t>;
 
     /**
      * Possible error codes related to file handling.

@@ -106,7 +106,7 @@ static int cachemgr_cli()
         std::uintmax_t total_size = 0;
 
         // used to pad the output
-        using mcd_t = cachemgr_t::mapped_cache_directory_t;
+        using mcd_t = libcachemgr::mapped_cache_directory_t;
         decltype(mcd_t::original_path)::size_type max_length_of_source_path = 0;
         decltype(mcd_t::target_path)::size_type max_length_of_target_path = 0;
 
@@ -125,14 +125,14 @@ static int cachemgr_cli()
             }
 
             // only obtain used disk space if the target path is not empty
-            if (dir.target_path.size() > 0 && dir.directory_type != directory_type_t::wildcard)
+            if (dir.has_target_directory())
             {
                 const auto dir_size = get_used_disk_space_of_safe(dir.target_path);
                 total_size += dir_size;
                 dir.disk_size = dir_size;
             }
             // obtain used disk space for a list of source files
-            else if (dir.resolved_source_files.size() > 0)
+            else if (dir.has_wildcard_matches())
             {
                 for (const auto &source_file : dir.resolved_source_files)
                 {

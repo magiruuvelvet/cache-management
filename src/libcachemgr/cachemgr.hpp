@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.hpp"
+#include "config.hpp"
 #include "package_manager_support/pm_base.hpp"
 
 #include <string>
@@ -28,9 +29,9 @@ public:
         struct cache_mappings_compare_result_t
         {
             /// the actual cache mapping, as found by the cache manager.
-            const libcachemgr::cache_mapping_t actual;
+            const libcachemgr::configuration_t::cache_mapping_t actual;
             /// the expected cache mapping, as defined by the configuration file.
-            const libcachemgr::cache_mapping_t expected;
+            const libcachemgr::configuration_t::cache_mapping_t expected;
         };
 
         using difference_t = std::list<const cache_mappings_compare_result_t>;
@@ -109,43 +110,6 @@ public:
     };
 
     /**
-     * Structure containing information about a cache directory mapping.
-     */
-    struct mapped_cache_directory_t
-    {
-        /**
-         * The type of the cache directory {original_path}.
-         */
-        const libcachemgr::directory_type_t directory_type;
-
-        /**
-         * The original path, which should be a symbolic link or bind mount.
-         */
-        const std::string original_path;
-
-        /**
-         * The target directory of the symbolic link or bind mount.
-         */
-        const std::string target_path;
-
-        /**
-         * Read-only pointer to the corresponding package manager.
-         */
-        const libcachemgr::package_manager_t package_manager;
-
-        /**
-         * List of resolved source files when wildcard matching is used.
-         */
-        const std::list<std::string> resolved_source_files;
-
-        /**
-         * The size on disk of the target directory {target_path}.
-         * This property can be mutated in const contexts.
-         */
-        mutable std::uintmax_t disk_size{0};
-    };
-
-    /**
      * Finds all configured @p cache_mappings and validates if all of them exist on disk
      * and point to the expected target directories.
      *
@@ -156,12 +120,12 @@ public:
      * @return comparison results (only contains differences)
      */
     cache_mappings_compare_results_t find_mapped_cache_directories(
-        const libcachemgr::cache_mappings_t &cache_mappings) noexcept;
+        const libcachemgr::configuration_t::cache_mappings_t &cache_mappings) noexcept;
 
     /**
      * Returns the mapped cache directories.
      */
-    inline constexpr const std::list<mapped_cache_directory_t> &mapped_cache_directories() const {
+    inline constexpr const std::list<libcachemgr::mapped_cache_directory_t> &mapped_cache_directories() const {
         return this->_mapped_cache_directories;
     }
 
@@ -180,7 +144,7 @@ public:
      *   If {this} goes out of scope, all pointers in this list become dangling and accessing
      *   them results in undefined behavior.
      */
-    const std::list<observer_ptr<mapped_cache_directory_t>> sorted_mapped_cache_directories(
+    const std::list<observer_ptr<libcachemgr::mapped_cache_directory_t>> sorted_mapped_cache_directories(
         sort_behavior sort_behavior = sort_behavior::disk_usage_descending) const noexcept;
 
     /**
@@ -189,12 +153,12 @@ public:
      * @param pm_name the name of the package manager
      * @return pointer to the corresponding cache mapping or nullptr if not found
      */
-    const observer_ptr<mapped_cache_directory_t> find_mapped_cache_directory_for_package_manager(
+    const observer_ptr<libcachemgr::mapped_cache_directory_t> find_mapped_cache_directory_for_package_manager(
         libcachemgr::package_manager_support::pm_base::pm_name_type pm_name) const noexcept;
 
 private:
     /**
      * List of mapped cache directories.
      */
-    std::list<mapped_cache_directory_t> _mapped_cache_directories;
+    std::list<libcachemgr::mapped_cache_directory_t> _mapped_cache_directories;
 };
