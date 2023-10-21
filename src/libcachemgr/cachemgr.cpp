@@ -33,8 +33,6 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
 
     for (const auto &mapping : cache_mappings)
     {
-        std::error_code ec_is_symlink, ec_is_directory;
-
         // empty source means this entry only has a target directory
         if (mapping.type == directory_type_t::standalone)
         {
@@ -78,7 +76,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         else if (mapping.type == directory_type_t::symbolic_link)
         {
             std::string symlink_target;
-            std::error_code ec_read_symlink;
+            std::error_code ec_is_symlink, ec_read_symlink;
             bool is_valid = true;
 
             // source is not a symbolic link
@@ -87,6 +85,11 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                 is_valid = false;
                 LOG_WARNING(libcachemgr::log_cachemgr,
                     "expected source '{}' to be a symbolic link, but it isn't", mapping.source);
+            }
+            else if (ec_is_symlink)
+            {
+                LOG_WARNING(libcachemgr::log_cachemgr,
+                    "(is_symlink) failed to stat file '{}': {}", mapping.source, ec_is_symlink);
             }
             else
             {
@@ -145,6 +148,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         // source must be a directory
         else if (mapping.type == directory_type_t::bind_mount)
         {
+            std::error_code ec_is_directory;
             bool is_valid = true;
 
             // source is not a directory
@@ -153,6 +157,12 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                 is_valid = false;
                 LOG_WARNING(libcachemgr::log_cachemgr,
                     "expected source '{}' to be a directory, but it isn't", mapping.source);
+            }
+            else if (ec_is_directory)
+            {
+                is_valid = false;
+                LOG_WARNING(libcachemgr::log_cachemgr,
+                    "(is_directory) failed to stat file '{}': {}", mapping.source, ec_is_directory);
             }
             else if (!os_utils::is_mount_point(mapping.source))
             {
@@ -202,17 +212,6 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         // source is invalid
         else
         {
-            if (ec_is_symlink)
-            {
-                LOG_WARNING(libcachemgr::log_cachemgr,
-                    "(is_symlink) failed to stat file '{}': {}", mapping.source, ec_is_symlink);
-            }
-            else if (ec_is_directory)
-            {
-                LOG_WARNING(libcachemgr::log_cachemgr,
-                    "(is_directory) failed to stat file '{}': {}", mapping.source, ec_is_directory);
-            }
-
             LOG_WARNING(libcachemgr::log_cachemgr,
                 "source '{}' was not found on disk or is inaccessible, check previous warnings for details",
                 mapping.source);
