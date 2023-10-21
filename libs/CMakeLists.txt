@@ -19,11 +19,19 @@ add_subdirectory(Catch2 EXCLUDE_FROM_ALL SYSTEM)
 option(FMT_INSTALL "" OFF)
 option(FMT_SYSTEM_HEADERS "" ON)
 add_subdirectory(fmt EXCLUDE_FROM_ALL SYSTEM)
+target_precompile_headers(fmt PUBLIC
+    "$<$<COMPILE_LANGUAGE:CXX>:<fmt/core.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<fmt/format.h$<ANGLE-R>>"
+    "$<$<COMPILE_LANGUAGE:CXX>:<fmt/ostream.h$<ANGLE-R>>"
+)
 
 # quill (MIT)
 option(QUILL_FMT_EXTERNAL "" ON)
 option(QUILL_NO_EXCEPTIONS "" OFF) # FIXME: disable exceptions
 add_subdirectory(quill EXCLUDE_FROM_ALL SYSTEM)
+target_precompile_headers(quill PUBLIC
+    "$<$<COMPILE_LANGUAGE:CXX>:<quill/Quill.h$<ANGLE-R>>"
+)
 
 # argparse-cpp (MIT)
 add_subdirectory(argparse-cpp/src EXCLUDE_FROM_ALL SYSTEM)
