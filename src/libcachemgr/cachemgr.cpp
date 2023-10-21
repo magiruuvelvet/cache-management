@@ -43,7 +43,6 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                 .target_path = mapping.target,
                 .package_manager = mapping.package_manager,
             });
-            continue;
         }
 
         // resolve wildcard pattern into a list of files
@@ -57,7 +56,6 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                 LOG_WARNING(libcachemgr::log_cachemgr,
                     "failed to resolve wildcard pattern for target '{}': {}",
                     mapping.target, ec_wildcard_resolve);
-                continue;
             }
             else
             {
@@ -131,7 +129,6 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .target = mapping.target,
                     },
                 });
-                continue;
             }
             else
             {
@@ -194,7 +191,6 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                         .target = mapping.target,
                     },
                 });
-                continue;
             }
             else
             {
