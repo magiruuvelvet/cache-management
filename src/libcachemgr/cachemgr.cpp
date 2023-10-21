@@ -208,33 +208,6 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
                 });
             }
         }
-
-        // source is invalid
-        else
-        {
-            LOG_WARNING(libcachemgr::log_cachemgr,
-                "source '{}' was not found on disk or is inaccessible, check previous warnings for details",
-                mapping.source);
-            compare_results.add_result(cache_mappings_compare_result_t{
-                    // cache directory is actually this
-                    .actual = libcachemgr::cache_mapping_t{
-                        .id = mapping.id,
-                        .type = mapping.type,
-                        .package_manager = mapping.package_manager,
-                        .source = {},
-                        .target = {},
-                    },
-                    // cache directory expected to be this
-                    .expected = libcachemgr::cache_mapping_t{
-                        .id = mapping.id,
-                        .type = mapping.type,
-                        .package_manager = mapping.package_manager,
-                        .source = mapping.source,
-                        .target = mapping.target,
-                    },
-                });
-            continue;
-        }
     }
 
     return compare_results;
