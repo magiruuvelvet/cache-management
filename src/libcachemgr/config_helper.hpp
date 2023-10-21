@@ -4,6 +4,7 @@
 #include "logging.hpp"
 
 #include <string_view>
+#include <algorithm>
 
 #include <fmt/core.h>
 
