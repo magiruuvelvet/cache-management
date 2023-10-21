@@ -151,10 +151,6 @@ static int cachemgr_cli()
                     dir.disk_size += file_size;
                 }
             }
-            else
-            {
-                LOG_ERROR(libcachemgr::log_main, "unreachable code reached");
-            }
         }
         for (const auto &dir : cachemgr.sorted_mapped_cache_directories())
         {
