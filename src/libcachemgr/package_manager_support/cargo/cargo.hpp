@@ -8,7 +8,10 @@ namespace package_manager_support {
 class cargo : public pm_base
 {
 public:
-    pm_name_type pm_name() const;
+    constexpr pm_name_type pm_name() const {
+        return "cargo";
+    }
+
     bool is_cache_directory_configurable() const;
     bool is_cache_directory_symlink_compatible() const;
 

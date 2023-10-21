@@ -50,11 +50,6 @@ std::string find_cache_in_npmrc(std::string_view npmrc_path)
 
 } // anonymous namespace
 
-pm_base::pm_name_type npm::pm_name() const
-{
-    return "npm";
-}
-
 bool npm::is_cache_directory_configurable() const
 {
     return true;

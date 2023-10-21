@@ -12,7 +12,7 @@ namespace package_manager_support {
 class pm_base
 {
 public:
-    pm_base() = default;
+    constexpr pm_base() = default;
     virtual ~pm_base() = default;
 
     /// alias the type of the package manager name (just to be sure)
@@ -21,7 +21,7 @@ public:
     /**
      * The name of the package manager.
      */
-    virtual pm_name_type pm_name() const = 0;
+    virtual constexpr pm_name_type pm_name() const = 0;
 
     /**
      * This method should return whether the package manager allows its

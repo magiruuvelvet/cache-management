@@ -67,11 +67,6 @@ static std::string cache_dir_from_json(std::string_view filename) noexcept
 
 } // anonymous namespace
 
-pm_base::pm_name_type composer::pm_name() const
-{
-    return "composer";
-}
-
 bool composer::is_cache_directory_configurable() const
 {
     return true;

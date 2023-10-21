@@ -4,11 +4,6 @@
 
 using namespace libcachemgr::package_manager_support;
 
-pm_base::pm_name_type cargo::pm_name() const
-{
-    return "cargo";
-}
-
 bool cargo::is_cache_directory_configurable() const
 {
     // TODO: should this really return true? since there is no unified cache directory for cargo

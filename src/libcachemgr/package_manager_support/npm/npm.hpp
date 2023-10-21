@@ -8,7 +8,9 @@ namespace package_manager_support {
 class npm : public pm_base
 {
 public:
-    pm_name_type pm_name() const;
+    constexpr pm_name_type pm_name() const {
+        return "npm";
+    }
 
     /// using a configuration file, see {npmrc_cache_path}
     bool is_cache_directory_configurable() const;

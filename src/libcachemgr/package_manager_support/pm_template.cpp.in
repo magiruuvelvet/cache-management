@@ -5,11 +5,6 @@
 
 using namespace libcachemgr::package_manager_support;
 
-pm_base::pm_name_type your_package_manager::pm_name() const
-{
-    return "your-package-manager";
-}
-
 bool your_package_manager::is_cache_directory_configurable() const
 {
     return true;

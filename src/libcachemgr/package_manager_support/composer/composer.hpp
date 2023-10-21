@@ -8,7 +8,10 @@ namespace package_manager_support {
 class composer : public pm_base
 {
 public:
-    pm_name_type pm_name() const;
+    constexpr pm_name_type pm_name() const {
+        return "composer";
+    }
+
     bool is_cache_directory_configurable() const;
     bool is_cache_directory_symlink_compatible() const;
 
