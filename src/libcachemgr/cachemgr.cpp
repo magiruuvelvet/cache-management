@@ -74,24 +74,42 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
             }
         }
 
-        // source is a symbolic link
-        else if (std::filesystem::is_symlink(mapping.source, ec_is_symlink))
+        // source must be a symbolic link
+        else if (mapping.type == directory_type_t::symbolic_link)
         {
-            // resolve the symbolic link
+            std::string symlink_target;
             std::error_code ec_read_symlink;
-            const std::string symlink_target = fs::read_symlink(mapping.source, ec_read_symlink);
+            bool is_valid = true;
+
+            // source is not a symbolic link
+            if (!std::filesystem::is_symlink(mapping.source, ec_is_symlink))
+            {
+                is_valid = false;
+                LOG_WARNING(libcachemgr::log_cachemgr,
+                    "expected source '{}' to be a symbolic link, but it isn't", mapping.source);
+            }
+            else
+            {
+                // resolve the symbolic link
+                symlink_target = fs::read_symlink(mapping.source, ec_read_symlink);
+            }
 
             if (ec_read_symlink)
             {
+                is_valid = false;
                 LOG_WARNING(libcachemgr::log_cachemgr,
                     "failed to read symbolic link '{}': {}", mapping.source, ec_read_symlink);
             }
-
-            if (symlink_target != mapping.target)
+            else if (symlink_target != mapping.target)
             {
+                is_valid = false;
                 LOG_WARNING(libcachemgr::log_cachemgr,
-                    "expected symlink target for source '{}' to be '{}', but found '{}' instead",
+                    "expected symbolic link target for source '{}' to be '{}', but found '{}' instead",
                     mapping.source, mapping.target, symlink_target);
+            }
+
+            if (!is_valid)
+            {
                 compare_results.add_result(cache_mappings_compare_result_t{
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
@@ -124,15 +142,30 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
             }
         }
 
-        // source is a directory
-        else if (std::filesystem::is_directory(mapping.source, ec_is_directory))
+        // source must be a directory
+        else if (mapping.type == directory_type_t::bind_mount)
         {
-            if (!os_utils::is_mount_point(mapping.source))
+            bool is_valid = true;
+
+            // source is not a directory
+            if (!std::filesystem::is_directory(mapping.source, ec_is_directory))
             {
+                is_valid = false;
+                LOG_WARNING(libcachemgr::log_cachemgr,
+                    "expected source '{}' to be a directory, but it isn't", mapping.source);
+            }
+            else if (!os_utils::is_mount_point(mapping.source))
+            {
+                is_valid = false;
+
                 // expected directory to be a mount point
                 LOG_WARNING(libcachemgr::log_cachemgr,
                     "expected directory '{}' to be a mount point, but found a regular directory instead",
                     mapping.source);
+            }
+
+            if (!is_valid)
+            {
                 compare_results.add_result(cache_mappings_compare_result_t{
                     // cache directory is actually this
                     .actual = libcachemgr::cache_mapping_t{
