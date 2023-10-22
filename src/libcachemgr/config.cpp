@@ -327,7 +327,7 @@ namespace {
      * Regex pattern to match placeholders.
      */
     static const std::regex placeholder_regex(
-        R"((~|%u|%g|\$HOME|\$XDG_CACHE_HOME|\$env\.cache_root))"
+        R"((~|%u|%g|\$HOME|\$XDG_CACHE_HOME|\$CACHE_ROOT))"
     );
 } // anonymous namespace
 
@@ -349,7 +349,7 @@ std::string libcachemgr::configuration_t::parse_path(std::string_view path_with_
         { "%g",              gid                    },
         { "$HOME",           home_env               },
         { "$XDG_CACHE_HOME", xdg_cache_home         },
-        { "$env.cache_root", this->_env_cache_root  },
+        { "$CACHE_ROOT",     this->_env_cache_root  },
     };
 
     // use std::sregex_iterator to find and replace matches
