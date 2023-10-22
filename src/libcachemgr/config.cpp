@@ -209,7 +209,7 @@ libcachemgr::configuration_t::configuration_t(
         ++i;
 
         /// get the value for the requested key in a safe manner.
-        /// if the {cache_mapping} object goes out of scope, the string_view becomes dangling
+        /// if the {tree} object (ryml arena) goes out of scope, the string_view becomes dangling
         const auto get_value = [&cache_mapping](const char *key) -> std::string_view {
             if (cache_mapping.has_child(key))
             {
@@ -241,7 +241,7 @@ libcachemgr::configuration_t::configuration_t(
                 return;
             }
 
-            // register the id in the set
+            // register the id in the set [string_view stays valid until the ryml arena goes out of scope]
             unique_ids.insert(id);
 
             // get a reference to all remaining keys
