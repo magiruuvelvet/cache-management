@@ -11,7 +11,7 @@
 using namespace libcachemgr;
 
 const std::string_view program_metadata::application_name = "cachemgr";
-const std::string_view program_metadata::application_version = "0.7.0";
+const std::string_view program_metadata::application_version = "0.7.1";
 const std::string_view program_metadata::application_version_suffix = "dev";
 const std::string_view program_metadata::platform_name = PROJECT_PLATFORM_NAME;
 
