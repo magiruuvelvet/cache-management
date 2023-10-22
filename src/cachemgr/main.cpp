@@ -243,7 +243,7 @@ static int cachemgr_cli()
         }
         else
         {
-            fmt::print("package manager '{}' not found\n", pm);
+            fmt::print(stderr, "package manager '{}' not found\n", pm);
             return 1;
         }
 
@@ -369,7 +369,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         else
         {
             *abort = true;
-            fmt::print("error: no package manager name specified for option '{}'\n",
+            fmt::print(stderr, "error: no package manager name specified for option '{}'\n",
                 std::string{cli_opt_print_pm_cache_location});
             return 1;
         }
@@ -381,7 +381,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         *abort = true;
         // be extra safe and assume argv[0] can somehow not exist
         const auto prog_name = argc > 0 ? argv[0] : program_metadata::application_name;
-        fmt::print("no valid action specified, please run `{} --help` for available actions\n", prog_name);
+        fmt::print(stderr, "no valid action specified, please run `{} --help` for available actions\n", prog_name);
         return 1;
     }
     else if (has_cli_actions > 1)
@@ -389,7 +389,7 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         *abort = true;
         // be extra safe and assume argv[0] can somehow not exist
         const auto prog_name = argc > 0 ? argv[0] : program_metadata::application_name;
-        fmt::print("multiple actions specified, please run `{} --help` for available actions\n", prog_name);
+        fmt::print(stderr, "multiple actions specified, please run `{} --help` for available actions\n", prog_name);
         return 1;
     }
 
