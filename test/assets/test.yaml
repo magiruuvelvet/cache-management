@@ -25,6 +25,7 @@ env:
 # longer a symbolic link or bind mount, the tool will issue a warning to the user.
 cache_mappings:
   # mandatory keys:
+  #   id: unique user-specified identifier for this cache mapping
   #   type: one of (symbolic_link, bind_mount, standalone, wildcard)
   #   target: absolute path
   #

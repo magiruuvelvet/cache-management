@@ -9,6 +9,7 @@
 #include <string_view>
 #include <regex>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <utils/os_utils.hpp>
 #include <utils/fs_utils.hpp>
@@ -198,6 +199,9 @@ libcachemgr::configuration_t::configuration_t(
     // get cache_mappings sequence
     const auto &cache_mappings = tree[key_seq_cache_mappings];
 
+    // keep track of unique ids for duplicate validation
+    std::unordered_set<std::string_view> unique_ids;
+
     // iterate over all cache mappings
     unsigned i = 0;
     for (const auto &cache_mapping : cache_mappings)
@@ -221,8 +225,26 @@ libcachemgr::configuration_t::configuration_t(
         // sequence entry must be a map
         if (cache_mapping.is_map())
         {
-            // get a reference to all required keys
+            // get a reference to the id key
             const auto id = get_value(key_str_id);
+
+            // the id must be unique
+            if (unique_ids.contains(id))
+            {
+                LOG_ERROR(libcachemgr::log_config,
+                    "duplicate id '{}' found for entry at position {}", id, i);
+
+                if (parse_error != nullptr) { *parse_error = parse_error::duplicate_id; }
+
+                // clear previously added cache mappings and abort
+                this->_cache_mappings.clear();
+                return;
+            }
+
+            // register the id in the set
+            unique_ids.insert(id);
+
+            // get a reference to all remaining keys
             const auto type = get_value(key_str_type);
             const auto package_manager = get_value(key_str_package_manager);
             const auto source = get_value(key_str_source);

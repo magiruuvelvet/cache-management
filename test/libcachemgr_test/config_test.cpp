@@ -136,3 +136,16 @@ TEST_CASE("config file is a directory", tag_name_config) {
         REQUIRE(config.cache_mappings().size() == 0);
     }
 }
+
+TEST_CASE("config file contains duplicated unique ids") {
+    {
+        configuration_t::file_error file_error;
+        configuration_t::parse_error parse_error;
+        configuration_t config(cachemgr_tests_assets_dir + "/non-unique-ids.yaml", &file_error, &parse_error);
+
+        REQUIRE(file_error == configuration_t::file_error::no_error);
+        REQUIRE(parse_error == configuration_t::parse_error::duplicate_id);
+
+        REQUIRE(config.cache_mappings().size() == 0);
+    }
+}

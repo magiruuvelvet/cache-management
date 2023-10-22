@@ -1,0 +1,11 @@
+env:
+  cache_root: /caches/%u
+
+cache_mappings:
+  - id: duplicated-id
+    type: symbolic_link
+    target: /tmp
+
+  - id: duplicated-id
+    type: bind_mount
+    target: /tmp

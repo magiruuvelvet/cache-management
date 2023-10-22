@@ -61,7 +61,8 @@ public:
         invalid_datatype = 2,
         /// indicates that a key has an invalid value
         invalid_value = 3,
-        /// indicates that the target for a non-wildcard cache mapping is missing
+        /// indicates that there is a duplicate unique identifier
+        duplicate_id = 4,
     };
 
     /**
@@ -170,13 +171,14 @@ template<> struct fmt::formatter<libcachemgr::configuration_t::file_error> : for
  */
 template<> struct fmt::formatter<libcachemgr::configuration_t::parse_error> : formatter<string_view> {
     auto format(libcachemgr::configuration_t::parse_error parse_error, format_context &ctx) const {
-        using fe = libcachemgr::configuration_t::parse_error;
+        using pe = libcachemgr::configuration_t::parse_error;
         string_view                    name = "parse_error::(unknown)";
         switch (parse_error) {
-            case fe::no_error:         name = "parse_error::no_error"; break;
-            case fe::missing_key:      name = "parse_error::missing_key"; break;
-            case fe::invalid_datatype: name = "parse_error::invalid_datatype"; break;
-            case fe::invalid_value:    name = "parse_error::invalid_value"; break;
+            case pe::no_error:         name = "parse_error::no_error"; break;
+            case pe::missing_key:      name = "parse_error::missing_key"; break;
+            case pe::invalid_datatype: name = "parse_error::invalid_datatype"; break;
+            case pe::invalid_value:    name = "parse_error::invalid_value"; break;
+            case pe::duplicate_id:     name = "parse_error::duplicate_id"; break;
         }
         return formatter<string_view>::format(name, ctx);
     }
