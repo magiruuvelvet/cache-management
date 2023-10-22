@@ -1,18 +1,24 @@
 [submodule "libs/rapidyaml"]
 	path = libs/rapidyaml
 	url = https://github.com/biojppm/rapidyaml
+	shallow = true
 [submodule "libs/Catch2"]
 	path = libs/Catch2
 	url = https://github.com/catchorg/Catch2
+	shallow = true
 [submodule "libs/fmt"]
 	path = libs/fmt
 	url = https://github.com/fmtlib/fmt
+	shallow = true
 [submodule "libs/argparse-cpp"]
 	path = libs/argparse-cpp
 	url = https://github.com/magiruuvelvet/argparse-cpp
+	shallow = true
 [submodule "libs/quill"]
 	path = libs/quill
 	url = https://github.com/magiruuvelvet/quill
+	shallow = true
 [submodule "libs/simdjson"]
 	path = libs/simdjson
 	url = https://github.com/simdjson/simdjson
+	shallow = true
