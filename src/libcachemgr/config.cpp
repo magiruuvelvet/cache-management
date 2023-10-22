@@ -225,6 +225,13 @@ libcachemgr::configuration_t::configuration_t(
         // sequence entry must be a map
         if (cache_mapping.is_map())
         {
+            // check for mandatory keys in the cache mapping entry
+            error_collection = {
+                validate_key_in_node(key_seq_cache_mappings, cache_mapping, key_str_id, key_type::string, true),
+                validate_key_in_node(key_seq_cache_mappings, cache_mapping, key_str_type, key_type::string, true),
+                validate_key_in_node(key_seq_cache_mappings, cache_mapping, key_str_target, key_type::string, true),
+            };
+
             // get a reference to the id key
             const auto id = get_value(key_str_id);
 
@@ -253,12 +260,6 @@ libcachemgr::configuration_t::configuration_t(
             LOG_DEBUG(libcachemgr::log_config,
                 "found cache_mapping: source='{}', target='{}', type='{}', id='{}'",
                 source, target, type, id);
-
-            // check for mandatory keys in the cache mapping entry
-            error_collection = {
-                validate_key_in_node(key_seq_cache_mappings, cache_mapping, key_str_type, key_type::string, true),
-                validate_key_in_node(key_seq_cache_mappings, cache_mapping, key_str_target, key_type::string, true),
-            };
 
             // parse the directory type of the cache mapping entry
             bool error;
