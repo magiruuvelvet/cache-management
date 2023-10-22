@@ -83,10 +83,14 @@ public:
     void set_print_pm_cache_locations(bool print_pm_cache_locations) noexcept;
     bool print_pm_cache_locations() const noexcept;
 
+    void set_print_pm_cache_location_of(const std::string &package_manager) noexcept;
+    const std::string &print_pm_cache_location_of() const noexcept;
+
 private:
     user_configuration_t() = default;
 
     std::string _configuration_file{};
+    std::string _print_pm_cache_location_of{};
     bool _verify_cache_mappings{false};
     bool _show_usage_stats{false};
     bool _print_pm_cache_locations{false};

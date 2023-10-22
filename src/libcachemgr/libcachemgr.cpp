@@ -113,3 +113,15 @@ bool user_configuration_t::print_pm_cache_locations() const noexcept
     mutex_lock_t lock{user_configuration_mutex};
     return this->_print_pm_cache_locations;
 }
+
+void user_configuration_t::set_print_pm_cache_location_of(const std::string &package_manager) noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    this->_print_pm_cache_location_of = package_manager;
+}
+
+const std::string &user_configuration_t::print_pm_cache_location_of() const noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    return this->_print_pm_cache_location_of;
+}

@@ -232,6 +232,24 @@ static int cachemgr_cli()
         return 0;
     }
 
+    else if (const auto pm = libcachemgr::user_configuration()->print_pm_cache_location_of(); pm.size() > 0)
+    {
+        using pm_base = libcachemgr::package_manager_support::pm_base;
+        using pm_registry = libcachemgr::package_manager_support::pm_registry;
+
+        if (const auto it = pm_registry::user_registry().find(pm); it != pm_registry::user_registry().end())
+        {
+            fmt::print("{}\n", it->second->get_cache_directory_path());
+        }
+        else
+        {
+            fmt::print("package manager '{}' not found\n", pm);
+            return 1;
+        }
+
+        return 0;
+    }
+
     return 0;
 }
 
@@ -256,7 +274,9 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         })();
 
         // register the option in the parser
-        parser.addArgument(option->short_opt, option->long_opt, full_description, option->arg_type, option->required);
+        parser.addArgument(
+            option->short_opt, option->long_opt, full_description, option->default_value,
+            option->arg_type, option->required);
     }
 
     // parse command line arguments
@@ -336,6 +356,23 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
     {
         has_cli_actions += 1;
         libcachemgr::user_configuration()->set_print_pm_cache_locations(true);
+    }
+
+    if (parser.exists(cli_opt_print_pm_cache_location))
+    {
+        const auto package_manager_name = parser.get(cli_opt_print_pm_cache_location);
+        if (package_manager_name.size() > 0)
+        {
+            has_cli_actions += 1;
+            libcachemgr::user_configuration()->set_print_pm_cache_location_of(package_manager_name);
+        }
+        else
+        {
+            *abort = true;
+            fmt::print("error: no package manager name specified for option '{}'\n",
+                std::string{cli_opt_print_pm_cache_location});
+            return 1;
+        }
     }
 
     // abort if no valid action was determined
