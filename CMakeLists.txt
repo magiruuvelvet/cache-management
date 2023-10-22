@@ -9,6 +9,9 @@ cmake_minimum_required(VERSION 3.25)
 # compile live git version tracking into the application
 option(ENABLE_GIT_VERSION_TRACKING "embed live git version information" ON)
 
+# disable this option if you toolchain has problems with precompiled headers
+option(ENABLE_PRECOMPILED_HEADERS "precompile expensive header files" ON)
+
 # enable this to perform profiling without the quill logging library (profiling quill is extremely slow)
 option(COMPILE_PROFILING_BUILD "compile a version optimized for profiling (completley disables logging)" OFF)
 

@@ -14,27 +14,33 @@ option(CATCH_INSTALL_DOCS "" OFF)
 option(CATCH_INSTALL_EXTRAS "" OFF)
 option(CATCH_DEVELOPMENT_BUILD "" OFF)
 add_subdirectory(Catch2 EXCLUDE_FROM_ALL SYSTEM)
-target_precompile_headers(Catch2 PUBLIC
-    "$<$<COMPILE_LANGUAGE:CXX>:<catch2/catch_test_macros.hpp$<ANGLE-R>>"
-)
+if (ENABLE_PRECOMPILED_HEADERS)
+    target_precompile_headers(Catch2 PUBLIC
+        "$<$<COMPILE_LANGUAGE:CXX>:<catch2/catch_test_macros.hpp$<ANGLE-R>>"
+    )
+endif()
 
 # {fmt} (MIT)
 option(FMT_INSTALL "" OFF)
 option(FMT_SYSTEM_HEADERS "" ON)
 add_subdirectory(fmt EXCLUDE_FROM_ALL SYSTEM)
-target_precompile_headers(fmt PUBLIC
-    "$<$<COMPILE_LANGUAGE:CXX>:<fmt/core.h$<ANGLE-R>>"
-    "$<$<COMPILE_LANGUAGE:CXX>:<fmt/format.h$<ANGLE-R>>"
-    "$<$<COMPILE_LANGUAGE:CXX>:<fmt/ostream.h$<ANGLE-R>>"
-)
+if (ENABLE_PRECOMPILED_HEADERS)
+    target_precompile_headers(fmt PUBLIC
+        "$<$<COMPILE_LANGUAGE:CXX>:<fmt/core.h$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<fmt/format.h$<ANGLE-R>>"
+        "$<$<COMPILE_LANGUAGE:CXX>:<fmt/ostream.h$<ANGLE-R>>"
+    )
+endif()
 
 # quill (MIT)
 option(QUILL_FMT_EXTERNAL "" ON)
 option(QUILL_NO_EXCEPTIONS "" OFF) # FIXME: disable exceptions
 add_subdirectory(quill EXCLUDE_FROM_ALL SYSTEM)
-target_precompile_headers(quill PUBLIC
-    "$<$<COMPILE_LANGUAGE:CXX>:<quill/Quill.h$<ANGLE-R>>"
-)
+if (ENABLE_PRECOMPILED_HEADERS)
+    target_precompile_headers(quill PUBLIC
+        "$<$<COMPILE_LANGUAGE:CXX>:<quill/Quill.h$<ANGLE-R>>"
+    )
+endif()
 
 # argparse-cpp (MIT)
 add_subdirectory(argparse-cpp/src EXCLUDE_FROM_ALL SYSTEM)
