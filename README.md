@@ -71,16 +71,9 @@ cmake --build ./build
 
 ## Configuration
 
-*Warning: It is not adviced to invest too much time configuring this on your system yet.*
-*The configuration is not stabalized yet and undergoes breaking changes.*
-*The minor version number will be increased on incompatible changes to the configuration,*
-*as long as the application major version number is still at `0`.*
-
-Currently the configuration is stored in `$XDG_CONFIG_HOME/cachemgr.yaml`
-(`~/.config/cachemgr.yaml` if `XDG_CONFIG_HOME` is not set).
-The log file is stored in `$XDG_CACHE_HOME/cachemgr.log`
-(`~/.cache/cachemgr.log` if `XDG_CACHE_HOME` is not set).
-Both locations are subject to change before the stable release, as they
-are too generic.
+The configuration is stored in `$XDG_CONFIG_HOME/cachemgr/cachemgr.yaml`
+(`~/.config/cachemgr/cachemgr.yaml` if `XDG_CONFIG_HOME` is not set).
+The log file is stored in `$XDG_CACHE_HOME/cachemgr/cachemgr.log`
+(`~/.cache/cachemgr/cachemgr.log` if `XDG_CACHE_HOME` is not set).
 
 For an example configuration, see [test.yaml](./test/assets/test.yaml) from the unit tests.
