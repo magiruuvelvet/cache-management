@@ -77,6 +77,9 @@ public:
     configuration_t(const std::string &config_file, file_error *file_error = nullptr, parse_error *parse_error = nullptr) noexcept;
     virtual ~configuration_t() = default;
 
+    static std::string_view get_application_cache_directory();
+    static std::string_view get_application_config_directory();
+
     /**
      * Returns the user-configured cache root.
      */

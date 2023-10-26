@@ -415,7 +415,6 @@ int main(int argc, char **argv)
 {
 #ifndef CACHEMGR_PROFILING_BUILD
     // catch errors early during first os_utils function calls
-    // NOTE: parse_cli_options() and freedesktop::xdg_paths::get_xdg_cache_home() make calls to os_utils internally
     logging_helper::set_logger(std::make_shared<basic_utils_logger>());
 #endif
 
@@ -429,14 +428,25 @@ int main(int argc, char **argv)
         }
     }
 
+    // perform this check after parsing the command line arguments
+    const bool has_config_dir = configuration_t::get_application_config_directory().size() > 0;
+    const bool has_cache_dir = configuration_t::get_application_cache_directory().size() > 0;
+
+    if (!has_config_dir || !has_cache_dir)
+    {
+        // detailed errors are already printed by the above functions
+        fmt::print(stderr, "error: required directories missing\n");
+        return 2;
+    }
+
 #ifndef CACHEMGR_PROFILING_BUILD
     // initialize logging subsystem (includes os_utils function calls)
     libcachemgr::init_logging(libcachemgr::logging_config{
         // silence info logs in the console
         .log_level_console = quill::LogLevel::Warning,
 
-        // store the log file in $XDG_CACHE_HOME/cachemgr.log for now
-        .log_file_path = freedesktop::xdg_paths::get_xdg_cache_home() + "/cachemgr.log",
+        // store the log file in $XDG_CACHE_HOME/cachemgr/cachemgr.log
+        .log_file_path = std::string{configuration_t::get_application_cache_directory()} + "/cachemgr.log",
     });
 #endif
 

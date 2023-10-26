@@ -1,6 +1,7 @@
 #include "config.hpp"
 #include "config_helper.hpp"
 #include "logging.hpp"
+#include "libcachemgr.hpp"
 
 #include "package_manager_support/pm_registry.hpp"
 
@@ -306,6 +307,88 @@ libcachemgr::configuration_t::configuration_t(
             LOG_WARNING(libcachemgr::log_config,
                 "found non-map or invalid entry in the '{}' sequence at position {}", key_seq_cache_mappings, i);
         }
+    }
+}
+
+/**
+ * Ensures the given directory exists and can be modified by the current process.
+ *
+ * If the directory doesn't exist yet, it will be attempted to create it.
+ *
+ * @param directory
+ * @return true directory exists and can be modified by the current process
+ * @return false something went wrong or insufficient permissions
+ */
+static bool ensure_directory(const std::string &directory) noexcept
+{
+    // note: logger is not initialized when calling this function
+
+    using perms = std::filesystem::perms;
+    const auto access_perms = perms::owner_read | perms::owner_write | perms::owner_exec;
+
+    std::error_code ec;
+    if (std::filesystem::exists(directory, ec) && std::filesystem::is_directory(directory, ec))
+    {
+        if (os_utils::can_access_file(directory, access_perms))
+        {
+            return true;
+        }
+        else
+        {
+            fmt::print(stderr, "insufficient permissions to access directory '{}' " \
+                "(0700 are the minimum required permissions)\n", directory);
+            return false;
+        }
+    }
+    else if (ec)
+    {
+        fmt::print(stderr, "failed to stat directory '{}': {}\n", directory, ec);
+        return false;
+    }
+    else
+    {
+        if (std::filesystem::create_directory(directory, ec))
+        {
+            // assume the creating process sets the correct permissions
+            return true;
+        }
+        else if (ec)
+        {
+            fmt::print(stderr, "failed to create directory '{}': {}\n", directory, ec);
+            return false;
+        }
+    }
+
+    return false;
+}
+
+std::string_view libcachemgr::configuration_t::get_application_cache_directory()
+{
+    static const auto application_cache_directory = fmt::format("{}/{}",
+        freedesktop::xdg_paths::get_xdg_cache_home(),
+        libcachemgr::program_metadata::application_name);
+    if (ensure_directory(application_cache_directory))
+    {
+        return application_cache_directory;
+    }
+    else
+    {
+        return std::string_view{};
+    }
+}
+
+std::string_view libcachemgr::configuration_t::get_application_config_directory()
+{
+    static const auto application_config_directory = fmt::format("{}/{}",
+        freedesktop::xdg_paths::get_xdg_config_home(),
+        libcachemgr::program_metadata::application_name);
+    if (ensure_directory(application_config_directory))
+    {
+        return application_config_directory;
+    }
+    else
+    {
+        return std::string_view{};
     }
 }
 

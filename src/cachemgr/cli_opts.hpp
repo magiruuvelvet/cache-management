@@ -9,6 +9,8 @@
 #include <utils/freedesktop/xdg_paths.hpp>
 #include <utils/types/pointer.hpp>
 
+#include <libcachemgr/config.hpp>
+
 #include <argparse/argparse.hpp>
 
 namespace {
@@ -75,7 +77,8 @@ struct config_cli_option final : public cli_option
     /// get the default configuration file location.
     /// NOTE: this path is used and must be valid, don't alter or decorate it.
     inline std::string get_config_file_location() const {
-        static const std::string default_value = freedesktop::xdg_paths::get_xdg_config_home() + "/cachemgr.yaml";
+        static const std::string default_value =
+            std::string{libcachemgr::configuration_t::get_application_config_directory()} + "/cachemgr.yaml";
         return default_value;
     }
 
