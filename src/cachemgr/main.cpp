@@ -234,16 +234,25 @@ static int cachemgr_cli()
 
     else if (const auto pm = libcachemgr::user_configuration()->print_pm_cache_location_of(); pm.size() > 0)
     {
-        using pm_base = libcachemgr::package_manager_support::pm_base;
         using pm_registry = libcachemgr::package_manager_support::pm_registry;
 
-        if (const auto it = pm_registry::user_registry().find(pm); it != pm_registry::user_registry().end())
+        if (pm == "list")
+        {
+            for (const auto &[_, pm] : pm_registry::registry())
+            {
+                fmt::print("{}\n", pm->pm_name());
+            }
+            return 0;
+        }
+
+        if (const auto it = pm_registry::registry().find(pm); it != pm_registry::registry().end())
         {
             fmt::print("{}\n", it->second->get_cache_directory_path());
         }
         else
         {
-            fmt::print(stderr, "package manager '{}' not found\n", pm);
+            fmt::print(stderr, "package manager '{}' not found, " \
+                "use 'list' to receive a list of possible package managers\n", pm);
             return 1;
         }
 
