@@ -129,7 +129,8 @@ struct mapped_cache_directory_t
         else if (this->directory_type == libcachemgr::directory_type_t::wildcard)
         {
             return fmt::format("{:<{}}",
-                this->wildcard_pattern, original_path_padding);
+                fmt::format("{} ({})", this->wildcard_pattern, this->resolved_source_files.size()),
+                original_path_padding);
         }
         else
         {
