@@ -127,8 +127,8 @@ static constexpr const std::array<observer_ptr<cli_option>, 7> cli_options = {
     &cli_opt_help,
     &cli_opt_version,
     &cli_opt_config,
-    &cli_opt_verify_cache_mappings,
     &cli_opt_usage_stats,
+    &cli_opt_verify_cache_mappings,
     &cli_opt_print_pm_cache_locations,
     &cli_opt_print_pm_cache_location,
 };
