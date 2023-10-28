@@ -83,6 +83,15 @@ static int cachemgr_cli()
         return 1;
     }
 
+    // flush log after parsing the configuration file
+    libcachemgr::flush_log();
+
+    // change the log level to the user specified ones
+    libcachemgr::change_log_level(libcachemgr::logging_config{
+        .log_level_console = config.log_level_console(),
+        .log_level_file = config.log_level_file(),
+    });
+
     // create the cache manager
     cachemgr_t cachemgr;
 
