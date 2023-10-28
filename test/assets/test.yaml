@@ -20,6 +20,16 @@ env:
   #   - target: $CACHE_ROOT/bundle
   cache_root: /caches/%u
 
+# supported log levels
+# - Debug
+# - Info
+# - Warning
+# - Error
+# - Critical
+logging:
+  log_level_console: Warning
+  log_level_file: Info
+
 # a sequence of cache mappings which should map a source path to a target path.
 # all mappings are verified, and in the unlikely event that the source path is no
 # longer a symbolic link or bind mount, the tool will issue a warning to the user.
