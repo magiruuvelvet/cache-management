@@ -1,5 +1,6 @@
 #pragma once
 
+#include "logging.hpp"
 #include "types.hpp"
 
 #include <string>
@@ -137,6 +138,16 @@ private:
     directory_type_t parse_directory_type(std::string_view directory_type, bool &error) const;
 
     /**
+     * Parses the given string representation of a log level into a log level enum value.
+     *
+     * On parse errors, the @p has_error flag is set to `true`.
+     *
+     * @param log_level_str string representation of a log level
+     * @return log level enum value
+     */
+    quill::LogLevel parse_log_level(const std::string_view &log_level_str, bool &has_error) const;
+
+    /**
      * Root directory where caches are stored.
      */
     std::string _env_cache_root;
@@ -145,6 +156,16 @@ private:
      * List of all registered cache mappings.
      */
     cache_mappings_t _cache_mappings;
+
+    /**
+     * Log level for console logging.
+     */
+    quill::LogLevel _log_level_console = quill::LogLevel::Warning;
+
+    /**
+     * Log level for file logging.
+     */
+    quill::LogLevel _log_level_file = quill::LogLevel::Info;
 };
 
 } // namespace libcachemgr

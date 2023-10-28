@@ -78,6 +78,8 @@ static int cachemgr_cli()
     if (file_error != configuration_t::file_error::no_error || parse_error != configuration_t::parse_error::no_error)
     {
         // errors are reported to the user via the logger
+        fmt::print(stderr, "errors occurred while parsing the configuration file.\n" \
+            "check log output for more information.\n");
         return 1;
     }
 

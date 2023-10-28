@@ -29,6 +29,11 @@ namespace {
     constexpr const char *key_map_env = "env";
     constexpr const char *key_str_cache_root = "cache_root";
 
+    /// logging settings
+    constexpr const char *key_map_logging = "logging";
+    constexpr const char *key_str_log_level_console = "log_level_console";
+    constexpr const char *key_str_log_level_file = "log_level_file";
+
     /// sequence of cache mappings
     /// cache_mappings:
     ///   - source: original cache location
@@ -170,6 +175,7 @@ libcachemgr::configuration_t::configuration_t(
     // check for mandatory keys, report as many errors as possible at once to the user
     error_collection = {
         validate_key(key_map_env, key_type::map, true),
+        validate_key(key_map_logging, key_type::map, true),
         validate_key(key_seq_cache_mappings, key_type::sequence, true),
     };
 
@@ -178,12 +184,15 @@ libcachemgr::configuration_t::configuration_t(
         return;
     }
 
-    // get env map
+    // get yaml maps
     const auto &env = tree[key_map_env];
+    const auto &logging = tree[key_map_logging];
 
-    // check for mandatory keys in the env map
+    // check for mandatory keys in the env map and logging map
     error_collection = {
         validate_key_in_node(key_map_env, env, key_str_cache_root, key_type::string, true),
+        validate_key_in_node(key_map_logging, logging, key_str_log_level_console, key_type::string, true),
+        validate_key_in_node(key_map_logging, logging, key_str_log_level_file, key_type::string, true),
     };
 
     // if any of the mandatory keys are missing, abort
@@ -195,6 +204,40 @@ libcachemgr::configuration_t::configuration_t(
     {
         const auto &cache_root = env[key_str_cache_root].val();
         this->_env_cache_root = parse_path(std::string_view(cache_root.str, cache_root.len));
+    }
+
+    // parse logging settings
+    {
+        const auto &log_level_console = logging[key_str_log_level_console].val();
+        const auto &log_level_file = logging[key_str_log_level_file].val();
+
+        const auto parse_log_level = [=](std::string_view key_name, std::string_view log_level_str) {
+            bool has_error;
+            const auto parsed_log_level = this->parse_log_level(log_level_str, has_error);
+
+            if (has_error)
+            {
+                LOG_ERROR(libcachemgr::log_config, "{}.{}: invalid log level '{}' specified",
+                    key_map_logging, key_name, log_level_str);
+                LOG_ERROR(libcachemgr::log_config,
+                    "supported log levels are: Debug, Info, Warning, Error, Critical (case sensitive)");
+            }
+
+            return parsed_log_level;
+        };
+
+        this->_log_level_console = parse_log_level(key_str_log_level_console,
+            std::string_view(log_level_console.str, log_level_console.len));
+
+        this->_log_level_file = parse_log_level(key_str_log_level_file,
+            std::string_view(log_level_file.str, log_level_file.len));
+
+        if (this->_log_level_console == quill::LogLevel::None || this->_log_level_file == quill::LogLevel::None)
+        {
+            // abort
+            if (parse_error != nullptr) { *parse_error = parse_error::invalid_value; }
+            return;
+        }
     }
 
     // get cache_mappings sequence
@@ -482,5 +525,27 @@ libcachemgr::directory_type_t libcachemgr::configuration_t::parse_directory_type
     {
         error = true;
         return {}; // default initialized enum, should never be used
+    }
+}
+
+quill::LogLevel libcachemgr::configuration_t::parse_log_level(const std::string_view &log_level_str, bool &has_error) const
+{
+    const std::unordered_map<std::string_view, quill::LogLevel> log_level_map = {
+        {"Debug",    quill::LogLevel::Debug},
+        {"Info",     quill::LogLevel::Info},
+        {"Warning",  quill::LogLevel::Warning},
+        {"Error",    quill::LogLevel::Error},
+        {"Critical", quill::LogLevel::Critical},
+    };
+
+    if (log_level_map.contains(log_level_str))
+    {
+        has_error = false;
+        return log_level_map.at(log_level_str);
+    }
+    else
+    {
+        has_error = true;
+        return quill::LogLevel::None;
     }
 }

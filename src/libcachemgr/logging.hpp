@@ -30,12 +30,12 @@ struct logging_config
     /**
      * The default log level for the console logger.
      */
-    quill::LogLevel log_level_console = quill::LogLevel::Info; // TODO: should be configurable (CMake + command line)
+    quill::LogLevel log_level_console = quill::LogLevel::Info;
 
     /**
      * The default log level for the file logger.
      */
-    quill::LogLevel log_level_file = quill::LogLevel::Debug; // TODO: should be configurable (CMake + command line)
+    quill::LogLevel log_level_file = quill::LogLevel::Debug;
 
     /**
      * The log file path.
