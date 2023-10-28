@@ -14,15 +14,21 @@
 #include <utils/logging_helper.hpp>
 #include <utils/freedesktop/os-release.hpp>
 
+#define ATTRIBUTE_USED __attribute__((used))
+
+extern "C" {
+
 /**
  * Shutdown routines for the quill logging library.
  */
-static void shutdown_quill()
+ATTRIBUTE_USED static void shutdown_quill(void)
 {
     quill::flush();
 }
 
 #if !defined(PROJECT_PLATFORM_WINDOWS)
+
+static constexpr int signal_offset = 128;
 
 /**
  * Signal handler for application crashes.
@@ -34,7 +40,7 @@ static void shutdown_quill()
  *
  * @param signal
  */
-static void crash_signal_handler(int signal)
+ATTRIBUTE_USED static void crash_signal_handler(int signal)
 {
     // restore original signal handler
     std::signal(signal, SIG_DFL);
@@ -57,13 +63,15 @@ static void crash_signal_handler(int signal)
  *
  * @param signal
  */
-[[noreturn]] static void normal_signal_handler(int signal)
+[[noreturn]] ATTRIBUTE_USED static void normal_signal_handler(int signal)
 {
     // call std::atexit functions before terminating the application
-    std::exit(signal);
+    std::exit(signal_offset + signal);
 }
 
 #endif // !defined(PROJECT_PLATFORM_WINDOWS)
+
+} // extern "C"
 
 namespace {
 
