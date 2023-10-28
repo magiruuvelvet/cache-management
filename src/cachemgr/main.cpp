@@ -84,9 +84,12 @@ static int cachemgr_cli()
     }
 
     // flush log after parsing the configuration file
+    // otherwise important messages might go missing due to asynchronous logging
     libcachemgr::flush_log();
 
-    // change the log level to the user specified ones
+    // change the log level to the user specified ones.
+    // before this, all log messages are enforced by the developer to avoid users silencing important log messages.
+    // the logging before calling this function should be moderate/conservative.
     libcachemgr::change_log_level(libcachemgr::logging_config{
         .log_level_console = config.log_level_console(),
         .log_level_file = config.log_level_file(),

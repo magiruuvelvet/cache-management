@@ -17,6 +17,13 @@
 #include <utils/freedesktop/xdg_paths.hpp>
 
 /**
+ * - Don't use excessive logging in this file.
+ * - Only log errors, warnings, and absolutely required information.
+ * - The log level will be changed to the user specified log level AFTER the config is fully parsed.
+ *   We want to avoid the user silencing important error messages during the parsing process.
+ */
+
+/**
  * Notes on the YAML parser used:
  *  - the internal string structure of ryml is NOT zero terminated
  *    (you must use str+len to correctly access the intended range of data)
