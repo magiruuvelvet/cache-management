@@ -13,6 +13,7 @@
 #include <libcachemgr/config.hpp>
 #include <libcachemgr/cachemgr.hpp>
 #include <libcachemgr/libcachemgr.hpp>
+#include <libcachemgr/messages.hpp>
 #include <libcachemgr/package_manager_support/pm_registry.hpp>
 
 #include "basic_utils_logger.hpp"
@@ -21,6 +22,7 @@
 using human_readable_file_size = file_size_units::human_readable_file_size;
 template<> struct fmt::formatter<human_readable_file_size> : ostream_formatter{};
 
+using namespace libcachemgr::messages;
 using program_metadata = libcachemgr::program_metadata;
 using configuration_t = libcachemgr::configuration_t;
 
@@ -114,7 +116,18 @@ static int cachemgr_cli()
         // collect usage statistics and print the results of individual directories
         for (const auto &dir : cachemgr.mapped_cache_directories())
         {
-            LOG_INFO(libcachemgr::log_main, "calculating usage statistics for directory: {}", dir.target_path);
+            if (dir.has_target_directory())
+            {
+                LOG_INFO(libcachemgr::log_main, "calculating usage statistics for directory: {}", dir.target_path);
+            }
+            else if (dir.has_wildcard_matches())
+            {
+                LOG_CALCULATING_USAGE_STATISTICS_FOR_WILDCARD_PATTERN_WITH_FILE_COUNT(
+                    // message arguments
+                    libcachemgr::log_main, dir.resolved_source_files.size(),
+                    // log message arguments
+                    dir.wildcard_pattern, dir.resolved_source_files.size());
+            }
 
             // calculate the padding required for pretty printing
             if (dir.directory_type == directory_type_t::symbolic_link)
