@@ -103,8 +103,8 @@ struct config_cli_option final : public cli_option
 // command line options
 static constexpr const auto cli_opt_help =
     cli_option("help",      "h", "", "print this help message and exit", cli_option::boolean_type);
-static constexpr const auto cli_opt_version = // -v is reserved for verbose output
-    cli_option("version",   "",  "", "print the version and exit",       cli_option::boolean_type);
+static constexpr const auto cli_opt_version =
+    cli_option("version",   "v", "", "print the version and exit",       cli_option::boolean_type);
 static constexpr const auto cli_opt_config =
     config_cli_option("config", "c", "", "path to the configuration file", cli_option::string_type);
 
