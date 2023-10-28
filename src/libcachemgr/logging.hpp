@@ -54,7 +54,19 @@ struct logging_config
 void init_logging(const logging_config &config = {});
 
 /**
+ * Call this function to change the log level of all registered loggers at runtime.
+ */
+void change_log_level(const logging_config &config);
+
+/**
+ * Force flush of all log messages.
+ */
+void flush_log();
+
+/**
  * Create a new logger with the desires configuration.
+ *
+ * Don't attempt to destroy the returned logger yourself. It is fully managed by quill.
  *
  * @param name name of the logger
  * @return

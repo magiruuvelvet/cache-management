@@ -1,6 +1,7 @@
 #include "logging.hpp"
 
 #include <cstdlib>
+#include <list>
 
 #if !defined(PROJECT_PLATFORM_WINDOWS)
 #include <csignal>
@@ -102,6 +103,12 @@ private:
 static constexpr const char *log_pattern = "%(level_id) [%(ascii_time)][%(thread_name)][%(logger_name:<8)] %(message)";
 static constexpr const char *timestamp_pattern = "%Y-%m-%d %H:%M:%S.%Qns";
 
+static constexpr std::uint8_t handler_id_console{0x8};
+static constexpr std::uint8_t handler_id_file{0x16};
+
+/// list of all loggers that have been created
+static std::list<quill::Logger*> quill_loggers;
+
 } // anonymous namespace
 
 quill::Logger *libcachemgr::log_main = nullptr;
@@ -170,6 +177,38 @@ void libcachemgr::init_logging(const logging_config &config)
 #endif // CACHEMGR_PROFILING_BUILD
 }
 
+void libcachemgr::change_log_level(const logging_config &config)
+{
+#ifndef CACHEMGR_PROFILING_BUILD
+    for (auto &logger : quill_loggers)
+    {
+        // find the highest log level
+        const quill::LogLevel highest_log_level = std::min(config.log_level_console, config.log_level_file);
+
+        // change the log level of all handlers
+        for (auto &handler : logger->handlers())
+        {
+            // identify the handler by its unique identifier
+            switch (handler->get_handler_id())
+            {
+                case handler_id_console: handler->set_log_level(config.log_level_console); break;
+                case handler_id_file:    handler->set_log_level(config.log_level_file); break;
+            }
+        }
+
+        // change the master log level of the logger itself
+        logger->set_log_level(highest_log_level);
+    }
+#endif // CACHEMGR_PROFILING_BUILD
+}
+
+void libcachemgr::flush_log()
+{
+#ifndef CACHEMGR_PROFILING_BUILD
+    quill::flush();
+#endif // CACHEMGR_PROFILING_BUILD
+}
+
 quill::Logger *libcachemgr::create_logger(const std::string &name, const logging_config &config)
 {
     using ConsoleColors = quill::ConsoleColours;
@@ -194,6 +233,7 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
         auto stdout_handler = quill::stdout_handler(name, colors);
         stdout_handler->set_pattern(log_pattern, timestamp_pattern);
         stdout_handler->set_log_level(config.log_level_console);
+        stdout_handler->set_handler_id(handler_id_console);
 
         handlers.push_back(stdout_handler);
     }
@@ -207,6 +247,7 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
         // create log file at the given location {config.log_level_file}
         auto file_handler = quill::file_handler(config.log_file_path, file_handler_config);
         file_handler->set_log_level(config.log_level_file);
+        file_handler->set_handler_id(handler_id_file);
 
         handlers.push_back(file_handler);
     }
@@ -217,6 +258,7 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
     // individual handlers might have a lower log level than this level
     // this avoids running log formatters at runtime when they are not needed
     logger->set_log_level(highest_log_level);
+    quill_loggers.emplace_back(logger);
     return logger;
 }
 

@@ -96,6 +96,20 @@ public:
     }
 
     /**
+     * Returns the user-configured log level for the console logger.
+     */
+    inline constexpr auto log_level_console() const noexcept {
+        return this->_log_level_console;
+    }
+
+    /**
+     * Returns the user-configured log level for the file logger.
+     */
+    inline constexpr auto log_level_file() const noexcept {
+        return this->_log_level_file;
+    }
+
+    /**
      * Finds the requested cache mapping in the registered cache mappings.
      *
      * If no such mapping is found, nullptr is returned.

@@ -301,9 +301,9 @@ libcachemgr::configuration_t::configuration_t(
             const auto source = get_value(key_str_source);
             const auto target = get_value(key_str_target);
 
-            LOG_DEBUG(libcachemgr::log_config,
-                "found cache_mapping: source='{}', target='{}', type='{}', id='{}'",
-                source, target, type, id);
+            // LOG_DEBUG(libcachemgr::log_config,
+            //     "found cache_mapping: source='{}', target='{}', type='{}', id='{}'",
+            //     source, target, type, id);
 
             // parse the directory type of the cache mapping entry
             bool error;
@@ -328,9 +328,9 @@ libcachemgr::configuration_t::configuration_t(
 
             if (pm != nullptr)
             {
-                LOG_INFO(libcachemgr::log_config,
-                    "found package manager for cache mapping with source='{}' and target='{}': {}",
-                    source, target, pm->pm_name());
+                // LOG_INFO(libcachemgr::log_config,
+                //     "found package manager for cache mapping with source='{}' and target='{}': {}",
+                //     source, target, pm->pm_name());
 
                 // add this package manager to the user's package manager registry
                 libcachemgr::package_manager_support::pm_registry::register_user_package_manager(pm);
@@ -344,6 +344,21 @@ libcachemgr::configuration_t::configuration_t(
                 .source = parse_path(source),
                 .target = parse_path(target),
             });
+
+            // log the added cache mapping with a pretty format
+            const auto &last = this->_cache_mappings.back();
+            if (pm != nullptr)
+            {
+                LOG_INFO(libcachemgr::log_config,
+                    "found cache mapping with id='{}', type='{}', source='{}', target='{}', package_manager='{}'",
+                    last.id, type, last.source, last.target, last.package_manager()->pm_name());
+            }
+            else
+            {
+                LOG_INFO(libcachemgr::log_config,
+                    "found cache mapping with id='{}', type='{}', source='{}', target='{}'",
+                    last.id, type, last.source, last.target);
+            }
         }
         else
         {
@@ -494,8 +509,8 @@ std::string libcachemgr::configuration_t::parse_path(std::string_view path_with_
         ++it;
     }
 
-    LOG_DEBUG(libcachemgr::log_config, "parse_path('{}') -> normalized path: '{}'",
-        path_with_placeholders, normalized_path);
+    // LOG_DEBUG(libcachemgr::log_config, "parse_path('{}') -> normalized path: '{}'",
+    //     path_with_placeholders, normalized_path);
 
     return normalized_path;
 }

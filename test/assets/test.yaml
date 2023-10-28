@@ -20,7 +20,9 @@ env:
   #   - target: $CACHE_ROOT/bundle
   cache_root: /caches/%u
 
-# supported log levels
+# the active log level after the configuration file was parsed
+#
+# supported log levels:
 # - Debug
 # - Info
 # - Warning
