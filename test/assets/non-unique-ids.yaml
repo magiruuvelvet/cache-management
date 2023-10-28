@@ -1,6 +1,10 @@
 env:
   cache_root: /caches/%u
 
+logging:
+  log_level_console: Debug
+  log_level_file: Debug
+
 cache_mappings:
   - id: duplicated-id
     type: symbolic_link
