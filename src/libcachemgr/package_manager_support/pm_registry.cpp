@@ -1,6 +1,7 @@
 #include "pm_registry.hpp"
 
 #include <type_traits>
+#include <concepts>
 
 #include "cargo/cargo.hpp"
 #include "composer/composer.hpp"
@@ -10,6 +11,14 @@
 
 using namespace libcachemgr::package_manager_support;
 
+// class test : public pm_base {
+// public:
+//     std::string_view pm_name() const { return ""; }
+//     bool is_cache_directory_configurable() const { return false; }
+//     bool is_cache_directory_symlink_compatible() const { return false; }
+//     std::string get_cache_directory_path() const { return ""; }
+// };
+
 namespace {
 
 static pm_registry::pm_registry_t _pm_registry{};
@@ -17,7 +26,12 @@ static pm_registry::pm_user_registry_t _pm_user_registry{};
 
 /// concept which checks if the type is a base of pm_base
 template<typename T>
-concept is_package_manager = std::is_base_of<pm_base, T>::value;
+concept is_package_manager = requires(T o) {
+    // must inherit from pm_base
+    requires std::derived_from<T, pm_base>;
+    // must have a constant evaluated pm_name() method
+    { std::bool_constant<(T{}.pm_name(), true)>() } -> std::same_as<std::true_type>;
+};
 
 template<is_package_manager T>
 inline constexpr void register_package_manager()
