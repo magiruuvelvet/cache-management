@@ -21,6 +21,9 @@ option(ENABLE_TESTING "build tests" ON)
 # enable this to perform profiling without the quill logging library (profiling quill is extremely slow)
 option(COMPILE_PROFILING_BUILD "compile a version optimized for profiling (completely disables logging)" OFF)
 
+# enable this option to build and link against the system shared SQLite library
+option(USE_SYSTEM_SQLITE "use shared SQLite from the system instead of bundled one" OFF)
+
 #######################################################################################
 # process early option dependencies here                                              #
 #######################################################################################
@@ -47,7 +50,7 @@ include(DetermineCompiler)
 include(GitVersionTracking)
 include(SetupTarget)
 
-project("cache-manager" LANGUAGES CXX)
+project("cache-manager" LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

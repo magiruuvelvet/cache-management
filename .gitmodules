@@ -22,3 +22,7 @@
 	path = libs/simdjson
 	url = https://github.com/simdjson/simdjson
 	shallow = true
+[submodule "libs/sqlite3"]
+	path = libs/sqlite3
+	url = https://github.com/magiruuvelvet/sqlite-amalgamation-mirror
+	shallow = true
