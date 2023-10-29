@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <cerrno>
+#include <cstring>
 #include <filesystem>
 
 #include "logging_helper.hpp"

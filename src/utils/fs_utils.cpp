@@ -1,6 +1,8 @@
 #include "fs_utils.hpp"
 
+#include <filesystem>
 #include <fstream>
+#include <cstring>
 #include <regex>
 
 #include "logging_helper.hpp"
