@@ -12,8 +12,11 @@ option(ENABLE_GIT_VERSION_TRACKING "embed live git version information" ON)
 # disable this option if your toolchain has problems with precompiled headers
 option(ENABLE_PRECOMPILED_HEADERS "precompile expensive header files" ON)
 
+# disable this option to skip building tests
+option(ENABLE_TESTING "build tests" ON)
+
 # enable this to perform profiling without the quill logging library (profiling quill is extremely slow)
-option(COMPILE_PROFILING_BUILD "compile a version optimized for profiling (completley disables logging)" OFF)
+option(COMPILE_PROFILING_BUILD "compile a version optimized for profiling (completely disables logging)" OFF)
 
 #######################################################################################
 # process early option dependencies here                                              #
@@ -72,4 +75,7 @@ add_subdirectory(libs)
 add_subdirectory(src/utils)
 add_subdirectory(src/libcachemgr)
 add_subdirectory(src/cachemgr)
-add_subdirectory(test)
+
+if (ENABLE_TESTING)
+    add_subdirectory(test)
+endif()
