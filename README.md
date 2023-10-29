@@ -48,6 +48,9 @@ If you have already cloned the repository without submodules, you can run `git s
  - **[quill](https://github.com/odygrd/quill)**: used for logging.
  - **[simdjson](https://github.com/simdjson/simdjson)**: This library was chosen for the JSON parsing support in the package manager module. It works without exceptions and is also super fast.
  - **[argparse-cpp](https://github.com/magiruuvelvet/argparse-cpp)**: Simple stupid command line parser for C++
+ - **[sqlite3](https://www.sqlite.org)**\*: A SQLite database is used for local cache analytics. SQLite was chosen for flexibility, portability and ease-of-use. This allows you to easily analyze the database using 3rd party applications.
+
+\* *can be build and linked against the system shared version if desired*
 
 ### Testing dependencies
 
