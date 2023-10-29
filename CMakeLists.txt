@@ -12,6 +12,9 @@ option(ENABLE_GIT_VERSION_TRACKING "embed live git version information" ON)
 # disable this option if your toolchain has problems with precompiled headers
 option(ENABLE_PRECOMPILED_HEADERS "precompile expensive header files" ON)
 
+# enable this option to build with LTO (might increase build time)
+option(ENABLE_LTO "enable link time optimizations" OFF)
+
 # disable this option to skip building tests
 option(ENABLE_TESTING "build tests" ON)
 
@@ -66,6 +69,18 @@ if (PROJECT_COMPILER_CLANG OR PROJECT_COMPILER_GCC)
     message(STATUS "Enabling compiler flag: -Werror=implicit-function-declaration")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=implicit-function-declaration")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror=implicit-function-declaration")
+endif()
+
+# LTO requires a project(), so check this here
+if (ENABLE_LTO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT LTO_SUPPORTED OUTPUT LTO_ERROR)
+    if (LTO_SUPPORTED)
+        message(STATUS "LTO enabled")
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+    else()
+        message(FATAL_ERROR "ENABLE_LTO=ON set, but LTO is not supported: <${LTO_ERROR}>")
+    endif()
 endif()
 
 # create dependency targets
