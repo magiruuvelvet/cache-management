@@ -55,6 +55,10 @@ target_include_directories(3rdparty_simdjson PRIVATE "${CMAKE_CURRENT_SOURCE_DIR
 # use generic fallback implementation until there is proper runtime cpu detection support
 target_compile_definitions(3rdparty_simdjson PRIVATE "-DSIMDJSON_IMPLEMENTATION_FALLBACK")
 target_compile_definitions(3rdparty_simdjson PRIVATE SIMDJSON_EXCEPTIONS=OFF)
+set_property(TARGET 3rdparty_simdjson PROPERTY CXX_STANDARD 20)
+set_property(TARGET 3rdparty_simdjson PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET 3rdparty_simdjson PROPERTY CXX_EXTENSIONS OFF)
+target_compile_options(3rdparty_simdjson PRIVATE -fno-exceptions -fno-rtti)
 add_library(simdjson INTERFACE)
 target_link_libraries(simdjson INTERFACE 3rdparty_simdjson)
 target_include_directories(simdjson SYSTEM INTERFACE "${SIMDJSON_INCLUDE_DIR}")
