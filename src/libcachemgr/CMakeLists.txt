@@ -1,5 +1,7 @@
 # shared sources across all platforms
 set(libcachemgr_shared_sources
+    database/cache_db.cpp
+    database/cache_db.hpp
     fs_watcher/fs_watcher.cpp
     fs_watcher/fs_watcher.hpp
     cachemgr.cpp
@@ -86,6 +88,7 @@ target_link_libraries(libcachemgr-private PRIVATE cachemgr-utils)
 target_link_libraries(libcachemgr-private PRIVATE ryml) # rapidyaml
 target_link_libraries(libcachemgr-private PRIVATE simdjson)
 target_link_libraries(libcachemgr-private PRIVATE quill::quill)
+target_link_libraries(libcachemgr-private PRIVATE sqlite3)
 
 # create interface
 add_library(libcachemgr INTERFACE)

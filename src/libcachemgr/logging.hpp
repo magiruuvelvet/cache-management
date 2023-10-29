@@ -10,6 +10,7 @@ extern quill::Logger *log_config;
 extern quill::Logger *log_pm;
   extern quill::Logger *log_composer;
   extern quill::Logger *log_npm;
+extern quill::Logger *log_db;
 extern quill::Logger *log_test;
 
 /**

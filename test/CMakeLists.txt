@@ -21,6 +21,11 @@ add_executable(cachemgr-test-pm-composer
     main_test.cpp
 )
 
+add_executable(cachemgr-test-database
+    include/test_helper.hpp
+    database_test.cpp
+)
+
 macro(SetupTestTarget TestTarget)
     SetupTarget(${TestTarget} "${TestTarget}")
 
@@ -43,3 +48,4 @@ endmacro()
 
 SetupTestTarget(cachemgr-tests)
 SetupTestTarget(cachemgr-test-pm-composer)
+SetupTestTarget(cachemgr-test-database)
