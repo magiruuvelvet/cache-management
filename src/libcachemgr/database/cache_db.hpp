@@ -5,12 +5,14 @@
 #include <functional>
 #include <optional>
 
+#include "models.hpp"
+
 typedef struct sqlite3 sqlite3;
 
 namespace libcachemgr {
 namespace database {
 
-class cache_db
+class cache_db final
 {
 public:
     /**
@@ -62,6 +64,15 @@ public:
      * Receives the current schema version of the database.
      */
     std::optional<std::uint32_t> get_database_version() const;
+
+    /**
+     * Inserts a new cache trend record into the database.
+     *
+     * @param cache_trend the cache trend record to insert
+     * @return true successfully inserted the record
+     * @return false failed to insert the record
+     */
+    bool insert_cache_trend(const cache_trend &cache_trend);
 
 private:
     sqlite3 *_db_ptr{nullptr};

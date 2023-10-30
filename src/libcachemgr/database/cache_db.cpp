@@ -9,6 +9,7 @@ using namespace libcachemgr::database;
 
 namespace {
     constexpr const char *tbl_schema_migration = "schema_migration";
+    constexpr const char *tbl_cache_trends = "cache_trends";
 } // anonymous namespace
 
 extern "C" {
@@ -242,4 +243,68 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
         });
 
     return result ? std::optional{version} : std::nullopt;
+}
+
+// TODO: generalize and make model-agnostic
+bool cache_db::insert_cache_trend(const cache_trend &cache_trend)
+{
+    struct sqlite3_stmt *stmt = nullptr;
+
+    const auto statement = fmt::format(
+        "insert into {} (timestamp, cache_mapping_id, package_manager, cache_size) "
+        "values (?, ?, ?, ?)", tbl_cache_trends);
+
+    LOG_DEBUG(libcachemgr::log_db, "preparing SQL statement: {}", statement);
+
+    if (sqlite3_prepare_v2(
+        this->_db_ptr,
+        statement.c_str(),
+        statement.size() + 1,
+        &stmt,
+        nullptr) == SQLITE_OK)
+    {
+        LOG_DEBUG(libcachemgr::log_db, "binding value: timestamp={}", cache_trend.timestamp);
+        sqlite3_bind_int64(stmt, 1, cache_trend.timestamp);
+
+        LOG_DEBUG(libcachemgr::log_db, "binding value: cache_mapping_id={}", cache_trend.cache_mapping_id);
+        sqlite3_bind_text(stmt, 2, cache_trend.cache_mapping_id.c_str(), cache_trend.cache_mapping_id.size(), SQLITE_STATIC);
+
+        LOG_DEBUG(libcachemgr::log_db, "binding value: package_manager={}", cache_trend.package_manager);
+        if (cache_trend.package_manager.has_value())
+        {
+            const auto &package_manager = cache_trend.package_manager.value();
+            sqlite3_bind_text(stmt, 3, package_manager.c_str(), package_manager.size(), SQLITE_STATIC);
+        }
+        else
+        {
+            sqlite3_bind_null(stmt, 3);
+        }
+
+        LOG_DEBUG(libcachemgr::log_db, "binding value: cache_size={}", cache_trend.cache_size);
+        sqlite3_bind_int64(stmt, 4, cache_trend.cache_size);
+
+        bool success = false;
+
+        LOG_DEBUG(libcachemgr::log_db, "executing prepared SQL statement: {}", statement);
+        if (sqlite3_step(stmt) == SQLITE_DONE)
+        {
+            LOG_DEBUG(libcachemgr::log_db, "successfully executed prepared SQL statement: {}", statement);
+            success = true;
+        }
+        else
+        {
+            LOG_ERROR(libcachemgr::log_db, "failed to execute prepared SQL statement: {} (ERROR: {})",
+                statement, sqlite3_errmsg(this->_db_ptr));
+        }
+
+        LOG_DEBUG(libcachemgr::log_db, "finalizing prepared SQL statement: {} (success={})", statement, success);
+        sqlite3_finalize(stmt);
+
+        return success;
+    }
+    else
+    {
+        LOG_ERROR(libcachemgr::log_db, "failed to prepare SQL statement: {}", sqlite3_errmsg(this->_db_ptr));
+        return false;
+    }
 }

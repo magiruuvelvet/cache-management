@@ -37,5 +37,17 @@ int main(int argc, char **argv)
     LOG_DEBUG(libcachemgr::log_db, "db.get_database_version(): {}", db.get_database_version());
     LOG_DEBUG(libcachemgr::log_db, "db.run_migrations(): {}", db.run_migrations());
 
+    LOG_DEBUG(libcachemgr::log_db, "db.insert_cache_trend(): {}",
+        db.insert_cache_trend(cache_trend{
+            .timestamp = std::uint64_t(
+                std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count()
+            ),
+            .cache_mapping_id = "sample",
+            //.package_manager = "sample",
+            //.package_manager = "'; drop table cache_trends;",
+            .package_manager = std::nullopt,
+            .cache_size = 2048,
+        }));
+
     return 0;
 }
