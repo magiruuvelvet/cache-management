@@ -1,10 +1,38 @@
 #include "cache_db.hpp"
 
+#include <libcachemgr/macros.hpp>
 #include <libcachemgr/logging.hpp>
 
 #include <sqlite3.h>
 
 using namespace libcachemgr::database;
+
+extern "C" {
+
+/**
+ * Ensure C calling convention is used for the `sqlite3_exec()` callback.
+ */
+LIBCACHEMGR_ATTRIBUTE_USED
+static int libcachemgr_sqlite3_exec_callback(void *sql_user_data, int count, char **data, char **columns)
+{
+    // get pointer to the packaging struct (instance is located on a C++ stack frame)
+    auto user_data_wrapper_ptr = static_cast<cache_db::sqlite3_exec_callback_userdata*>(sql_user_data);
+
+    // get pointer to the provided callback function
+    auto callback_function_ptr = static_cast<
+        cache_db::sqlite3_exec_callback_userdata::sqlite_callback_t_ptr
+    >(user_data_wrapper_ptr->callback_function_ptr);
+
+    // call the provided callback function with the SQL dataset
+    return (*callback_function_ptr)(cache_db::callback_data{
+        .count = count,
+        // make the dataset const, there is no need to ever modify this
+        .data = const_cast<const char**>(data),
+        .columns = const_cast<const char**>(columns),
+    }) ? SQLITE_OK : SQLITE_ABORT;
+}
+
+} // extern "C"
 
 cache_db::cache_db()
 {
@@ -53,33 +81,14 @@ bool cache_db::execute_statement(std::string_view statement,
 
     char *errmsg = nullptr;
 
-    using sqlite_callback_t_ptr = const sqlite_callback_t *const;
-
-    /// ugly packaging struct to force C++ stuff into SQLite
-    struct {
-        /// const pointer to the provided {callback} function
-        sqlite_callback_t_ptr callback_function_ptr;
-    } user_data_wrapper{
+    sqlite3_exec_callback_userdata user_data_wrapper{
         .callback_function_ptr = &callback,
     };
 
     if (sqlite3_exec(
         this->_db_ptr,
         statement.data(),
-        // C++ only allows passing inline lambda functions as C function pointer
-        +[](void *sql_user_data, int count, char **data, char **columns) -> int {
-            // get pointer to the packaging struct
-            auto user_data_wrapper_ptr = static_cast<decltype(user_data_wrapper)*>(sql_user_data);
-            // get pointer to the provided {callback} function
-            auto callback_function_ptr = static_cast<sqlite_callback_t_ptr>(user_data_wrapper_ptr->callback_function_ptr);
-            // call the provided {callback} function with the SQL dataset
-            return (*callback_function_ptr)(callback_data{
-                .count = count,
-                // make the dataset const, there is no need to ever modify this
-                .data = const_cast<const char**>(data),
-                .columns = const_cast<const char**>(columns),
-            }) ? SQLITE_OK : SQLITE_ABORT;
-        },
+        libcachemgr_sqlite3_exec_callback, // callback function with C ABI
         &user_data_wrapper,
         &errmsg) == SQLITE_OK)
     {

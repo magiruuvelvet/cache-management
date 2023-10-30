@@ -69,6 +69,7 @@ private:
     std::string _db_path{":memory:"};
     bool _is_open{false};
 
+public:
     /**
      * Read-only view of the entire dataset passed to the callback function.
      */
@@ -87,6 +88,19 @@ private:
      */
     using sqlite_callback_t = std::function<bool(callback_data)>;
 
+    /**
+     * Packaging struct to pass C++ data into SQLite.
+     */
+    struct sqlite3_exec_callback_userdata final
+    {
+        /// type alias for the callback function pointer
+        using sqlite_callback_t_ptr = const sqlite_callback_t *const;
+
+        /// const pointer to the provided {callback} function
+        sqlite_callback_t_ptr callback_function_ptr;
+    };
+
+private:
     /**
      * Executes a single SQL statement and runs the given callback function for the entire dataset.
      *
