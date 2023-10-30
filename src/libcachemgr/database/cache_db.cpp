@@ -7,6 +7,10 @@
 
 using namespace libcachemgr::database;
 
+namespace {
+    constexpr const char *tbl_schema_migration = "schema_migration";
+} // anonymous namespace
+
 extern "C" {
 
 /**
@@ -132,7 +136,7 @@ bool cache_db::execute_migration(const std::function<bool()> &migration,
         }
 
         // register the migration in the database
-        if (!this->execute_statement(fmt::format("insert into schema_migration (version) values ({})", to_version)))
+        if (!this->execute_statement(fmt::format("insert into {} (version) values ({})", tbl_schema_migration, to_version)))
         {
             return false;
         }
@@ -184,7 +188,7 @@ bool cache_db::create_database_schema()
     return this->execute_transactional([=]{
         LOG_INFO(libcachemgr::log_db, "creating initial database schema...");
         const auto result = this->execute_statement(
-            "CREATE TABLE schema_migration (version INTEGER NOT NULL PRIMARY KEY CHECK(version >= 0))"
+            fmt::format("CREATE TABLE {} (version INTEGER NOT NULL PRIMARY KEY CHECK(version >= 0))", tbl_schema_migration)
         );
         if (result)
         {
@@ -202,14 +206,14 @@ bool cache_db::create_database_schema()
 bool cache_db::run_migration_v0_to_v1()
 {
     return this->execute_migration([=]{
-        if (!this->execute_statement(
-            "CREATE TABLE cache_trends ("
+        if (!this->execute_statement(fmt::format(
+            "CREATE TABLE {} ("
             "timestamp INTEGER NOT NULL, "      // UTC unix timestamp when the trend was calculated
             "cache_mapping_id TEXT NOT NULL, "  // user-defined cache_mappings[].id
             "package_manager TEXT, "            // name of the package manager
             "cache_size INTEGER NOT NULL CHECK(cache_size >= 0), " // cache size in bytes
             "PRIMARY KEY (timestamp, cache_mapping_id)"
-            ")"
+            ")", tbl_cache_trends)
         )) return false;
 
         return true;
@@ -220,7 +224,7 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
 {
     std::uint32_t version = 0;
     const auto result = this->execute_statement(
-        "select version from schema_migration order by version desc limit 1",
+        fmt::format("select version from {} order by version desc limit 1", tbl_schema_migration),
         [&](const callback_data dataset) -> bool {
             if (dataset.count == 0)
             {
