@@ -13,6 +13,7 @@ set(libcachemgr_shared_sources
     libcachemgr.hpp
     logging.cpp
     logging.hpp
+    macros.hpp
     messages.hpp
     types.hpp
 )

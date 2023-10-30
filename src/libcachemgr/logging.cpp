@@ -9,19 +9,19 @@
 
 #include <quill/Quill.h>
 
+#include "macros.hpp"
 #include "libcachemgr.hpp"
 
 #include <utils/logging_helper.hpp>
 #include <utils/freedesktop/os-release.hpp>
-
-#define ATTRIBUTE_USED __attribute__((used))
 
 extern "C" {
 
 /**
  * Shutdown routines for the quill logging library.
  */
-ATTRIBUTE_USED static void shutdown_quill(void)
+LIBCACHEMGR_ATTRIBUTE_USED
+static void shutdown_quill(void)
 {
     quill::flush();
 }
@@ -40,7 +40,8 @@ static constexpr int signal_offset = 128;
  *
  * @param signal
  */
-ATTRIBUTE_USED static void crash_signal_handler(int signal)
+LIBCACHEMGR_ATTRIBUTE_USED
+static void crash_signal_handler(int signal)
 {
     // restore original signal handler
     std::signal(signal, SIG_DFL);
@@ -63,7 +64,8 @@ ATTRIBUTE_USED static void crash_signal_handler(int signal)
  *
  * @param signal
  */
-[[noreturn]] ATTRIBUTE_USED static void normal_signal_handler(int signal)
+[[noreturn]] LIBCACHEMGR_ATTRIBUTE_USED
+static void normal_signal_handler(int signal)
 {
     // call std::atexit functions before terminating the application
     std::exit(signal_offset + signal);
