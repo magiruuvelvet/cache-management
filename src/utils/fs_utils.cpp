@@ -9,7 +9,7 @@
 
 namespace fs_utils {
 
-std::string read_text_file(std::string_view path, std::error_code *ec) noexcept
+std::string read_text_file(const std::string &path, std::error_code *ec) noexcept
 {
     std::string buffer;
 
@@ -21,7 +21,7 @@ std::string read_text_file(std::string_view path, std::error_code *ec) noexcept
             (*ec) = std::make_error_code(std::errc{errno});
         }
         // TODO: use <format> once it is more available across different C++ standard libaries
-        logging_helper::get_logger()->log_error("failed to open file: " + std::string{path} +
+        logging_helper::get_logger()->log_error("failed to open file: " + path +
             " (" + strerror(errno) + ")");
         return {};
     }
@@ -41,14 +41,14 @@ std::string read_text_file(std::string_view path, std::error_code *ec) noexcept
     return buffer;
 }
 
-std::error_code find_in_text_file(std::string_view path, std::string &out,
+std::error_code find_in_text_file(const std::string &path, std::string &out,
     std::function<bool(std::string_view line, std::string &cb_out)> line_callback) noexcept
 {
     std::ifstream fstream(path, std::ios::in);
     if (!fstream)
     {
         // TODO: use <format> once it is more available across different C++ standard libaries
-        logging_helper::get_logger()->log_error("failed to open file: " + std::string{path} +
+        logging_helper::get_logger()->log_error("failed to open file: " + path +
             " (" + strerror(errno) + ")");
         return std::make_error_code(std::errc{errno});
     }

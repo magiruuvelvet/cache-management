@@ -18,7 +18,7 @@ namespace fs_utils {
  * @param ec optional error_code for error handling
  * @return file contents as a string
  */
-std::string read_text_file(std::string_view path, std::error_code *ec = nullptr) noexcept;
+std::string read_text_file(const std::string &path, std::error_code *ec = nullptr) noexcept;
 
 /**
  * Reads a text file line-by-line and invokes the given @p line_callback function for each line.
@@ -40,7 +40,7 @@ std::string read_text_file(std::string_view path, std::error_code *ec = nullptr)
  * @param line_callback `bool(std::string_view line, std::string &cb_out)`
  * @return error code
  */
-std::error_code find_in_text_file(std::string_view path, std::string &out,
+std::error_code find_in_text_file(const std::string &path, std::string &out,
     std::function<bool(std::string_view line, std::string &cb_out)> line_callback) noexcept;
 
 /// Resolves the given wildcard pattern into a list of file paths.
