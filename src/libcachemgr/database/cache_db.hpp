@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <string>
-#include <string_view>
 #include <functional>
 #include <optional>
 
@@ -96,7 +95,7 @@ public:
         /// type alias for the callback function pointer
         using sqlite_callback_t_ptr = const sqlite_callback_t *const;
 
-        /// const pointer to the provided {callback} function
+        /// const pointer to the provided callback function
         sqlite_callback_t_ptr callback_function_ptr;
     };
 
@@ -115,7 +114,7 @@ private:
      * @return true the statement was executed successfully
      * @return false the statement was erroneous or the callback function returned an error
      */
-    bool execute_statement(std::string_view statement,
+    bool execute_statement(const std::string &statement,
         const sqlite_callback_t &callback = {}) const;
 
     /**

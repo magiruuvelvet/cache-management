@@ -74,7 +74,7 @@ bool cache_db::open()
     return this->_is_open;
 }
 
-bool cache_db::execute_statement(std::string_view statement,
+bool cache_db::execute_statement(const std::string &statement,
         const sqlite_callback_t &callback) const
 {
     LOG_DEBUG(libcachemgr::log_db, "executing SQL statement: {}", statement);
@@ -87,7 +87,7 @@ bool cache_db::execute_statement(std::string_view statement,
 
     if (sqlite3_exec(
         this->_db_ptr,
-        statement.data(),
+        statement.c_str(),
         libcachemgr_sqlite3_exec_callback, // callback function with C ABI
         &user_data_wrapper,
         &errmsg) == SQLITE_OK)
