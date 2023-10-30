@@ -4,6 +4,7 @@
 #include <utils/fs_utils.hpp>
 
 #include <fstream>
+#include <string>
 #include <string_view>
 
 #include <libcachemgr/logging.hpp>
@@ -12,7 +13,7 @@ using namespace libcachemgr::package_manager_support;
 
 namespace {
 
-std::string find_cache_in_npmrc(std::string_view npmrc_path)
+std::string find_cache_in_npmrc(const std::string &npmrc_path)
 {
     LOG_DEBUG(libcachemgr::log_npm,
         "looking for a cache= entry in '{}'", npmrc_path);
