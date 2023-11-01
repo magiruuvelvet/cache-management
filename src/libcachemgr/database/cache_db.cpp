@@ -39,6 +39,127 @@ static int libcachemgr_sqlite3_exec_callback(void *sql_user_data, int count, cha
 
 } // extern "C"
 
+namespace {
+
+struct parameter_binder final
+{
+
+// bogus struct to catch unsupported types at compile-time
+struct UnsupportedType;
+
+// helper function to count the number of placeholders in the SQL statement
+static inline constexpr std::size_t count_placeholders(std::string_view sql, char placeholder = '?') {
+    std::size_t count = 0;
+    std::size_t pos = 0;
+    while ((pos = sql.find(placeholder, pos)) != std::string_view::npos) {
+        ++count;
+        ++pos;
+    }
+    return count;
+}
+
+template<typename StringType>
+static inline constexpr bool bind_text_parameter(
+    sqlite3 *db, sqlite3_stmt *stmt,
+    std::size_t idx, const StringType &param)
+{
+    LOG_DEBUG(libcachemgr::log_db, "binding text parameter {}: {}", idx, param);
+
+    if (sqlite3_bind_text(stmt, idx, param.c_str(), param.size(), SQLITE_STATIC) != SQLITE_OK) {
+        LOG_ERROR(libcachemgr::log_db, "failed to bind text parameter {}: {}", idx, sqlite3_errmsg(db));
+        return false;
+    }
+
+    return true;
+}
+
+template<typename IntegerType>
+static inline constexpr bool bind_integer_parameter(
+    sqlite3 *db, sqlite3_stmt *stmt,
+    std::size_t idx, const IntegerType &param)
+{
+    std::string_view type_id;
+    int sql_ret;
+
+    if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::uint64_t>) {
+        type_id = "int64";
+        LOG_DEBUG(libcachemgr::log_db, "binding {} parameter {}: {}", type_id, idx, param);
+        sql_ret = sqlite3_bind_int64(stmt, idx, param);
+    } else {
+        static_assert(std::is_same_v<std::decay_t<decltype(param)>, UnsupportedType>,
+            "unsupported integer type");
+    }
+
+    if (sql_ret != SQLITE_OK) {
+        LOG_ERROR(libcachemgr::log_db, "failed to bind {} parameter {}: {}", type_id, idx, sqlite3_errmsg(db));
+        return false;
+    }
+
+    return true;
+}
+
+template<typename... Args, std::size_t... I>
+static inline constexpr bool bind_parameters_impl(
+    sqlite3 *db, sqlite3_stmt *stmt,
+    const std::tuple<Args...> &params, std::index_sequence<I...>)
+{
+    // note: sqlite3_bind_null() does not need to be called because NULL is the default state for unbound parameters
+
+    bool success = true;
+
+    // use a fold expression to bind parameters
+    (..., [&]{
+        const auto &param = std::get<I>(params);
+        const auto idx = I + 1;
+
+        // bind string
+        if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::string>) {
+            success = bind_text_parameter(db, stmt, idx, param);
+        }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::optional<std::string>>) {
+            if (param) {
+                success = bind_text_parameter(db, stmt, idx, *param);
+            }
+        }
+
+        // bind integers
+        else if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::uint64_t>) {
+            success = bind_integer_parameter(db, stmt, idx, param);
+        }
+        else if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::optional<std::uint64_t>>) {
+            if (param) {
+                success = bind_integer_parameter(db, stmt, idx, *param);
+            }
+        }
+
+        // unsupported type is a compile-time error
+        else
+        {
+            static_assert(std::is_same_v<std::decay_t<decltype(param)>, UnsupportedType>,
+                "unsupported parameter type");
+        }
+    }());
+
+    return success;
+}
+
+}; // struct parameter_binder
+
+template<typename... Args>
+static inline constexpr bool bind_parameters(sqlite3 *db, sqlite3_stmt *stmt, Args&&... args)
+{
+    // constexpr std::size_t sql_placeholders = parameter_binder::count_placeholders(statement);
+    // static_assert(sql_placeholders == sizeof...(args),
+    //     "Number of parameters doesn't match the number of placeholders in the SQL statement.");
+
+    return parameter_binder::bind_parameters_impl(
+        db, stmt,
+        std::forward_as_tuple(args...),
+        std::index_sequence_for<Args...>{});
+}
+
+} // anonymous namespace
+
 cache_db::cache_db()
 {
     LOG_INFO(libcachemgr::log_db, "SQLite version: {}", sqlite3_libversion());
@@ -80,7 +201,7 @@ bool cache_db::open()
 }
 
 bool cache_db::execute_statement(const std::string &statement,
-        const sqlite_callback_t &callback) const
+    const sqlite_callback_t &callback) const
 {
     LOG_DEBUG(libcachemgr::log_db, "executing SQL statement: {}", statement);
 
@@ -107,6 +228,55 @@ bool cache_db::execute_statement(const std::string &statement,
     }
 
     return false;
+}
+
+bool cache_db::execute_prepared_statement(const std::string &statement,
+    const std::function<bool(sqlite3_stmt *stmt)> &bind_parameters_cb) const
+{
+    struct sqlite3_stmt *stmt = nullptr;
+
+    LOG_DEBUG(libcachemgr::log_db, "preparing SQL statement: {}", statement);
+
+    if (sqlite3_prepare_v2(
+        this->_db_ptr,
+        statement.c_str(),
+        statement.size() + 1,
+        &stmt,
+        nullptr) == SQLITE_OK)
+    {
+        LOG_DEBUG(libcachemgr::log_db, "binding parameters for SQL statement: {}", statement);
+
+        if (!bind_parameters_cb(stmt))
+        {
+            LOG_ERROR(libcachemgr::log_db, "failed to bind parameters for SQL statement: {}", statement);
+            sqlite3_finalize(stmt);
+            return false;
+        }
+
+        bool success = false;
+
+        LOG_DEBUG(libcachemgr::log_db, "executing prepared SQL statement: {}", statement);
+        if (sqlite3_step(stmt) == SQLITE_DONE)
+        {
+            LOG_DEBUG(libcachemgr::log_db, "successfully executed prepared SQL statement: {}", statement);
+            success = true;
+        }
+        else
+        {
+            LOG_ERROR(libcachemgr::log_db, "failed to execute prepared SQL statement: {} (ERROR: {})",
+                statement, sqlite3_errmsg(this->_db_ptr));
+        }
+
+        LOG_DEBUG(libcachemgr::log_db, "finalizing prepared SQL statement: {} (success={})", statement, success);
+        sqlite3_finalize(stmt);
+
+        return success;
+    }
+    else
+    {
+        LOG_ERROR(libcachemgr::log_db, "failed to prepare SQL statement: {}", sqlite3_errmsg(this->_db_ptr));
+        return false;
+    }
 }
 
 bool cache_db::execute_transactional(const std::function<bool()> &callback)
@@ -245,66 +415,19 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
     return result ? std::optional{version} : std::nullopt;
 }
 
-// TODO: generalize and make model-agnostic
 bool cache_db::insert_cache_trend(const cache_trend &cache_trend)
 {
-    struct sqlite3_stmt *stmt = nullptr;
-
     const auto statement = fmt::format(
         "insert into {} (timestamp, cache_mapping_id, package_manager, cache_size) "
-        "values (?, ?, ?, ?)", tbl_cache_trends);
+        "values (?1, ?2, ?3, ?4)", tbl_cache_trends);
 
-    LOG_DEBUG(libcachemgr::log_db, "preparing SQL statement: {}", statement);
+    auto db_ptr = this->_db_ptr;
 
-    if (sqlite3_prepare_v2(
-        this->_db_ptr,
-        statement.c_str(),
-        statement.size() + 1,
-        &stmt,
-        nullptr) == SQLITE_OK)
-    {
-        LOG_DEBUG(libcachemgr::log_db, "binding value: timestamp={}", cache_trend.timestamp);
-        sqlite3_bind_int64(stmt, 1, cache_trend.timestamp);
-
-        LOG_DEBUG(libcachemgr::log_db, "binding value: cache_mapping_id={}", cache_trend.cache_mapping_id);
-        sqlite3_bind_text(stmt, 2, cache_trend.cache_mapping_id.c_str(), cache_trend.cache_mapping_id.size(), SQLITE_STATIC);
-
-        LOG_DEBUG(libcachemgr::log_db, "binding value: package_manager={}", cache_trend.package_manager);
-        if (cache_trend.package_manager.has_value())
-        {
-            const auto &package_manager = cache_trend.package_manager.value();
-            sqlite3_bind_text(stmt, 3, package_manager.c_str(), package_manager.size(), SQLITE_STATIC);
-        }
-        else
-        {
-            sqlite3_bind_null(stmt, 3);
-        }
-
-        LOG_DEBUG(libcachemgr::log_db, "binding value: cache_size={}", cache_trend.cache_size);
-        sqlite3_bind_int64(stmt, 4, cache_trend.cache_size);
-
-        bool success = false;
-
-        LOG_DEBUG(libcachemgr::log_db, "executing prepared SQL statement: {}", statement);
-        if (sqlite3_step(stmt) == SQLITE_DONE)
-        {
-            LOG_DEBUG(libcachemgr::log_db, "successfully executed prepared SQL statement: {}", statement);
-            success = true;
-        }
-        else
-        {
-            LOG_ERROR(libcachemgr::log_db, "failed to execute prepared SQL statement: {} (ERROR: {})",
-                statement, sqlite3_errmsg(this->_db_ptr));
-        }
-
-        LOG_DEBUG(libcachemgr::log_db, "finalizing prepared SQL statement: {} (success={})", statement, success);
-        sqlite3_finalize(stmt);
-
-        return success;
-    }
-    else
-    {
-        LOG_ERROR(libcachemgr::log_db, "failed to prepare SQL statement: {}", sqlite3_errmsg(this->_db_ptr));
-        return false;
-    }
+    return this->execute_prepared_statement(statement, [&](sqlite3_stmt *stmt) -> bool {
+        return bind_parameters(db_ptr, stmt,
+            cache_trend.timestamp,
+            cache_trend.cache_mapping_id,
+            cache_trend.package_manager,
+            cache_trend.cache_size);
+    });
 }

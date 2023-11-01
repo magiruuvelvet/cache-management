@@ -8,6 +8,7 @@
 #include "models.hpp"
 
 typedef struct sqlite3 sqlite3;
+typedef struct sqlite3_stmt sqlite3_stmt;
 
 namespace libcachemgr {
 namespace database {
@@ -127,6 +128,20 @@ private:
      */
     bool execute_statement(const std::string &statement,
         const sqlite_callback_t &callback = {}) const;
+
+    /**
+     * Executes a single prepared SQL statement.
+     *
+     * The @p bind_parameters_cb callback must bind all the necessary parameters to the statement.
+     * If this callback returns false, the statement is not executed.
+     *
+     * @param statement prepared SQL statement to execute
+     * @param bind_parameters_cb callback function to bind parameters to the statement
+     * @return true the statement was executed successfully
+     * @return false the statement was erroneous or the binding of parameters failed
+     */
+    bool execute_prepared_statement(const std::string &statement,
+        const std::function<bool(sqlite3_stmt *stmt)> &bind_parameters_cb = {}) const;
 
     /**
      * Executes the given callback inside a transaction.
