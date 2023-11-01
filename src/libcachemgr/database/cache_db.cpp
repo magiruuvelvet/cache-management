@@ -3,6 +3,8 @@
 #include <libcachemgr/macros.hpp>
 #include <libcachemgr/logging.hpp>
 
+#include <type_traits>
+
 #include <sqlite3.h>
 
 using namespace libcachemgr::database;
@@ -73,25 +75,16 @@ static inline constexpr bool bind_text_parameter(
     return true;
 }
 
-template<typename IntegerType>
-static inline constexpr bool bind_integer_parameter(
+template<typename IntegralType>
+static inline constexpr bool bind_integral_parameter(
     sqlite3 *db, sqlite3_stmt *stmt,
-    std::size_t idx, const IntegerType &param)
+    std::size_t idx, const IntegralType &param)
 {
-    std::string_view type_id;
-    int sql_ret;
+    LOG_DEBUG(libcachemgr::log_db, "binding integral parameter {}: {}", idx, param);
 
-    if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::uint64_t>) {
-        type_id = "int64";
-        LOG_DEBUG(libcachemgr::log_db, "binding {} parameter {}: {}", type_id, idx, param);
-        sql_ret = sqlite3_bind_int64(stmt, idx, param);
-    } else {
-        static_assert(std::is_same_v<std::decay_t<decltype(param)>, UnsupportedType>,
-            "unsupported integer type");
-    }
-
-    if (sql_ret != SQLITE_OK) {
-        LOG_ERROR(libcachemgr::log_db, "failed to bind {} parameter {}: {}", type_id, idx, sqlite3_errmsg(db));
+    // use sqlite3_bind_int64 for every integral type
+    if (sqlite3_bind_int64(stmt, idx, param) != SQLITE_OK) {
+        LOG_ERROR(libcachemgr::log_db, "failed to bind integral parameter {}: {}", idx, sqlite3_errmsg(db));
         return false;
     }
 
@@ -123,12 +116,13 @@ static inline constexpr bool bind_parameters_impl(
         }
 
         // bind integers
-        else if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::uint64_t>) {
-            success = bind_integer_parameter(db, stmt, idx, param);
+        else if constexpr (std::is_integral_v<std::decay_t<decltype(param)>>) {
+            success = bind_integral_parameter(db, stmt, idx, param);
         }
+        // TODO: generic std::optional< std::is_integral_v > check without negatively affecting the remaining if-else chain
         else if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::optional<std::uint64_t>>) {
             if (param) {
-                success = bind_integer_parameter(db, stmt, idx, *param);
+                success = bind_integral_parameter(db, stmt, idx, *param);
             }
         }
 
@@ -136,7 +130,7 @@ static inline constexpr bool bind_parameters_impl(
         else
         {
             static_assert(std::is_same_v<std::decay_t<decltype(param)>, UnsupportedType>,
-                "unsupported parameter type");
+                "bind_parameters_impl: unsupported parameter type");
         }
     }());
 
