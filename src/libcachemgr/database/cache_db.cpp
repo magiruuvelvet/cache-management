@@ -49,6 +49,12 @@ struct parameter_binder final
 // bogus struct to catch unsupported types at compile-time
 struct UnsupportedType;
 
+template<typename T, typename Enable = void>
+struct is_optional : std::false_type {};
+
+template<typename T>
+struct is_optional<std::optional<T>> : std::true_type {};
+
 // helper function to count the number of placeholders in the SQL statement
 static inline constexpr std::size_t count_placeholders(std::string_view sql, char placeholder = '?') {
     std::size_t count = 0;
@@ -115,12 +121,13 @@ static inline constexpr bool bind_parameters_impl(
             }
         }
 
-        // bind integers
+        // bind integer
         else if constexpr (std::is_integral_v<std::decay_t<decltype(param)>>) {
             success = bind_integral_parameter(db, stmt, idx, param);
         }
-        // TODO: generic std::optional< std::is_integral_v > check without negatively affecting the remaining if-else chain
-        else if constexpr (std::is_same_v<std::decay_t<decltype(param)>, std::optional<std::uint64_t>>) {
+        else if constexpr (
+            is_optional<std::decay_t<decltype(param)>>::value &&
+            std::is_integral_v<typename std::decay_t<decltype(param)>::value_type>) {
             if (param) {
                 success = bind_integral_parameter(db, stmt, idx, *param);
             }
