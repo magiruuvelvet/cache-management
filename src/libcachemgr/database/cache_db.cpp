@@ -43,29 +43,36 @@ static int libcachemgr_sqlite3_exec_callback(void *sql_user_data, int count, cha
 
 namespace {
 
+/**
+ * compile-time facilities to generate SQL parameter bindings in a type-safe manner
+ */
 struct parameter_binder final
 {
 
-// bogus struct to catch unsupported types at compile-time
+/// bogus struct to catch unsupported types at compile-time
 struct UnsupportedType;
 
+/// checks if the given type is a `std::optional<T>`
 template<typename T, typename Enable = void>
-struct is_optional : std::false_type {};
+struct is_optional : std::false_type{};
 
+/// checks if the given type is a `std::optional<T>`
 template<typename T>
-struct is_optional<std::optional<T>> : std::true_type {};
+struct is_optional<std::optional<T>> : std::true_type{};
 
-// helper function to count the number of placeholders in the SQL statement
-static inline constexpr std::size_t count_placeholders(std::string_view sql, char placeholder = '?') {
-    std::size_t count = 0;
-    std::size_t pos = 0;
-    while ((pos = sql.find(placeholder, pos)) != std::string_view::npos) {
-        ++count;
-        ++pos;
-    }
-    return count;
-}
-
+/**
+ * Binds a SQL `TEXT` parameter to the given value.
+ *
+ * Uses `sqlite3_bind_text` to bind the text value.
+ *
+ * @tparam StringType string-like type
+ * @param db sqlite3 database handle
+ * @param stmt sqlite3 prepared statement handle
+ * @param idx parameter index in the SQL statement
+ * @param param value to bind
+ * @return true value was successfully bound
+ * @return false value could not be bound
+ */
 template<typename StringType>
 static inline constexpr bool bind_text_parameter(
     sqlite3 *db, sqlite3_stmt *stmt,
@@ -81,6 +88,19 @@ static inline constexpr bool bind_text_parameter(
     return true;
 }
 
+/**
+ * Binds an SQL integral parameter to the given value.
+ *
+ * Currently this function always uses `sqlite3_bind_int64` regardless of the integral size.
+ *
+ * @tparam IntegralType integral-like type
+ * @param db sqlite3 database handle
+ * @param stmt sqlite3 prepared statement handle
+ * @param idx parameter index in the SQL statement
+ * @param param value to bind
+ * @return true value was successfully bound
+ * @return false value could not be bound
+ */
 template<typename IntegralType>
 static inline constexpr bool bind_integral_parameter(
     sqlite3 *db, sqlite3_stmt *stmt,
@@ -97,6 +117,18 @@ static inline constexpr bool bind_integral_parameter(
     return true;
 }
 
+/**
+ * Parameter binder implementation which checks and decides at compile-time,
+ * which SQLite bind function should be called for the given type at runtime.
+ *
+ * @tparam Args parameter types
+ * @tparam I number of parameters to bind
+ * @param db sqlite3 database handle
+ * @param stmt sqlite3 prepared statement handle
+ * @param params types of the values to bind
+ * @return true all types have a corresponding SQLite bind function and were successfully bound
+ * @return false all types have a corresponding SQLite bind function but failed to bind at runtime
+ */
 template<typename... Args, std::size_t... I>
 static inline constexpr bool bind_parameters_impl(
     sqlite3 *db, sqlite3_stmt *stmt,
@@ -108,7 +140,7 @@ static inline constexpr bool bind_parameters_impl(
 
     // use a fold expression to bind parameters
     (..., [&]{
-        const auto &param = std::get<I>(params);
+        const auto &param = std::get<I>(params).value;
         const auto idx = I + 1;
 
         // bind string
@@ -146,17 +178,63 @@ static inline constexpr bool bind_parameters_impl(
 
 }; // struct parameter_binder
 
+/**
+ * compile-time facilities to generate a SQL INSERT statement in a type-safe manner
+ */
+struct query_builder final
+{
+
+/**
+ * INSERT statement builder implementation which generates a SQL INSERT statement
+ * in a type-safe manner based on the given field pairs.
+ *
+ * The number of columns and binding placeholders in the statement are always equal.
+ *
+ * @tparam FieldPairs field pairs which know the column name at compile-time
+ * @tparam I number of columns and binding placeholders in the statement
+ * @param table_name SQL table name
+ * @param field_pairs field pairs which know the column name at compile-time
+ * @return the generated SQL INSERT statement
+ */
+template<typename... FieldPairs, std::size_t... I>
+static inline constexpr auto generate_insert_statement_impl(
+    std::string_view table_name,
+    const std::tuple<FieldPairs...> &field_pairs, std::index_sequence<I...>)
+{
+    // use a fold expression to generate the insert statement
+    return fmt::format(
+        "insert into {} ({}) values ({})",
+        table_name,
+        // generate column names
+        fmt::join(std::array<fmt::string_view, sizeof...(FieldPairs)>{
+            // field_pair.name is a compile-time constant
+            std::get<I>(field_pairs).name...
+        }, ", "),
+        // generate query placeholders: ?1, ?2, ...
+        fmt::join(std::array<fmt::string_view, sizeof...(FieldPairs)>{
+            fmt::format("?{}", I + 1)...
+        }, ", ")
+    );
+}
+
+}; // struct query_builder
+
 template<typename... Args>
 static inline constexpr bool bind_parameters(sqlite3 *db, sqlite3_stmt *stmt, Args&&... args)
 {
-    // constexpr std::size_t sql_placeholders = parameter_binder::count_placeholders(statement);
-    // static_assert(sql_placeholders == sizeof...(args),
-    //     "Number of parameters doesn't match the number of placeholders in the SQL statement.");
-
     return parameter_binder::bind_parameters_impl(
         db, stmt,
         std::forward_as_tuple(args...),
         std::index_sequence_for<Args...>{});
+}
+
+template<typename... FieldPairs>
+static inline constexpr auto generate_insert_statement(std::string_view table_name, FieldPairs&&... field_pairs)
+{
+    return query_builder::generate_insert_statement_impl(
+        table_name,
+        std::forward_as_tuple(field_pairs...),
+        std::index_sequence_for<FieldPairs...>{});
 }
 
 } // anonymous namespace
@@ -418,9 +496,15 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
 
 bool cache_db::insert_cache_trend(const cache_trend &cache_trend)
 {
-    const auto statement = fmt::format(
-        "insert into {} (timestamp, cache_mapping_id, package_manager, cache_size) "
-        "values (?1, ?2, ?3, ?4)", tbl_cache_trends);
+    // TODO: merge generate_insert_statement() and bind_parameters() into a single function call
+    // TODO: clean up execute_prepared_statement() and maybe rename the function
+
+    const auto statement = generate_insert_statement(
+        tbl_cache_trends,
+        cache_trend.timestamp,
+        cache_trend.cache_mapping_id,
+        cache_trend.package_manager,
+        cache_trend.cache_size);
 
     auto db_ptr = this->_db_ptr;
 
