@@ -12,6 +12,9 @@ namespace {
     class basic_utils_logger final : public logging_helper
     {
     public:
+        void log_debug(const std::string &message) override {
+            fmt::print(stderr, "[dbg] {}\n", message);
+        }
         void log_info(const std::string &message) override {
             fmt::print(stderr, "[inf] {}\n", message);
         }

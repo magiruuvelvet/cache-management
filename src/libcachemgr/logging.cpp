@@ -90,6 +90,11 @@ public:
         this->_quill_utils_logger = libcachemgr::create_logger("utils", config);
     }
 
+    void log_debug(const std::string &message) override
+    {
+        LOG_DEBUG(this->_quill_utils_logger, "{}", message);
+    }
+
     void log_info(const std::string &message) override
     {
         LOG_INFO(this->_quill_utils_logger, "{}", message);

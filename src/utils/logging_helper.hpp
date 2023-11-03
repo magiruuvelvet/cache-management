@@ -13,6 +13,11 @@ class logging_helper
 {
 public:
     /**
+     * Debugging messages.
+     */
+    virtual void log_debug(const std::string& message) = 0;
+
+    /**
      * General informative messages for verbose logging.
      */
     virtual void log_info(const std::string &message) = 0;

@@ -10,6 +10,7 @@ class void_logger final : public logging_helper
 {
     // since nothing happens with the log messages, we don't care about thread safety
 public:
+    constexpr inline void log_debug(const std::string &) override {}
     constexpr inline void log_info(const std::string &) override {}
     constexpr inline void log_warning(const std::string &) override {}
     constexpr inline void log_error(const std::string &) override {}
