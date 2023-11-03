@@ -258,11 +258,14 @@ quill::Logger *libcachemgr::create_logger(const std::string &name, const logging
     if (config.log_to_file)
     {
         // create file logger
-        auto file_handler_config = quill::FileHandlerConfig();
+        auto file_handler_config = quill::RotatingFileHandlerConfig();
         file_handler_config.set_pattern(log_pattern, timestamp_pattern);
+        file_handler_config.set_rotation_naming_scheme(quill::RotatingFileHandlerConfig::RotationNamingScheme::Index);
+        file_handler_config.set_rotation_max_file_size(4096 * 1024); // 4 MiB
+        file_handler_config.set_remove_old_files(false);
 
         // create log file at the given location {config.log_level_file}
-        auto file_handler = quill::file_handler(config.log_file_path, file_handler_config);
+        auto file_handler = quill::rotating_file_handler(config.log_file_path, file_handler_config);
         file_handler->set_log_level(config.log_level_file);
         file_handler->set_handler_id(handler_id_file);
 
