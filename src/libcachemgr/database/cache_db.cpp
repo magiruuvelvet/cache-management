@@ -21,6 +21,13 @@ cache_db::cache_db(const std::string& db_path)
     : cache_db()
 {
     this->_db_path = db_path;
+
+    if (this->_db_path.empty())
+    {
+        this->_db_path = ":memory:";
+    }
+
+    LOG_INFO(libcachemgr::log_db, "database location: {}", this->_db_path);
 }
 
 cache_db::~cache_db()
