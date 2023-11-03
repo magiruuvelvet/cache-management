@@ -9,12 +9,9 @@
 #include "models.hpp"
 
 typedef struct sqlite3 sqlite3;
-typedef struct sqlite3_stmt sqlite3_stmt;
 
 namespace libcachemgr {
 namespace database {
-
-class __cache_db_private;
 
 class cache_db final
 {
@@ -57,34 +54,6 @@ public:
     }
 
     /**
-     * Runs all migrations and brings the database up to date.
-     *
-     * @return true all migrations were run successfully, the database is up to date
-     * @return false something went wrong during the migration process
-     */
-    bool run_migrations();
-
-    /**
-     * Receives the current schema version of the database.
-     */
-    std::optional<std::uint32_t> get_database_version() const;
-
-    /**
-     * Inserts a new cache trend record into the database.
-     *
-     * @param cache_trend the cache trend record to insert
-     * @return true successfully inserted the record
-     * @return false failed to insert the record
-     */
-    bool insert_cache_trend(const cache_trend &cache_trend);
-
-private:
-    sqlite3 *_db_ptr{nullptr};
-    std::string _db_path{":memory:"};
-    bool _is_open{false};
-
-public:
-    /**
      * Read-only view of the entire dataset passed to the callback function.
      */
     struct callback_data
@@ -114,48 +83,33 @@ public:
         sqlite_callback_t_ptr callback_function_ptr;
     };
 
+    /**
+     * Runs all migrations and brings the database up to date.
+     *
+     * @return true all migrations were run successfully, the database is up to date
+     * @return false something went wrong during the migration process
+     */
+    bool run_migrations();
+
+    /**
+     * Receives the current schema version of the database.
+     */
+    std::optional<std::uint32_t> get_database_version() const;
+
+    /**
+     * Inserts a new cache trend record into the database.
+     *
+     * @param cache_trend the cache trend record to insert
+     * @return true successfully inserted the record
+     * @return false failed to insert the record
+     */
+    bool insert_cache_trend(const cache_trend &cache_trend);
+
 private:
-    /**
-     * Executes a single SQL statement and runs the given callback function for the entire dataset.
-     *
-     * The callback lambda function can capture variables. All the heavy lifting is done
-     * in the background by making use of the user data functionality of `sqlite3_exec()`.
-     * There is no need to use ugly void pointers to pass user data around.
-     *
-     * This function also handles the error handling and logging.
-     *
-     * @param statement SQL statement to execute
-     * @param callback callback function for the dataset
-     * @return true the statement was executed successfully
-     * @return false the statement was erroneous or the callback function returned an error
-     */
-    bool execute_statement(const std::string &statement,
-        const sqlite_callback_t &callback = {}) const;
-
-    /**
-     * Executes a single prepared SQL statement.
-     *
-     * The @p parameter_binder_func function must bind all the necessary parameters to the statement.
-     * If this function returns false, the statement is not executed.
-     *
-     * @param statement prepared SQL statement to execute
-     * @param parameter_binder_func function to bind parameters to the statement
-     * @return true the statement was executed successfully
-     * @return false the statement was erroneous or the binding of parameters failed
-     */
-    bool execute_prepared_statement(const std::string &statement,
-        const std::function<bool(sqlite3_stmt *stmt)> &parameter_binder_func = {}) const;
-
-    /**
-     * Executes the given callback inside a transaction.
-     *
-     * If the given callback function returns false, the transaction will be rolled back.
-     *
-     * @param callback database manipulation functions to run inside the transaction
-     * @return true the callback was executed successfully and all data was committed to the database
-     * @return false the callback encountered an error and everything was rolled back
-     */
-    bool execute_transactional(const std::function<bool()> &callback);
+    // TODO: migrate into __private class and remove 'typedef struct sqlite3 sqlite3'
+    sqlite3 *_db_ptr{nullptr};
+    std::string _db_path{":memory:"};
+    bool _is_open{false};
 
     /**
      * Database migration runner with automatic transactions, logging and error handling.
@@ -174,8 +128,10 @@ private:
     bool create_database_schema();
     bool run_migration_v0_to_v1();
 
+    /// private implementation class
+    class __cache_db_private;
     friend class __cache_db_private;
-    std::shared_ptr<__cache_db_private> __private;
+    std::unique_ptr<__cache_db_private> __private;
 };
 
 } // namespace database

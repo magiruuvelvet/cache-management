@@ -10,7 +10,7 @@ namespace {
 
 cache_db::cache_db()
 {
-    this->__private = std::make_shared<__cache_db_private>(this);
+    this->__private = std::make_unique<__cache_db_private>(this);
 
     LOG_INFO(libcachemgr::log_db, "SQLite version: {}", sqlite3_libversion());
 }
@@ -50,106 +50,12 @@ bool cache_db::open()
     return this->_is_open;
 }
 
-bool cache_db::execute_statement(const std::string &statement,
-    const sqlite_callback_t &callback) const
-{
-    LOG_DEBUG(libcachemgr::log_db, "executing SQL statement: {}", statement);
-
-    char *errmsg = nullptr;
-
-    sqlite3_exec_callback_userdata user_data_wrapper{
-        .callback_function_ptr = &callback,
-    };
-
-    if (sqlite3_exec(
-        this->_db_ptr,
-        statement.c_str(),
-        libcachemgr_sqlite3_exec_callback, // callback function with C ABI
-        &user_data_wrapper,
-        &errmsg) == SQLITE_OK)
-    {
-        LOG_DEBUG(libcachemgr::log_db, "executed SQL statement: {}", statement);
-        return true;
-    }
-    else if (errmsg)
-    {
-        LOG_ERROR(libcachemgr::log_db, "failed to execute SQL statement: {}: {}", statement, errmsg);
-        sqlite3_free(errmsg);
-    }
-
-    return false;
-}
-
-bool cache_db::execute_prepared_statement(const std::string &statement,
-    const std::function<bool(sqlite3_stmt *stmt)> &parameter_binder_func) const
-{
-    struct sqlite3_stmt *stmt = nullptr;
-
-    LOG_DEBUG(libcachemgr::log_db, "preparing SQL statement: {}", statement);
-
-    if (sqlite3_prepare_v2(
-        this->_db_ptr,
-        statement.c_str(),
-        statement.size() + 1,
-        &stmt,
-        nullptr) == SQLITE_OK)
-    {
-        LOG_DEBUG(libcachemgr::log_db, "binding parameters for SQL statement: {}", statement);
-
-        if (!parameter_binder_func(stmt))
-        {
-            LOG_ERROR(libcachemgr::log_db, "failed to bind parameters for SQL statement: {}", statement);
-            sqlite3_finalize(stmt);
-            return false;
-        }
-
-        bool success = false;
-
-        LOG_DEBUG(libcachemgr::log_db, "executing prepared SQL statement: {}", statement);
-        if (sqlite3_step(stmt) == SQLITE_DONE)
-        {
-            LOG_DEBUG(libcachemgr::log_db, "successfully executed prepared SQL statement: {}", statement);
-            success = true;
-        }
-        else
-        {
-            LOG_ERROR(libcachemgr::log_db, "failed to execute prepared SQL statement: {} (ERROR: {})",
-                statement, sqlite3_errmsg(this->_db_ptr));
-        }
-
-        LOG_DEBUG(libcachemgr::log_db, "finalizing prepared SQL statement: {} (success={})", statement, success);
-        sqlite3_finalize(stmt);
-
-        return success;
-    }
-    else
-    {
-        LOG_ERROR(libcachemgr::log_db, "failed to prepare SQL statement: {}", sqlite3_errmsg(this->_db_ptr));
-        return false;
-    }
-}
-
-bool cache_db::execute_transactional(const std::function<bool()> &callback)
-{
-    this->execute_statement("begin");
-    if (callback())
-    {
-        this->execute_statement("commit");
-        return true;
-    }
-    else
-    {
-        this->execute_statement("rollback");
-        return false;
-    }
-}
-
 bool cache_db::execute_migration(const std::function<bool()> &migration,
     std::uint32_t from_version, std::uint32_t to_version)
 {
     LOG_INFO(libcachemgr::log_db, "migrating database from version {} to {}...", from_version, to_version);
 
-    const auto result = this->execute_transactional([=]{
+    const auto result = this->__private->execute_transactional([=]{
         // run the provided migration function
         if (!migration())
         {
@@ -157,7 +63,8 @@ bool cache_db::execute_migration(const std::function<bool()> &migration,
         }
 
         // register the migration in the database
-        if (!this->execute_statement(fmt::format("insert into {} (version) values ({})", tbl_schema_migration, to_version)))
+        if (!this->__private->execute_statement(
+            fmt::format("insert into {} (version) values ({})", tbl_schema_migration, to_version)))
         {
             return false;
         }
@@ -206,9 +113,9 @@ bool cache_db::run_migrations()
 
 bool cache_db::create_database_schema()
 {
-    return this->execute_transactional([=]{
+    return this->__private->execute_transactional([=]{
         LOG_INFO(libcachemgr::log_db, "creating initial database schema...");
-        const auto result = this->execute_statement(
+        const auto result = this->__private->execute_statement(
             fmt::format("CREATE TABLE {} (version INTEGER NOT NULL PRIMARY KEY CHECK(version >= 0))", tbl_schema_migration)
         );
         if (result)
@@ -227,7 +134,7 @@ bool cache_db::create_database_schema()
 bool cache_db::run_migration_v0_to_v1()
 {
     return this->execute_migration([=]{
-        if (!this->execute_statement(fmt::format(
+        if (!this->__private->execute_statement(fmt::format(
             "CREATE TABLE {} ("
             "timestamp INTEGER NOT NULL, "      // UTC unix timestamp when the trend was calculated
             "cache_mapping_id TEXT NOT NULL, "  // user-defined cache_mappings[].id
@@ -244,7 +151,7 @@ bool cache_db::run_migration_v0_to_v1()
 std::optional<std::uint32_t> cache_db::get_database_version() const
 {
     std::uint32_t version = 0;
-    const auto result = this->execute_statement(
+    const auto result = this->__private->execute_statement(
         fmt::format("select version from {} order by version desc limit 1", tbl_schema_migration),
         [&](const callback_data dataset) -> bool {
             if (dataset.count == 0)
@@ -267,8 +174,7 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
 
 bool cache_db::insert_cache_trend(const cache_trend &cache_trend)
 {
-    return execute_insert_statement(
-        this->__private.get(),
+    return this->__private->execute_insert_statement(
         tbl_cache_trends,
         cache_trend.timestamp,
         cache_trend.cache_mapping_id,
