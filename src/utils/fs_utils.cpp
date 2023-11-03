@@ -103,7 +103,7 @@ std::list<std::string> resolve_wildcard_pattern(const std::string &pattern, std:
             {
                 const auto has_match = std::regex_match(entry.path().filename().string(), regex_pattern);
 
-                logging_helper::get_logger()->log_info(
+                logging_helper::get_logger()->log_debug(
                     "matching file: '" + entry.path().string() + "' against pattern: " + file_wildcard_pattern +
                     " (" + (has_match ? "match" : "no match") + ")");
 
