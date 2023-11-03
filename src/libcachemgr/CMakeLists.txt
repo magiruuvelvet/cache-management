@@ -1,7 +1,7 @@
 # shared sources across all platforms
 set(libcachemgr_shared_sources
-    database/cache_db_private.cpp
-    database/cache_db_private.hpp
+    database/private/cache_db_private.cpp
+    database/private/cache_db_private.hpp
     database/cache_db.cpp
     database/cache_db.hpp
     database/models.hpp

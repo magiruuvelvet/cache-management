@@ -1,5 +1,5 @@
 #include "cache_db.hpp"
-#include "cache_db_private.hpp"
+#include "private/cache_db_private.hpp"
 
 using libcachemgr::database::cache_db;
 
