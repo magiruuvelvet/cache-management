@@ -3,6 +3,8 @@
 #include <libcachemgr/logging.hpp>
 #include <libcachemgr/database/cache_db.hpp>
 
+#include <utils/datetime_utils.hpp>
+
 #include <test_helper.hpp>
 
 #include <fmt/format.h>
@@ -39,9 +41,7 @@ int main(int argc, char **argv)
 
     LOG_DEBUG(libcachemgr::log_db, "db.insert_cache_trend(): {}",
         db.insert_cache_trend(cache_trend{
-            .timestamp = std::uint64_t(
-                std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count()
-            ),
+            .timestamp = datetime_utils::get_current_system_timestamp_in_utc(),
             .cache_mapping_id = "sample",
             //.package_manager = "sample",
             //.package_manager = "'; drop table cache_trends;",
