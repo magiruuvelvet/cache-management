@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <optional>
+#include <memory>
 
 #include "models.hpp"
 
@@ -12,6 +13,8 @@ typedef struct sqlite3_stmt sqlite3_stmt;
 
 namespace libcachemgr {
 namespace database {
+
+class __cache_db_private;
 
 class cache_db final
 {
@@ -132,16 +135,16 @@ private:
     /**
      * Executes a single prepared SQL statement.
      *
-     * The @p bind_parameters_cb callback must bind all the necessary parameters to the statement.
-     * If this callback returns false, the statement is not executed.
+     * The @p parameter_binder_func function must bind all the necessary parameters to the statement.
+     * If this function returns false, the statement is not executed.
      *
      * @param statement prepared SQL statement to execute
-     * @param bind_parameters_cb callback function to bind parameters to the statement
+     * @param parameter_binder_func function to bind parameters to the statement
      * @return true the statement was executed successfully
      * @return false the statement was erroneous or the binding of parameters failed
      */
     bool execute_prepared_statement(const std::string &statement,
-        const std::function<bool(sqlite3_stmt *stmt)> &bind_parameters_cb = {}) const;
+        const std::function<bool(sqlite3_stmt *stmt)> &parameter_binder_func = {}) const;
 
     /**
      * Executes the given callback inside a transaction.
@@ -170,6 +173,9 @@ private:
 
     bool create_database_schema();
     bool run_migration_v0_to_v1();
+
+    friend class __cache_db_private;
+    std::shared_ptr<__cache_db_private> __private;
 };
 
 } // namespace database
