@@ -4,6 +4,7 @@ set(libcachemgr_shared_sources
     database/private/cache_db_private.hpp
     database/cache_db.cpp
     database/cache_db.hpp
+    database/model_formatter.hpp
     database/models.hpp
     fs_watcher/fs_watcher.cpp
     fs_watcher/fs_watcher.hpp
