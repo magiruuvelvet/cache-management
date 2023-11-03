@@ -21,7 +21,7 @@ extern "C" {
  * Shutdown routines for the quill logging library.
  */
 LIBCACHEMGR_ATTRIBUTE_USED
-static void shutdown_quill(void)
+void shutdown_quill(void)
 {
     quill::flush();
 }
@@ -41,7 +41,7 @@ static constexpr int signal_offset = 128;
  * @param signal
  */
 LIBCACHEMGR_ATTRIBUTE_USED
-static void crash_signal_handler(int signal)
+void crash_signal_handler(int signal)
 {
     // restore original signal handler
     std::signal(signal, SIG_DFL);
@@ -65,7 +65,7 @@ static void crash_signal_handler(int signal)
  * @param signal
  */
 [[noreturn]] LIBCACHEMGR_ATTRIBUTE_USED
-static void normal_signal_handler(int signal)
+void normal_signal_handler(int signal)
 {
     // call std::atexit functions before terminating the application
     std::exit(signal_offset + signal);
