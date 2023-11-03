@@ -80,3 +80,25 @@ The log file is stored in `$XDG_CACHE_HOME/cachemgr/cachemgr.log`
 (`~/.cache/cachemgr/cachemgr.log` if `XDG_CACHE_HOME` is not set).
 
 For an example configuration, see [test.yaml](./test/assets/test.yaml) from the unit tests.
+
+## Database
+
+This application creates a SQLite database to store local cache analytics.
+Each time the cache usage statistics are calculated, a cache trend record is created
+in the database. This allows you to keep track of cache growth and shrinkage, and
+even generate fancy graphs for visualization (using 3rd party software).
+
+### Database Tables
+
+- `schema_migration`: internal table used for schema migrations (**DO NOT TOUCH**)
+
+- `cache_trends`: cache trend records
+  - `timestamp (INTEGER NOT NULL)`\
+    UTC unix timestamp when the trend was calculated
+  - `cache_mapping_id (TEXT NOT NULL)`\
+    user-defined cache mapping id (from the configuration file)
+  - `package_manager (TEXT)`\
+    the package manager of the cache mapping
+  - `cache_size (INTEGER NOT NULL CHECK(cache_size >= 0))`\
+    cache size in bytes
+  - *Hint:* select all records with a human-readable date format: `select datetime(timestamp, 'unixepoch'), * from cache_trends;`
