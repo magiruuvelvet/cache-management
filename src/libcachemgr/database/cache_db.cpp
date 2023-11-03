@@ -177,10 +177,14 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
 bool cache_db::insert_cache_trend(const cache_trend &cache_trend)
 {
     LOG_INFO(libcachemgr::log_db, "inserting {}", fmt::format("{}", cache_trend));
-    return this->__private->execute_insert_statement(
+    const auto status = this->__private->execute_insert_statement(
         tbl_cache_trends,
         cache_trend.timestamp,
         cache_trend.cache_mapping_id,
         cache_trend.package_manager,
         cache_trend.cache_size);
+    if (!status) {
+        LOG_WARNING(libcachemgr::log_db, "failed to insert {}", fmt::format("{}", cache_trend));
+    }
+    return status;
 }
