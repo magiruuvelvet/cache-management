@@ -38,6 +38,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
         {
             // add source-less directory to list
             this->_mapped_cache_directories.emplace_back(libcachemgr::mapped_cache_directory_t{
+                .id = mapping.id,
                 .directory_type = directory_type_t::standalone,
                 .original_path = {}, // standalone doesn't have an original path
                 .target_path = mapping.target,
@@ -60,6 +61,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
             else
             {
                 this->_mapped_cache_directories.emplace_back(libcachemgr::mapped_cache_directory_t{
+                    .id = mapping.id,
                     .directory_type = directory_type_t::wildcard,
                     // wildcard patterns don't have an original path and are similar to standalone directories
                     .original_path = {},
@@ -130,6 +132,7 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
             {
                 // add the symlinked directory to the list
                 this->_mapped_cache_directories.emplace_back(libcachemgr::mapped_cache_directory_t{
+                    .id = mapping.id,
                     .directory_type = directory_type_t::symbolic_link,
                     .original_path = mapping.source,
                     .target_path = symlink_target,
@@ -186,11 +189,12 @@ cachemgr_t::cache_mappings_compare_results_t cachemgr_t::find_mapped_cache_direc
             {
                 // add the bind mount to the list
                 this->_mapped_cache_directories.emplace_back(libcachemgr::mapped_cache_directory_t{
-                   .directory_type = directory_type_t::bind_mount,
-                   .original_path = mapping.source,
-                   // treat the target path as the mount point location
-                   .target_path = mapping.source,
-                   .package_manager = mapping.package_manager,
+                    .id = mapping.id,
+                    .directory_type = directory_type_t::bind_mount,
+                    .original_path = mapping.source,
+                    // treat the target path as the mount point location
+                    .target_path = mapping.source,
+                    .package_manager = mapping.package_manager,
                 });
             }
         }

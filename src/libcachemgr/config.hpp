@@ -20,7 +20,7 @@ public:
      */
     struct cache_mapping_t final
     {
-        const std::string id; // unused for now, type might change in the future
+        const std::string id;
         const directory_type_t type;
         const package_manager_t package_manager;
         const std::string source;

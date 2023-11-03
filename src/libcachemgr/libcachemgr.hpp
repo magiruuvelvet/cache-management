@@ -74,6 +74,9 @@ public:
     void set_configuration_file(const std::string &configuration_file) noexcept;
     const std::string &configuration_file() const noexcept;
 
+    void set_database_file(const std::string &database_file) noexcept;
+    const std::string &database_file() const noexcept;
+
     void set_verify_cache_mappings(bool verify_cache_mappings) noexcept;
     bool verify_cache_mappings() const noexcept;
 
@@ -90,6 +93,7 @@ private:
     user_configuration_t() = default;
 
     std::string _configuration_file{};
+    std::string _database_file{};
     std::string _print_pm_cache_location_of{};
     bool _verify_cache_mappings{false};
     bool _show_usage_stats{false};

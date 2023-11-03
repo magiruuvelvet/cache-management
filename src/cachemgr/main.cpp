@@ -6,6 +6,7 @@
 #include <fmt/ostream.h>
 
 #include <utils/os_utils.hpp>
+#include <utils/datetime_utils.hpp>
 #include <utils/types/file_size_units.hpp>
 #include <utils/freedesktop/xdg_paths.hpp>
 
@@ -15,6 +16,7 @@
 #include <libcachemgr/libcachemgr.hpp>
 #include <libcachemgr/messages.hpp>
 #include <libcachemgr/package_manager_support/pm_registry.hpp>
+#include <libcachemgr/database/cache_db.hpp>
 
 #include "basic_utils_logger.hpp"
 #include "cli_opts.hpp"
@@ -94,6 +96,18 @@ static int cachemgr_cli()
         .log_level_console = config.log_level_console(),
         .log_level_file = config.log_level_file(),
     });
+
+    // create the database
+    // TODO: handle backups before running migrations
+    libcachemgr::database::cache_db db(libcachemgr::user_configuration()->database_file());
+    const auto is_db_open = db.open();
+    if (is_db_open)
+    {
+        if (!db.run_migrations())
+        {
+            return 3;
+        }
+    }
 
     // create the cache manager
     cachemgr_t cachemgr;
@@ -177,6 +191,18 @@ static int cachemgr_cli()
                     total_size += file_size;
                     dir.disk_size += file_size;
                 }
+            }
+
+            if (is_db_open)
+            {
+                // select datetime(timestamp, 'unixepoch'), * from cache_trends;
+                db.insert_cache_trend(libcachemgr::database::cache_trend{
+                    .timestamp = datetime_utils::get_current_system_timestamp_in_utc(),
+                    .cache_mapping_id = dir.id,
+                    .package_manager = dir.package_manager ?
+                        std::optional{std::string{dir.package_manager()->pm_name()}} : std::nullopt,
+                    .cache_size = dir.disk_size,
+                });
             }
         }
         for (const auto &dir : cachemgr.sorted_mapped_cache_directories())
@@ -428,6 +454,11 @@ static int parse_cli_options(int argc, char **argv, bool *abort)
         fmt::print(stderr, "multiple actions specified, please run `{} --help` for available actions\n", prog_name);
         return 1;
     }
+
+    // set the location to the database file
+    libcachemgr::user_configuration()->set_database_file(
+        std::string{libcachemgr::configuration_t::get_application_config_directory()} + "/cachemgr.db"
+    );
 
     return 0;
 }

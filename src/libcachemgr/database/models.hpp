@@ -65,11 +65,15 @@ struct field_pair final
         return this->value;
     }
 
+    field_pair(const field_pair &other) = default;
+    field_pair(field_pair &&other) = default;
+    field_pair &operator=(const field_pair &other) = default;
+
     /// value type alias (required for constexpr operations)
     using value_type = FieldType;
 
     /// read-only view of the column name
-    const std::string_view name = FieldName.value;
+    const std::string_view name{FieldName.value};
 
     /// column value
     FieldType value;

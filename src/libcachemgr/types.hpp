@@ -54,6 +54,11 @@ enum class directory_type_t : unsigned
 struct mapped_cache_directory_t
 {
     /**
+     * The unique identifier of the cache directory mapping.
+     */
+    const std::string id;
+
+    /**
      * The type of the cache directory {original_path}.
      */
     const libcachemgr::directory_type_t directory_type;

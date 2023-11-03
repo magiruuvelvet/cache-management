@@ -78,6 +78,18 @@ const std::string &user_configuration_t::configuration_file() const noexcept
     return this->_configuration_file;
 }
 
+void user_configuration_t::set_database_file(const std::string &database_file) noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    this->_database_file = database_file;
+}
+
+const std::string &user_configuration_t::database_file() const noexcept
+{
+    mutex_lock_t lock{user_configuration_mutex};
+    return this->_database_file;
+}
+
 void user_configuration_t::set_verify_cache_mappings(bool verify_cache_mappings) noexcept
 {
     mutex_lock_t lock{user_configuration_mutex};
