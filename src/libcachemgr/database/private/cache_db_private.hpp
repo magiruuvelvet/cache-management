@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../cache_db.hpp"
 
 #include <libcachemgr/logging.hpp>

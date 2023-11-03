@@ -1,6 +1,8 @@
 #include "cache_db.hpp"
 #include "private/cache_db_private.hpp"
 
+#include "model_formatter.hpp"
+
 using libcachemgr::database::cache_db;
 
 namespace {
@@ -174,6 +176,7 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
 
 bool cache_db::insert_cache_trend(const cache_trend &cache_trend)
 {
+    LOG_INFO(libcachemgr::log_db, "inserting {}", fmt::format("{}", cache_trend));
     return this->__private->execute_insert_statement(
         tbl_cache_trends,
         cache_trend.timestamp,
