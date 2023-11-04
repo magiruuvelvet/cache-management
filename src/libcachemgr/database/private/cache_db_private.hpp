@@ -37,7 +37,7 @@ public:
      * @return false the statement was erroneous or the callback function returned an error
      */
     bool execute_statement(const std::string &statement,
-        const sqlite_callback_t &callback = {}) const;
+        const sqlite_callback_t &callback = nullptr) const;
 
     /**
      * Executes a single prepared SQL statement.

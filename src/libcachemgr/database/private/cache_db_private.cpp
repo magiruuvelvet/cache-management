@@ -21,12 +21,17 @@ int libcachemgr_sqlite3_exec_callback(void *sql_user_data, int count, char **dat
     >(user_data_wrapper_ptr->callback_function_ptr);
 
     // call the provided callback function with the SQL dataset
-    return (*callback_function_ptr)(cache_db::callback_data{
-        .count = count,
-        // make the dataset const, there is no need to ever modify this
-        .data = const_cast<const char**>(data),
-        .columns = const_cast<const char**>(columns),
-    }) ? SQLITE_OK : SQLITE_ABORT;
+    if ((*callback_function_ptr)) {
+        return (*callback_function_ptr)(cache_db::callback_data{
+            .count = count,
+            // make the dataset const, there is no need to ever modify this
+            .data = const_cast<const char**>(data),
+            .columns = const_cast<const char**>(columns),
+        }) ? SQLITE_OK : SQLITE_ABORT;
+    }
+
+    // no callback function was provided
+    return SQLITE_OK;
 }
 
 } // extern "C"
