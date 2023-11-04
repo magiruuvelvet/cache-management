@@ -127,6 +127,7 @@ private:
 
     bool create_database_schema();
     bool run_migration_v0_to_v1();
+    bool run_migration_v1_to_v2();
 
     /// private implementation class
     class __cache_db_private;

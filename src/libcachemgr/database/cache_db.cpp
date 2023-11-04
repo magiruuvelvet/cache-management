@@ -5,6 +5,18 @@
 
 using libcachemgr::database::cache_db;
 
+/**
+ * IMPORTANT NOTE REGARDING MIGRATIONS:
+ *
+ *  Always fully write out the column names in all migrations,
+ *  instead of using variable names. For historical reasons and
+ *  for migration compatibility from old versions.
+ *
+ *  If a table name changes, add a new constant for it, instead of
+ *  renaming the existing constants.
+ *
+ */
+
 namespace {
     constexpr const char *tbl_schema_migration = "schema_migration";
     constexpr const char *tbl_cache_trends = "cache_trends";
@@ -115,6 +127,8 @@ bool cache_db::run_migrations()
     {
         case 1:
             if (!this->run_migration_v0_to_v1()) return false;
+        case 2:
+            if (!this->run_migration_v1_to_v2()) return false;
     }
 
     return true;
@@ -155,6 +169,21 @@ bool cache_db::run_migration_v0_to_v1()
 
         return true;
     }, 0, 1);
+}
+
+bool cache_db::run_migration_v1_to_v2()
+{
+    return this->execute_migration([=]{
+        if (!this->__private->execute_statement("PRAGMA application_id = 1100861576")) return false;
+        if (!this->__private->execute_statement(fmt::format(
+            "CREATE INDEX idx_cache_size ON {} (cache_size)", tbl_cache_trends)
+        )) return false;
+        if (!this->__private->execute_statement(fmt::format(
+            "CREATE INDEX idx_cache_trend_record ON {} (timestamp, cache_mapping_id, cache_size)", tbl_cache_trends)
+        )) return false;
+
+        return true;
+    }, 1, 2);
 }
 
 std::optional<std::uint32_t> cache_db::get_database_version() const
