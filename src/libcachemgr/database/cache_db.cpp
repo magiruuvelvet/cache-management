@@ -15,6 +15,10 @@ using libcachemgr::database::cache_db;
  *  If a table name changes, add a new constant for it, instead of
  *  renaming the existing constants.
  *
+ *  If creating new tables or new columns, ensure that static typing
+ *  using constraints is enforced! We don't want dynamic typing in a
+ *  relational database.
+ *
  */
 
 namespace {
@@ -122,14 +126,25 @@ bool cache_db::run_migrations()
         db_version = 0;
     }
 
+    bool migration_executed = false;
+
     // run all migrations incrementally [fallthrough switch]
     switch (db_version.value() + 1)
     {
         case 1:
             if (!this->run_migration_v0_to_v1()) return false;
+            migration_executed = true;
         case 2:
             if (!this->run_migration_v1_to_v2()) return false;
+            migration_executed = true;
+        case 3:
+            if (!this->run_migration_v2_to_v3()) return false;
+            migration_executed = true;
     }
+
+    // if a migration was executed, perform a VACUUM on the database
+    // VACUUM must run outside of a transaction
+    if (migration_executed && !this->__private->execute_statement("VACUUM")) return false;
 
     return true;
 }
@@ -184,6 +199,78 @@ bool cache_db::run_migration_v1_to_v2()
 
         return true;
     }, 1, 2);
+}
+
+bool cache_db::run_migration_v2_to_v3()
+{
+    return this->execute_migration([=]{
+        // drop current indices on the cache_trends table
+        if (!this->__private->execute_statement("DROP INDEX idx_cache_size")) return false;
+        if (!this->__private->execute_statement("DROP INDEX idx_cache_trend_record")) return false;
+
+        // rename the cache_trends table
+        if (!this->__private->execute_statement(fmt::format(
+            "ALTER TABLE {} RENAME TO {}_old", tbl_cache_trends, tbl_cache_trends)
+        )) return false;
+
+        // create new cache_trends table with enforced static typing
+        if (!this->__private->execute_statement(fmt::format(
+            "CREATE TABLE {} ("
+            "timestamp INTEGER NOT NULL CHECK(typeof(timestamp) = 'integer' AND timestamp >= 0), "
+            "cache_mapping_id TEXT NOT NULL CHECK(typeof(cache_mapping_id) = 'text'), "
+            "package_manager TEXT CHECK(typeof(package_manager) = 'text' OR package_manager IS NULL), "
+            "cache_size INTEGER NOT NULL CHECK(typeof(cache_size) = 'integer' AND cache_size >= 0), "
+            "PRIMARY KEY (timestamp, cache_mapping_id)"
+            ")", tbl_cache_trends)
+        )) return false;
+
+        // recreate the indices for the cache_trends table
+        if (!this->__private->execute_statement(fmt::format(
+            "CREATE INDEX idx_cache_size ON {} (cache_size)", tbl_cache_trends)
+        )) return false;
+        if (!this->__private->execute_statement(fmt::format(
+            "CREATE INDEX idx_cache_trend_record ON {} (timestamp, cache_mapping_id, cache_size)", tbl_cache_trends)
+        )) return false;
+
+        // transfer the data from the old cache_trends table to the new cache_trends table
+        if (!this->__private->execute_statement(fmt::format(
+            "INSERT INTO {} (timestamp, cache_mapping_id, package_manager, cache_size) "
+            "SELECT timestamp, cache_mapping_id, package_manager, cache_size FROM {}_old",
+            tbl_cache_trends, tbl_cache_trends)
+        )) return false;
+
+        // drop the old cache_trends table
+        if (!this->__private->execute_statement(fmt::format(
+            "DROP TABLE {}_old", tbl_cache_trends)
+        )) return false;
+
+        // also enforce static typing on the schema_migration table
+        if (!this->__private->execute_statement(fmt::format(
+            "ALTER TABLE {} RENAME TO {}_old", tbl_schema_migration, tbl_schema_migration)
+        )) return false;
+
+        // create new schema_migration table with enforced static typing
+        if (!this->__private->execute_statement(fmt::format(
+            // previous DDL -> CREATE TABLE {} (version INTEGER NOT NULL PRIMARY KEY CHECK(version >= 0))
+            "CREATE TABLE {} ("
+            "version INTEGER NOT NULL CHECK(typeof(version) = 'integer' AND version >= 0), "
+            "PRIMARY KEY (version)"
+            ")", tbl_schema_migration)
+        )) return false;
+
+        // transfer the data from the old schema_migration table to the new schema_migration table
+        if (!this->__private->execute_statement(fmt::format(
+            "INSERT INTO {} (version) "
+            "SELECT version FROM {}_old", tbl_schema_migration, tbl_schema_migration)
+        )) return false;
+
+        // drop the old schema_migration table
+        if (!this->__private->execute_statement(fmt::format(
+            "DROP TABLE {}_old", tbl_schema_migration)
+        )) return false;
+
+        return true;
+    }, 2, 3);
 }
 
 std::optional<std::uint32_t> cache_db::get_database_version() const
