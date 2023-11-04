@@ -91,10 +91,12 @@ even generate fancy graphs for visualization (using 3rd party software).
 
 ### Database Tables
 
+*Notice:* static typing is enforced using constraints
+
 - `schema_migration`: internal table used for schema migrations (**DO NOT TOUCH**)
 
 - `cache_trends`: cache trend records
-  - `timestamp (INTEGER NOT NULL)`\
+  - `timestamp (INTEGER NOT NULL CHECK(timestamp >= 0))`\
     UTC unix timestamp when the trend was calculated
   - `cache_mapping_id (TEXT NOT NULL)`\
     user-defined cache mapping id (from the configuration file)
