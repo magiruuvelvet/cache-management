@@ -76,6 +76,7 @@ cmake --build ./build
 
 The configuration is stored in `$XDG_CONFIG_HOME/cachemgr/cachemgr.yaml`
 (`~/.config/cachemgr/cachemgr.yaml` if `XDG_CONFIG_HOME` is not set).
+
 The log file is stored in `$XDG_CACHE_HOME/cachemgr/cachemgr.log`
 (`~/.cache/cachemgr/cachemgr.log` if `XDG_CACHE_HOME` is not set).
 
