@@ -84,6 +84,11 @@ For an example configuration, see [test.yaml](./test/assets/test.yaml) from the 
 
 ## Database
 
+> **Attention:**\
+> Versions prior to 0.13.0 should not be used on production databases, as version 0.13.0
+> was the first version which introduced a schema version check on startup.
+> Using an incompatible database can lead to data loss and data corruption.
+
 This application creates a SQLite database to store local cache analytics.
 Each time the cache usage statistics are calculated, a cache trend record is created
 in the database. This allows you to keep track of cache growth and shrinkage, and
@@ -91,7 +96,7 @@ even generate fancy graphs for visualization (using 3rd party software).
 
 ### Database Tables
 
-*Notice:* static typing is enforced using constraints
+*Notice: static typing is enforced using constraints*
 
 - `schema_migration`: internal table used for schema migrations (**DO NOT TOUCH**)
 
