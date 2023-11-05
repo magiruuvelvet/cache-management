@@ -10,6 +10,8 @@ add_library(cachemgr-utils-private STATIC
     fs_utils.hpp
     logging_helper.cpp
     logging_helper.hpp
+    number_utils.cpp
+    number_utils.hpp
     os_utils.cpp
     os_utils.hpp
 )
