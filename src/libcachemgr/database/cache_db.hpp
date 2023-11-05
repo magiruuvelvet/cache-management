@@ -15,6 +15,14 @@ namespace database {
 
 class cache_db final
 {
+    /**
+     * Required database schema version for seamless operation.
+     *
+     * If an older version of the application tries to load a newer database,
+     * the compatibility check will fail.
+     */
+    static constexpr std::uint32_t required_schema_version = 3;
+
 public:
     /**
      * Construct a new cache database in `:memory:` and prepares some internal variables.
@@ -52,6 +60,12 @@ public:
     inline bool is_open() const {
         return this->_is_open;
     }
+
+    /**
+     * Checks the database schema compatibility against the required version.
+     * This method should be called AFTER running the migrations.
+     */
+    bool check_compatibility() const;
 
     /**
      * Read-only view of the entire dataset passed to the callback function.

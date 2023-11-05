@@ -39,6 +39,11 @@ int main(int argc, char **argv)
     LOG_DEBUG(libcachemgr::log_db, "db.get_database_version(): {}", db.get_database_version());
     LOG_DEBUG(libcachemgr::log_db, "db.run_migrations(): {}", db.run_migrations());
 
+    if (!db.check_compatibility())
+    {
+        return 3;
+    }
+
     LOG_DEBUG(libcachemgr::log_db, "db.insert_cache_trend(): {}",
         db.insert_cache_trend(cache_trend{
             .timestamp = datetime_utils::get_current_system_timestamp_in_utc(),

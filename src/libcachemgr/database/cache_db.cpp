@@ -75,6 +75,27 @@ bool cache_db::open()
     return this->_is_open;
 }
 
+bool cache_db::check_compatibility() const
+{
+    const auto current_version = this->get_database_version();
+    [[likely]] if (current_version.has_value() && current_version.value() == required_schema_version)
+    {
+        LOG_DEBUG(libcachemgr::log_db,
+            "database schema version is compatible with this version of libcachemgr. "
+            "required database schema version: {}, current database schema version: {}",
+            required_schema_version, current_version);
+        return true;
+    }
+    else
+    {
+        LOG_ERROR(libcachemgr::log_db,
+            "the current database schema version is incompatible with this version of libcachemgr. "
+            "required database schema version: {}, current database schema version: {}",
+            required_schema_version, current_version);
+        return false;
+    }
+}
+
 bool cache_db::execute_migration(const std::function<bool()> &migration,
     std::uint32_t from_version, std::uint32_t to_version)
 {

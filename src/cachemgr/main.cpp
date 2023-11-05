@@ -107,6 +107,11 @@ static int cachemgr_cli()
         {
             return 3;
         }
+
+        if (!db.check_compatibility())
+        {
+            return 3;
+        }
     }
 
     // create the cache manager
