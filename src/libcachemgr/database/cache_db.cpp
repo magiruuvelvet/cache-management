@@ -311,7 +311,7 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
             {
                 bool is_ok = false;
                 version = number_utils::parse_integer<std::uint32_t>(dataset.data[0], &is_ok);
-                if (is_ok)
+                [[likely]] if (is_ok)
                 {
                     LOG_DEBUG(libcachemgr::log_db, "found database version: {}", version);
                     return true;
