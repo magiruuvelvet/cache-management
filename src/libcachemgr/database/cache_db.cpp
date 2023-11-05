@@ -3,6 +3,8 @@
 
 #include "model_formatter.hpp"
 
+#include <utils/number_utils.hpp>
+
 using libcachemgr::database::cache_db;
 
 /**
@@ -307,11 +309,18 @@ std::optional<std::uint32_t> cache_db::get_database_version() const
             }
             else
             {
-                // trust SQLite and assume the returned number is always a valid number
-                // TODO: check if the returned number is a valid number
-                version = std::strtoul(dataset.data[0], nullptr, 10);
-                LOG_DEBUG(libcachemgr::log_db, "found database version: {}", version);
-                return true;
+                bool is_ok = false;
+                version = number_utils::parse_integer<std::uint32_t>(dataset.data[0], &is_ok);
+                if (is_ok)
+                {
+                    LOG_DEBUG(libcachemgr::log_db, "found database version: {}", version);
+                    return true;
+                }
+                else
+                {
+                    LOG_ERROR(libcachemgr::log_db, "failed to parse database version: {}", dataset.data[0]);
+                    return false;
+                }
             }
         });
 
